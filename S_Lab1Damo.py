@@ -14,7 +14,7 @@ axel_length = 0.184
 # ----Move Funv----
 def move_str(bot, D, max_v = 50):
     
-    bot.reset_encoder()
+    bot.reset_encoders()
     bot.set_left_motor_speed(max_v)
     bot.set_right_motor_speed(max_v)
     
@@ -96,7 +96,7 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
         d_left = (R + axel_length/2) * theta
         d_right = (R - axel_length/2) * theta
     
-    bot.reset_encoder()  
+    bot.reset_encoders()  
     init_l = bot.get_left_motor_encoder_reading()
     init_r = bot.get_right_motor_encoder_reading()
 
