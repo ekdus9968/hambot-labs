@@ -12,7 +12,7 @@ wheel_radius = 0.090
 axel_length = 0.184
 
 # ----Move Funv----
-def move_str(D, max_v = 50):
+def move_str(bot, D, max_v = 50):
     bot.set_left_motor_speed(max_v)
     bot.set_right_motor_speed(max_v)
     
