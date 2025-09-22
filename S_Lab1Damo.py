@@ -81,6 +81,7 @@ def move_rot(bot, delta_theta, max_v=50):
             break        
         time.sleep(0.01)
 
+#DONE!
 "Turning R/W"
 def move_arc(bot, R, theta, direction="CCW", max_v=50):
     # cal r/l turn
@@ -131,13 +132,13 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
         time.sleep(0.01)       
 
 
-# ---- Path ----
-P = [(1.0, -2.0, np.pi),
-     (1.5, -2.0, np.pi),
-     (-2.0, -1.5, np.pi/2),
-     (-2.0, -0.5, np.pi/2),
-     (-1.0, -0.5, 3*np.pi/2),
-     (-0.5, -1.0, 7*np.pi/4)]
+# # ---- Path ----
+# P = [(1.0, -2.0, np.pi),
+#      (1.5, -2.0, np.pi),
+#      (-2.0, -1.5, np.pi/2),
+#      (-2.0, -0.5, np.pi/2),
+#      (-1.0, -0.5, 3*np.pi/2),
+#      (-0.5, -1.0, 7*np.pi/4)]
 
 #Old maze
 #D_01 = np.linalg.norm(np.array(P[1][:2]) - np.array(P[0][:2]))
@@ -166,23 +167,23 @@ P = [(1.0, -2.0, np.pi),
 
 # NEW MAZE 
 #P0->P1
-print("P0->P1")
-move_str(bot, D=1.0, max_v=35) 
-#P1->P1
-print("P1->P1")
-move_rot(bot, np.pi / 4, max_v=35)
-#P1->P2
-print("P1->P2")
-move_str(bot, D=1.5 , max_v=35) 
-#P2->P2
-print("P2->P2")
-move_rot(bot, - np.pi / 4, max_v=35)
-#P2->P3
-print("P2->P3")
-move_str(bot, D=1.0, max_v=35) 
+# print("P0->P1")
+# move_str(bot, D=1.0, max_v=35) 
+# #P1->P1
+# print("P1->P1")
+# move_rot(bot, np.pi / 4, max_v=35)
+# #P1->P2
+# print("P1->P2")
+# move_str(bot, D=1.5 , max_v=35) 
+# #P2->P2
+# print("P2->P2")
+# move_rot(bot, - np.pi / 4, max_v=35)
+# #P2->P3
+# print("P2->P3")
+# move_str(bot, D=1.0, max_v=35) 
 #P3->P3
 print("P3->P3")
-move_rot(bot, - np.pi / 2, max_v=35)
+move_rot(bot, - np.pi , max_v=35)
 #P3->P4
 print("P3->P4")
 move_str(bot, D=1.0, max_v=35) 
