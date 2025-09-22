@@ -183,6 +183,6 @@ print("P3->P3")
 move_rot(bot, - np.pi / 2, max_v=20)
 #P3->P4
 print("P3->P4")
-move_arc(bot, R=0.5, theta=np.pi / 2 , direction="CW", max_v=20)
+move_arc(bot, R=2.0, theta=np.pi / 2 , direction="CW", max_v=20)
 
 print("DONE")
