@@ -13,22 +13,28 @@ axel_length = 0.184
 
 # ----Move Funv----
 def move_str(bot, D, max_v = 50):
+    
+    bot.reset_encoder()
     bot.set_left_motor_speed(max_v)
     bot.set_right_motor_speed(max_v)
     
-    initial_encoder = bot.get_left_motor_encoder_reading()
+    initial_l = bot.get_left_motor_encoder_reading()
+    initial_r = bot.get_right_motor_encoder_reading()
     
     while True:
         # 현재 이동 거리 계산
-        distance_traveled = wheel_radius * (bot.get_left_motor_encoder_reading() - initial_encoder)
+        l_delta = bot.get_left_motor_encoder_reading() - initial_l
+        r_delta = bot.get_right_motor_encoder_reading() - initial_r
+        distance_traveled = wheel_radius * (l_delta + r_delta) / 2
         
         # 디버깅 출력
         print("Motor Encoder Readings: ", bot.get_encoder_readings())
-        print("Left Motor Encoder Reading: ", bot.get_left_motor_encoder_reading())
         print("Distance traveled: ", distance_traveled, '\n')
         
         # 목표 거리 도달 시 멈춤
         if distance_traveled >= D:
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
             bot.stop_motors()
             break
         
