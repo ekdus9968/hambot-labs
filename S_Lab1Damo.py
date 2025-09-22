@@ -12,6 +12,7 @@ wheel_radius = 0.090
 axel_length = 0.184
 
 # ----Move Funv----
+#DONE!
 def move_str(bot, D, max_v = 50):
     
     bot.reset_encoders()
@@ -40,7 +41,7 @@ def move_str(bot, D, max_v = 50):
         
         time.sleep(0.01)  # 루프 너무 빠르게 도는 것 방지
         
-
+#DONE!
 def move_rot(bot, delta_theta, max_v=50):
     """
     bot: HamBot 객체
@@ -152,7 +153,7 @@ P = [(1.0, -2.0, np.pi),
 #move_str(bot, D=0.3, max_v=50)  # 50 ~100 단위로 속도 조정
 
 # # P1 -> P2
-#move_arc(bot, R=1.0, theta=np.pi/2, direction="CW", max_v=50)
+move_arc(bot, R=5.0, theta=np.pi/2, direction="CW", max_v=50)
 
 # # P2 -> P3
 # D_23 = np.linalg.norm(np.array(P[3][:2]) - np.array(P[2][:2]))
@@ -162,7 +163,7 @@ P = [(1.0, -2.0, np.pi),
 # move_arc(bot, R=0.5, theta=np.pi, direction="CW", max_v=50)
 
 # # P4 -> P5
-move_rot(bot, np.pi, max_v=50)
+#move_rot(bot, np.pi, max_v=50)
 
 # # P5 -> P6
 # D_45 = np.linalg.norm(np.array(P[5][:2]) - np.array(P[4][:2]))
