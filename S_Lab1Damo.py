@@ -113,6 +113,8 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
         d_r = wheel_radius * r_delta
         
         if abs(d_l) >= abs(d_left) or abs(d_r) >= abs(d_right):
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
             bot.stop_motors()
             break
     time.sleep(0.01)       
