@@ -79,13 +79,6 @@ def move_rot(bot, delta_theta, max_v=50):
 
 "Turning R/W"
 def move_arc(bot, R, theta, direction="CCW", max_v=50):
-    """
-    bot: HamBot 객체
-    R: 회전 반지름 (m)
-    theta: 회전 각도 (rad)
-    direction: "CCW" 또는 "CW"
-    max_v: 최대 속도 (-100 ~ 100)
-    """
     # 왼쪽/오른쪽 이동 거리 계산
     if direction.upper() == "CCW":
         d_left = (R - axel_length/2) * theta
@@ -97,13 +90,6 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
     bot.reset_encoders()  
     init_l = bot.get_left_encoder_reading()
     init_r = bot.get_right_encoder_reading()
-
-    
-    v_ratio_l = d_left / max(abs(d_left), abs(d_right))
-    v_ratio_r = d_right / max(abs(d_left), abs(d_right))
-    
-    bot.set_left_motor_speed(max_v * v_ratio_l)
-    bot.set_right_motor_speed(max_v * v_ratio_r)
     
     while True:
         l_delta = bot.get_left_encoder_reading() - init_l
@@ -111,6 +97,17 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
         
         d_l = wheel_radius * l_delta
         d_r = wheel_radius * r_delta
+        
+        #each loop. cal rest of D ratio in live 
+        #when i only use ratio var, it stops faster
+        l_remain = d_left - d_l
+        r_remain = d_right - d_r
+        
+        v_ratio_l = l_remain / max(abs(d_left), abs(d_right))
+        v_ratio_r = r_remain / max(abs(d_left), abs(d_right))
+        
+        bot.set_left_motor_speed(max_v * v_ratio_l)
+        bot.set_right_motor_speed(max_v * v_ratio_r)
         
         print("L: ", d_l)
         print("Target L: ", d_left )
