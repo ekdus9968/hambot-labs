@@ -92,8 +92,8 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
     init_l = bot.get_left_encoder_reading()
     init_r = bot.get_right_encoder_reading()
     
-    v_ratio_l = l_remain / max(abs(d_left), abs(d_right))
-    v_ratio_r = r_remain / max(abs(d_left), abs(d_right))
+    v_ratio_l = d_left / max(abs(d_left), abs(d_right))
+    v_ratio_r = d_right / max(abs(d_left), abs(d_right))
     
     bot.set_left_motor_speed(max_v * v_ratio_l)
     bot.set_right_motor_speed(max_v * v_ratio_r)
