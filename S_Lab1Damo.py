@@ -70,9 +70,9 @@ def move_rot(bot, delta_theta, max_v=50):
         
         curr_theta = (r_d -l_d) / axel_length
         
-        print("L_D: ", l_d)
-        print("R_D: ", r_d)
-        print("Approx theta: ", curr_theta)
+        print("ROT:: L_D: ", l_d)
+        print("ROT:: R_D: ", r_d)
+        print("ROT:: Approx theta: ", curr_theta)
         
         if abs(l_d) >= abs(l_dist) or abs(r_d) >= abs(r_dist):
             bot.stop_motors()
@@ -117,9 +117,9 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
         bot.set_left_motor_speed(max_v * v_ratio_l)
         bot.set_right_motor_speed(max_v * v_ratio_r)
         
-        print("L: ", d_l)
-        print("Target L: ", d_left )
-        print("Target R: ", d_right )
+        print("ARC:: L: ", d_l)
+        print("ARC:: Target L: ", d_left )
+        print("ARC:: Target R: ", d_right )
         
         if abs(d_l) >= abs(d_left) and abs(d_r) >= abs(d_right):
             bot.set_left_motor_speed(0)
