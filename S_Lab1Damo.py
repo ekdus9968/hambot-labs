@@ -168,25 +168,25 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
 # NEW MAZE 
 #P0->P1
 print("P0->P1")
-move_str(bot, D=1.0, max_v=35) 
+move_str(bot, D=1.5, max_v=35) 
 #P1->P1
 print("P1->P1")
 move_rot(bot, np.pi / 2, max_v=35)
 #P1->P2
 print("P1->P2")
-move_str(bot, D=1.5 , max_v=35) 
+move_str(bot, D=2.0 , max_v=35) 
 #P2->P2
 print("P2->P2")
 move_rot(bot, - np.pi / 2, max_v=35)
 #P2->P3
 print("P2->P3")
-move_str(bot, D=1.0, max_v=35) 
+move_str(bot, D=1.5, max_v=35) 
 #P3->P3
 print("P3->P3")
 move_rot(bot, - np.pi , max_v=35)
 #P3->P4
 print("P3->P4")
-move_str(bot, D=1.0, max_v=35) 
+move_str(bot, D=1.5, max_v=35) 
 
 #P4->P5
 print("P4->P5")
