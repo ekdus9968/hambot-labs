@@ -24,7 +24,7 @@ def move_str(bot, D, max_v = 50):
     while True:
         # 현재 이동 거리 계산
         l_delta = bot.get_left_encoder_reading() - initial_l
-        r_delta = bot.get_right_ncoder_reading() - initial_r
+        r_delta = bot.get_right_encoder_reading() - initial_r
         distance_traveled = wheel_radius * (l_delta + r_delta) / 2
         
         # 디버깅 출력
