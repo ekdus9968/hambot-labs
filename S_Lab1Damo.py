@@ -103,8 +103,8 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
         l_remain = d_left - d_l
         r_remain = d_right - d_r
         
-        v_ratio_l = l_remain / max(abs(d_left), abs(d_right))
-        v_ratio_r = r_remain / max(abs(d_left), abs(d_right))
+        v_ratio_l = l_remain / max(abs(l_remain), abs(r_remain))
+        v_ratio_r = r_remain / max(abs(l_remain), abs(r_remain))
         
         bot.set_left_motor_speed(max_v * v_ratio_l)
         bot.set_right_motor_speed(max_v * v_ratio_r)
@@ -118,7 +118,7 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
             bot.set_right_motor_speed(0)
             bot.stop_motors()
             break
-    time.sleep(0.01)       
+        time.sleep(0.01)       
 
 
 # ---- Path ----
