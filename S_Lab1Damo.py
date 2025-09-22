@@ -112,8 +112,8 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
 
 
 # ---- Path ----
-P = [(2.0, -2.0, np.pi),
-     (-1.5, -2.0, np.pi),
+P = [(1.0, -2.0, np.pi),
+     (1.5, -2.0, np.pi),
      (-2.0, -1.5, np.pi/2),
      (-2.0, -0.5, np.pi/2),
      (-1.0, -0.5, 3*np.pi/2),
