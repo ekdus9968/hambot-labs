@@ -78,7 +78,7 @@ def move_rot(bot, delta_theta, max_v=50):
         time.sleep(0.01)
 
 "Turning R/W"
-def move_arc(bot, R, theta, direction="CCW", max_v=50):
+def move_arc(bot, R, theta, max_v=50):
     """
     bot: HamBot 객체
     R: 회전 반지름 (m)
@@ -149,7 +149,7 @@ D_01 = np.linalg.norm(np.array(P[1][:2]) - np.array(P[0][:2]))
 move_str(bot, D=0.3, max_v=50)  # 50 ~100 단위로 속도 조정
 
 # # P1 -> P2
-move_arc(bot, R=0.5, theta=np.pi/2, direction="CW", max_v=50)
+move_arc(bot, R=0.5, theta=np.pi/2, max_v=50)
 
 # # P2 -> P3
 # D_23 = np.linalg.norm(np.array(P[3][:2]) - np.array(P[2][:2]))
