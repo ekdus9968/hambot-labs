@@ -41,7 +41,7 @@ def move_str(bot, D, max_v = 50):
         time.sleep(0.01)  # 루프 너무 빠르게 도는 것 방지
         
 
-def move_rot(bot, curr_yaw, new_yaw, max_v=50):
+def move_rot(bot, delta_theta, max_v=50):
     """
     bot: HamBot 객체
     curr_yaw: 현재 회전 각도 (rad)
@@ -49,34 +49,32 @@ def move_rot(bot, curr_yaw, new_yaw, max_v=50):
     max_v: 회전 속도 (-100 ~ 100)
     """
     # 회전 방향 계산
-    delta_theta = (new_yaw - curr_yaw + np.pi) % (2 * np.pi) - np.pi
+    l_dist = -delta_theta * (axel_length / 2)
+    r_dist = delta_theta * (axel_length / 2)
     
-    if delta_theta > 0:
-        l_speed = -max_v
-        r_speed = max_v
-    else:
-        l_speed = max_v
-        r_speed = -max_v
+    init_l = bot.get_left_encoder_reading()
+    init_r = bot.get_right_encoder_reading()
+    
+    max_dist = max(abs(l_dist), abs(r_dist))
+    v_l = max_v * l_dist / max_dist
+    v_r = max_v * r_dist / max_dist
     
     # 모터 속도 설정
-    bot.set_left_motor_speed(l_speed)
-    bot.set_right_motor_speed(r_speed)
+    bot.set_left_motor_speed(v_l)
+    bot.set_right_motor_speed(v_r)
     
     # 단순 루프: 목표 각도에 도달하면 정지
     while True:
-        # HamBot IMU가 있는 경우 현재 yaw 읽기
-        try:
-            curr_yaw = bot.imu.get_roll_pitch_yaw()[2]
-        except AttributeError:
-            # IMU 없으면 임시로 루프 시간을 두고 회전만 시뮬레이션
-            time.sleep(0.01)
-            break  # 실제 모터 테스트 시 IMU 값 필요
         
-        turn_wheel = (new_yaw - curr_yaw + np.pi) % (2 * np.pi) - np.pi
-        if abs(turn_wheel) < 0.01:
+        l_delta = bot.get_left_encoder_reading() - init_l
+        r_delta = bot.get_right_encoder_reading() - init_r
+        
+        l_d = wheel_radius * l_delta
+        r_d = wheel_radius * r_delta
+        
+        if abs(l_d) >= abs(l_dist) or abs(r_d) >= abs(r_dist):
             bot.stop_motors()
-            break
-        
+            break        
         time.sleep(0.01)
 
 "Turning R/W"
@@ -151,7 +149,7 @@ D_01 = np.linalg.norm(np.array(P[1][:2]) - np.array(P[0][:2]))
 move_str(bot, D=0.15, max_v=50)  # 50 ~100 단위로 속도 조정
 
 # # P1 -> P2
-move_arc(bot, R=3.0, theta=np.pi/2, direction="CW", max_v=50)
+move_arc(bot, R=1.0, theta=np.pi/2, direction="CW", max_v=50)
 
 # # P2 -> P3
 # D_23 = np.linalg.norm(np.array(P[3][:2]) - np.array(P[2][:2]))
@@ -161,7 +159,7 @@ move_arc(bot, R=3.0, theta=np.pi/2, direction="CW", max_v=50)
 # move_arc(bot, R=0.5, theta=np.pi, direction="CW", max_v=50)
 
 # # P4 -> P5
-# move_rot(bot, curr_yaw=np.pi/2, new_yaw=7*np.pi/4, max_v=50)
+move_rot(bot, np.pi, max_v=50)
 
 # # P5 -> P6
 # D_45 = np.linalg.norm(np.array(P[5][:2]) - np.array(P[4][:2]))
