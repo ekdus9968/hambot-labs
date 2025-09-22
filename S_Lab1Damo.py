@@ -79,7 +79,7 @@ def move_rot(bot, curr_yaw, new_yaw, max_v=50):
         
         time.sleep(0.01)
 
-
+"Turning R/W"
 def move_arc(bot, R, theta, direction="CCW", max_v=50):
     """
     bot: HamBot 객체
@@ -92,29 +92,32 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
     if direction.upper() == "CCW":
         d_left = (R - axel_length/2) * theta
         d_right = (R + axel_length/2) * theta
-    elif direction.upper() == "CW":
+    else:
         d_left = (R + axel_length/2) * theta
         d_right = (R - axel_length/2) * theta
-    else:
-        raise ValueError("direction must be 'CCW' or 'CW'")
     
-    # 이동 시간 계산 (단순 속도 기반)
-    t_total = max(abs(d_left), abs(d_right)) / max_v
+    bot.reset_encoder()  
+    init_l = bot.get_left_motor_encoder_reading()
+    init_r = bot.get_right_motor_encoder_reading()
+
     
-    # 모터 속도 설정
-    omega_left = (d_left / t_total) / bot.wheel_radius
-    omega_right = (d_right / t_total) / bot.wheel_radius
+    v_ratio_l = d_left / max(abs(d_left), abs(d_right))
+    v_ratio_r = d_right / max(abs(d_left), abs(d_right))
     
-    bot.set_left_motor_speed(omega_left)
-    bot.set_right_motor_speed(omega_right)
+    bot.set_left_moter_speed(max_v * v_ratio_l)
+    bot.set_right_moter_speed(max_v * v_ratio_r)
     
-    # 이동 루프
-    t0 = time.time()
     while True:
-        if time.time() - t0 >= t_total:
-            bot.stop_motors()
+        l_delta = bot.get_left_motor_encoder_reading() - init_l
+        r_delta = bot.get_right_motor_encoder_reading() - init_r
+        
+        d_l = wheel_radius * l_delta
+        d_r = wheel_radius * r_delta
+        
+        if abs(d_l) >= abs(d_left) or abs(d_r) >= abs(d_right):
+            bot.stop_moters()
             break
-        time.sleep(0.01)
+    time.sleep(0.01)       
 
 
 # ---- Path ----
