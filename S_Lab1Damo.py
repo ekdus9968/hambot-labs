@@ -165,24 +165,24 @@ P = [(1.0, -2.0, np.pi),
 # NEW MAZE 
 #P0->P1
 print("P0->P1")
-move_str(bot, D=0.5, max_v=50) 
+move_str(bot, D=0.5, max_v=20) 
 #P1->P1
 print("P1->P1")
-move_rot(bot, np.pi / 4, max_v=50)
+move_rot(bot, np.pi / 4, max_v=20)
 #P1->P2
 print("P1->P2")
-move_str(bot, D=0.5, max_v=50) 
+move_str(bot, D=0.5, max_v=20) 
 #P2->P2
 print("P2->P2")
-move_rot(bot, - np.pi / 4, max_v=50)
+move_rot(bot, - np.pi / 4, max_v=20)
 #P2->P3
 print("P2->P3")
-move_str(bot, D=0.5, max_v=50) 
+move_str(bot, D=0.5, max_v=20) 
 #P3->P3
 print("P3->P3")
-move_rot(bot, - np.pi / 2, max_v=50)
+move_rot(bot, - np.pi / 2, max_v=20)
 #P3->P4
 print("P3->P4")
-move_arc(bot, R=0.5, theta=np.pi / 2 , direction="CW", max_v=50)
+move_arc(bot, R=0.5, theta=np.pi / 2 , direction="CW", max_v=20)
 
 print("DONE")
