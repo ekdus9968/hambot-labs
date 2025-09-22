@@ -18,13 +18,13 @@ def move_str(bot, D, max_v = 50):
     bot.set_left_motor_speed(max_v)
     bot.set_right_motor_speed(max_v)
     
-    initial_l = bot.get_left_motor_encoder_reading()
-    initial_r = bot.get_right_motor_encoder_reading()
+    initial_l = bot.get_left_encoder_reading()
+    initial_r = bot.get_right_encoder_reading()
     
     while True:
         # 현재 이동 거리 계산
-        l_delta = bot.get_left_motor_encoder_reading() - initial_l
-        r_delta = bot.get_right_motor_encoder_reading() - initial_r
+        l_delta = bot.get_left_encoder_reading() - initial_l
+        r_delta = bot.get_right_ncoder_reading() - initial_r
         distance_traveled = wheel_radius * (l_delta + r_delta) / 2
         
         # 디버깅 출력
@@ -97,8 +97,8 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
         d_right = (R - axel_length/2) * theta
     
     bot.reset_encoders()  
-    init_l = bot.get_left_motor_encoder_reading()
-    init_r = bot.get_right_motor_encoder_reading()
+    init_l = bot.get_left_encoder_reading()
+    init_r = bot.get_right_encoder_reading()
 
     
     v_ratio_l = d_left / max(abs(d_left), abs(d_right))
@@ -108,8 +108,8 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
     bot.set_right_moter_speed(max_v * v_ratio_r)
     
     while True:
-        l_delta = bot.get_left_motor_encoder_reading() - init_l
-        r_delta = bot.get_right_motor_encoder_reading() - init_r
+        l_delta = bot.get_left_encoder_reading() - init_l
+        r_delta = bot.get_right_encoder_reading() - init_r
         
         d_l = wheel_radius * l_delta
         d_r = wheel_radius * r_delta
