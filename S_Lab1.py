@@ -106,7 +106,7 @@ def rot_in_place(bot, R, D, theta, max_v=50):
     prev_O = start_O
     while abs(rotated) < abs(theta):
         curr_O = bot.get_heading()
-         ,.         
+         
         delta = (curr_O - prev_O + np.pi) %(2 * np.pi) - np.pi
         rotated += delta
         prev_O = curr_O
@@ -151,28 +151,6 @@ P = [(2.0, -2.0, np.pi),
      (-1.0, -0.5, 3*np.pi/2),
      (-0.5, -1.0, 7*np.pi/4)]
 
-# # ---- auto loop ----
-# for i in range(len(P)-1):
-#     start = P[i][:2]
-#     end = P[i+1][:2]
-    
-#     # move vector
-#     vec = np.array(end) - np.array(start)
-#     distance = np.linalg.norm(vec)
-    
-#     # new angle
-#     angle_target = np.arctan2(vec[1], vec[0])
-#     angle_current = P[i][2]
-#     delta_angle = (angle_target - angle_current + np.pi) % (2*np.pi) - np.pi
-    
-#     # rot->str
-#     move_rot(bot, angle_current, angle_target)
-#     move_str(bot, distance, max_v=50)
-
-
-# P0 -> P1
-# D_01 = np.linalg.norm(np.array(P[1][:2]) - np.array(P[0][:2]))
-# move_str(bot, D=D_01, max_v=50)  # 50 ~100 단위로 속도 조정
 
 # P1 -> P2
 rot_in_place(bot, R=1.0, theta=np.pi/2, max_v=50)

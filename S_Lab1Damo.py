@@ -6,11 +6,13 @@ from robot_systems.robot import HamBot
 bot = HamBot(lidar_enabled=False, camera_enabled=False)
 
 #
-MAX_V = 50
+
 MAX_W = 50
+wheel_radius = 0.090
+axel_length = 0.184
 
 # ----Move Funv----
-def move_str(D, speed=MAX_V):
+def move_str(D, max_v = 50):
     bot.set_left_motor_speed(max_v)
     bot.set_right_motor_speed(max_v)
     
@@ -18,7 +20,7 @@ def move_str(D, speed=MAX_V):
     
     while True:
         # 현재 이동 거리 계산
-        distance_traveled = bot.wheel_radius * (bot.get_left_motor_encoder_reading() - initial_encoder)
+        distance_traveled = wheel_radius * (bot.get_left_motor_encoder_reading() - initial_encoder)
         
         # 디버깅 출력
         print("Motor Encoder Readings: ", bot.get_encoder_readings())
@@ -82,11 +84,11 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
     """
     # 왼쪽/오른쪽 이동 거리 계산
     if direction.upper() == "CCW":
-        d_left = (R - bot.axel_length/2) * theta
-        d_right = (R + bot.axel_length/2) * theta
+        d_left = (R - axel_length/2) * theta
+        d_right = (R + axel_length/2) * theta
     elif direction.upper() == "CW":
-        d_left = (R + bot.axel_length/2) * theta
-        d_right = (R - bot.axel_length/2) * theta
+        d_left = (R + axel_length/2) * theta
+        d_right = (R - axel_length/2) * theta
     else:
         raise ValueError("direction must be 'CCW' or 'CW'")
     
@@ -118,45 +120,45 @@ P = [(2.0, -2.0, np.pi),
      (-0.5, -1.0, 7*np.pi/4)]
 
 # ---- 자동 주행 루프 ----
-for i in range(len(P)-1):
-    start = P[i][:2]
-    end = P[i+1][:2]
+# for i in range(len(P)-1):
+#     start = P[i][:2]
+#     end = P[i+1][:2]
     
-    # 이동 벡터
-    vec = np.array(end) - np.array(start)
-    distance = np.linalg.norm(vec)
+#     # 이동 벡터
+#     vec = np.array(end) - np.array(start)
+#     distance = np.linalg.norm(vec)
     
-    # 목표 각도
-    angle_target = np.arctan2(vec[1], vec[0])
-    angle_current = P[i][2]
-    delta_angle = (angle_target - angle_current + np.pi) % (2*np.pi) - np.pi
+#     # 목표 각도
+#     angle_target = np.arctan2(vec[1], vec[0])
+#     angle_current = P[i][2]
+#     delta_angle = (angle_target - angle_current + np.pi) % (2*np.pi) - np.pi
     
-    # 회전 후 직선 이동
-    move_rot(bot, angle_current, angle_target)
-    move_str(bot, distance, max_v=50)
+#     # 회전 후 직선 이동
+#     move_rot(bot, angle_current, angle_target)
+#     move_str(bot, distance, max_v=50)
 
 
 D_01 = np.linalg.norm(np.array(P[1][:2]) - np.array(P[0][:2]))
 move_str(bot, D=D_01, max_v=50)  # 50 ~100 단위로 속도 조정
 
-# P1 -> P2
-move_arc(bot, R=0.5, theta=np.pi/2, direction="CW", max_v=50)
+# # P1 -> P2
+# move_arc(bot, R=0.5, theta=np.pi/2, direction="CW", max_v=50)
 
-# P2 -> P3
-D_23 = np.linalg.norm(np.array(P[3][:2]) - np.array(P[2][:2]))
-move_str(bot, D=D_23, max_v=50)
+# # P2 -> P3
+# D_23 = np.linalg.norm(np.array(P[3][:2]) - np.array(P[2][:2]))
+# move_str(bot, D=D_23, max_v=50)
 
-# P3 -> P4
-move_arc(bot, R=0.5, theta=np.pi, direction="CW", max_v=50)
+# # P3 -> P4
+# move_arc(bot, R=0.5, theta=np.pi, direction="CW", max_v=50)
 
-# P4 -> P5
-move_rot(bot, curr_yaw=np.pi/2, new_yaw=7*np.pi/4, max_v=50)
+# # P4 -> P5
+# move_rot(bot, curr_yaw=np.pi/2, new_yaw=7*np.pi/4, max_v=50)
 
-# P5 -> P6
-D_45 = np.linalg.norm(np.array(P[5][:2]) - np.array(P[4][:2]))
-move_str(bot, D=D_45, max_v=50)
+# # P5 -> P6
+# D_45 = np.linalg.norm(np.array(P[5][:2]) - np.array(P[4][:2]))
+# move_str(bot, D=D_45, max_v=50)
 
 
-print("Path 완료!")
-bot.stop_motors()
+# print("Path 완료!")
+# bot.stop_motors()
 
