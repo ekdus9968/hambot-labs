@@ -43,12 +43,7 @@ def move_str(bot, D, max_v = 50):
         
 #DONE!
 def move_rot(bot, delta_theta, max_v=50):
-    """
-    bot: HamBot 객체
-    curr_yaw: 현재 회전 각도 (rad)
-    new_yaw: 목표 회전 각도 (rad)
-    max_v: 회전 속도 (-100 ~ 100)
-    """
+
     # cal Orientation
     l_dist = -delta_theta * (axel_length / 2)
     r_dist = delta_theta * (axel_length / 2)
@@ -72,6 +67,12 @@ def move_rot(bot, delta_theta, max_v=50):
         
         l_d = wheel_radius * l_delta
         r_d = wheel_radius * r_delta
+        
+        curr_theta = (r_d -l_d) / axel_length
+        
+        print("L_D: ", l_d)
+        print("R_D: ", r_d)
+        print("Approx theta: ", curr_theta)
         
         if abs(l_d) >= abs(l_dist) or abs(r_d) >= abs(r_dist):
             bot.stop_motors()
@@ -163,18 +164,25 @@ P = [(1.0, -2.0, np.pi),
 
 # NEW MAZE 
 #P0->P1
+print("P0->P1")
 move_str(bot, D=0.5, max_v=50) 
 #P1->P1
+print("P1->P1")
 move_rot(bot, np.pi / 4, max_v=50)
 #P1->P2
+print("P1->P2")
 move_str(bot, D=0.5, max_v=50) 
 #P2->P2
+print("P2->P2")
 move_rot(bot, - np.pi / 4, max_v=50)
 #P2->P3
+print("P2->P3")
 move_str(bot, D=0.5, max_v=50) 
 #P3->P3
+print("P3->P3")
 move_rot(bot, - np.pi / 2, max_v=50)
 #P3->P4
+print("P3->P4")
 move_arc(bot, R=0.5, theta=np.pi / 2 , direction="CW", max_v=50)
 
-
+print("DONE")
