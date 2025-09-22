@@ -153,7 +153,7 @@ P = [(1.0, -2.0, np.pi),
 #move_str(bot, D=0.3, max_v=50)  # 50 ~100 단위로 속도 조정
 
 # # P1 -> P2
-move_arc(bot, R=2.0, theta=np.pi/2, direction="CW", max_v=50)
+move_arc(bot, R=2.0, theta=np.pi, direction="CW", max_v=50)
 
 # # P2 -> P3
 # D_23 = np.linalg.norm(np.array(P[3][:2]) - np.array(P[2][:2]))
