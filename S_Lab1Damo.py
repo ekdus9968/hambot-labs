@@ -75,6 +75,8 @@ def move_rot(bot, delta_theta, max_v=50):
         print("ROT:: Approx theta: ", curr_theta)
         
         if abs(l_d) >= abs(l_dist) or abs(r_d) >= abs(r_dist):
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
             bot.stop_motors()
             break        
         time.sleep(0.01)
@@ -162,25 +164,25 @@ P = [(1.0, -2.0, np.pi),
 # print("Path 완료!")
 # bot.stop_motors()
 
-# # NEW MAZE 
-# #P0->P1
-# print("P0->P1")
-# move_str(bot, D=1.0, max_v=20) 
-# #P1->P1
-# print("P1->P1")
-# move_rot(bot, np.pi / 4, max_v=20)
-# #P1->P2
-# print("P1->P2")
-# move_str(bot, D=1.5 , max_v=20) 
-# #P2->P2
-# print("P2->P2")
-# move_rot(bot, - np.pi / 4, max_v=20)
-# #P2->P3
-# print("P2->P3")
-# move_str(bot, D=1.0, max_v=20) 
-# #P3->P3
-# print("P3->P3")
-# move_rot(bot, - np.pi / 2, max_v=20)
+# NEW MAZE 
+#P0->P1
+print("P0->P1")
+move_str(bot, D=1.0, max_v=20) 
+#P1->P1
+print("P1->P1")
+move_rot(bot, np.pi / 4, max_v=20)
+#P1->P2
+print("P1->P2")
+move_str(bot, D=1.5 , max_v=20) 
+#P2->P2
+print("P2->P2")
+move_rot(bot, - np.pi / 4, max_v=20)
+#P2->P3
+print("P2->P3")
+move_str(bot, D=1.0, max_v=20) 
+#P3->P3
+print("P3->P3")
+move_rot(bot, - np.pi / 2, max_v=20)
 
 # #P3->P4
 print("P3->P4")
