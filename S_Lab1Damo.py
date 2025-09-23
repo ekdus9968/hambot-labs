@@ -193,4 +193,5 @@ move_str(bot, D=1.5, max_v=35)
 print("P4->P5")
 move_arc(bot, R=1.0, theta=np.pi , direction="CW", max_v=35)
 
+
 print("DONE")
