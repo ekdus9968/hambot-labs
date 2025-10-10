@@ -29,9 +29,14 @@ try:
             print(f"Front distance: {scan[center_idx]:.3f} m")
         else:
             print("No LiDAR data received")
-        time.sleep(0.1)
+        
+        forward_distance = np.min(scan[175:185]) 
+        
+        if np.isnan(forward_distance) or np.isinf(forward_distance):
+            forward_distance = 6.0
+        
         # PID 계산
-        error = scan- target_distance
+        error = forward_distance - target_distance
         proportional = Kp * error
         integral += error * dt
         derivative = (error - prev_error) / dt
