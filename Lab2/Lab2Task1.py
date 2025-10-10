@@ -10,7 +10,7 @@ Ki = 0.01
 Kd = 0.5
 
 # T_Distance
-target_distance = 0.6
+target_distance = 6
 dt = 0.032  # 32ms
 
 # PID 
@@ -28,7 +28,7 @@ try:
         # 로봇 앞쪽 거리 (approx 180° 전방)
         forward_distance = min(lidar[175:195])
         if np.isinf(forward_distance) or np.isnan(forward_distance):
-            forward_distance = 6.0  # 기본값
+            forward_distance = 2.4  # 기본값
 
         # PID 계산
         error = forward_distance - target_distance
