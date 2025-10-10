@@ -10,7 +10,7 @@ Ki = 0.01
 Kd = 0.5
 
 # T_Distance
-target_distance = 1
+target_distance = 6
 dt = 0.032  # 32ms
 
 # PID 
@@ -30,7 +30,7 @@ try:
         else:
             print("No LiDAR data received")
         
-        forward_distance = np.min(scan[175:185]) /100
+        forward_distance = np.min(scan[175:185]) /600
         
         if np.isnan(forward_distance) or np.isinf(forward_distance):
             forward_distance = 6.0
