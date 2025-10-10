@@ -30,7 +30,7 @@ try:
         else:
             print("No LiDAR data received")
         
-        forward_distance = np.min(scan[175:185]) 
+        forward_distance = np.min(scan[175:185]) /100
         
         if np.isnan(forward_distance) or np.isinf(forward_distance):
             forward_distance = 6.0
