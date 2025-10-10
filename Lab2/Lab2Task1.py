@@ -23,13 +23,13 @@ bot = HamBot(lidar_enabled=True, camera_enabled=False)
 
 try:
     while True:
-        # LiDAR
-        lidar = bot.get_range_image()  # 360개 값, 각도 0~359
-        # 로봇 앞쪽 거리 (approx 180° 전방)
-        forward_distance = min(lidar[175:195])/10000.00
-        if np.isinf(forward_distance) or np.isnan(forward_distance):
-            forward_distance = 2.4  # 기본값
-
+        scan = bot.get_lidar_scan()
+        if scan is not None and len(scan) > 0:
+            center_idx = len(scan) // 2
+            print(f"Front distance: {scan[center_idx]:.3f} m")
+        else:
+            print("No LiDAR data received")
+        time.sleep(0.1)
         # PID 계산
         error = forward_distance - target_distance
         proportional = Kp * error
