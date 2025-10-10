@@ -5,9 +5,9 @@ import numpy as np
 from robot_systems.robot import HamBot
 
 # PID gains
-Kp = 10.0
+Kp = 5.0
 Ki = 0.5
-Kd = 1.0
+Kd = 0.5
 
 # T_Distance
 target_distance = 1
@@ -45,10 +45,10 @@ try:
 
         if np.isnan(u) or np.isinf(u):
             u = 0.0
-        #
-        u = max(min(u, 40), -40)  # HamBot 모터 범위 -100~100
+        #saturation
+        u = np.clip(u, -20, 20)
 
-        # 모터 속도 적용
+        # 
         bot.set_left_motor_speed(u)
         bot.set_right_motor_speed(u)
 
