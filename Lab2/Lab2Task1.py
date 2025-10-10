@@ -9,21 +9,21 @@ Kp = 1.0
 Ki = 0.01
 Kd = 0.5
 
-# 목표 거리 (미터)
-target_distance = 1.0
+# T_Distance
+target_distance = 0.6
 dt = 0.032  # 32ms
 
-# PID 상태 변수
+# PID 
 integral = 0.0
 prev_error = 0.0
 error = 0.0
 
-# HamBot 초기화
+# HamBot setting
 bot = HamBot(lidar_enabled=True, camera_enabled=False)
 
 try:
     while True:
-        # LiDAR 읽기
+        # LiDAR
         lidar = bot.get_range_image()  # 360개 값, 각도 0~359
         # 로봇 앞쪽 거리 (approx 180° 전방)
         forward_distance = min(lidar[175:195])
@@ -38,7 +38,9 @@ try:
         prev_error = error
         u = proportional + Ki * integral + Kd * derivative
 
-        # 속도 제한
+        if np.isnan(u) or np.isinf(u):
+            u = 0.0
+        #
         u = max(min(u, 50), -50)  # HamBot 모터 범위 -100~100
 
         # 모터 속도 적용
@@ -48,6 +50,10 @@ try:
         # 디버깅 출력
         print(f"Forward: {forward_distance:.3f}, Error: {error:.3f}, PID u: {u:.2f}")
 
+        if abs(error) < 0.005 and abs(u) < 0.005:
+            print("Reached target distance. Stopping robot.")
+            bot.stop_motors()
+            break
         # dt만큼 대기
         time.sleep(dt)
 
