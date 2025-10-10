@@ -46,7 +46,7 @@ try:
         if np.isnan(u) or np.isinf(u):
             u = 0.0
         #
-        u = max(min(u, 25), -25)  # HamBot 모터 범위 -100~100
+        u = max(min(u, 40), -40)  # HamBot 모터 범위 -100~100
 
         # 모터 속도 적용
         bot.set_left_motor_speed(u)
