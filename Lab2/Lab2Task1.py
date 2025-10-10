@@ -6,7 +6,7 @@ from robot_systems.robot import HamBot
 
 # PID gains
 Kp = 10.0
-Ki = 1.0
+Ki = 3.0
 Kd = 5.0
 
 # T_Distance
@@ -55,7 +55,7 @@ try:
         # 디버깅 출력
         print(f"Forward: {forward_distance:.3f}, Error: {error:.3f}, PID u: {u:.2f}")
 
-        if abs(error) < 0.005 and abs(u) < 0.005:
+        if abs(error) < 0.01 and abs(u) < 0.01:
             print("Reached target distance. Stopping robot.")
             bot.stop_motors()
             break
