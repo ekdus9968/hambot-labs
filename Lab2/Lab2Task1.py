@@ -6,7 +6,7 @@ from robot_systems.robot import HamBot
 
 # PID gains
 Kp = 10.0
-Ki = 0.1
+Ki = 1.0
 Kd = 5.0
 
 # T_Distance
