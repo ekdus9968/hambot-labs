@@ -26,7 +26,7 @@ try:
         # LiDAR
         lidar = bot.get_range_image()  # 360개 값, 각도 0~359
         # 로봇 앞쪽 거리 (approx 180° 전방)
-        forward_distance = min(lidar[175:195])
+        forward_distance = min(lidar[175:195])/10000.00
         if np.isinf(forward_distance) or np.isnan(forward_distance):
             forward_distance = 2.4  # 기본값
 
@@ -41,7 +41,7 @@ try:
         if np.isnan(u) or np.isinf(u):
             u = 0.0
         #
-        u = max(min(u, 50), -50)  # HamBot 모터 범위 -100~100
+        u = max(min(u, 25), -25)  # HamBot 모터 범위 -100~100
 
         # 모터 속도 적용
         bot.set_left_motor_speed(u)
