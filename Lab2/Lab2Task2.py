@@ -16,10 +16,10 @@ Ki = 0.01
 Kd = 0.5
 
 # Target distances (meters)
-target_D_f = 0.5
-target_D_r = 0.15
+target_D_f = 0.3
+target_D_r = 0.1
 target_D_l = 0.5
-dt = 0.05  # 제어 주기 (초)
+dt = 0.032  # 제어 주기 (초)
 
 # PID state variables
 I_f = 0.0
@@ -37,9 +37,6 @@ print("amBot initialized and ready for wall following.")
 # Utility functions
 # ========================
 
-def stop(bot):
-    bot.stop_motors()
-    print("Motors stopped.")
 
 
 def move_forward(bot, speed=50, duration=2.0):
@@ -92,12 +89,6 @@ def turn_left(bot, target_angle=90):
     move_forward(bot)
 
 
-def parking(bot):
-    print("Parking...")
-    bot.stop_motors()
-    print("Done.")
-
-
 # ========================
 # Wall following control
 # ========================
@@ -118,9 +109,9 @@ def withWall(bot):
             continue
 
         # 센서 데이터 (degrees 기준)
-        D_f = np.nanmin(lidar[175:195])  # front
-        D_r = np.nanmin(lidar[265:285])  # right
-        D_l = np.nanmin(lidar[75:105])   # left
+        D_f = np.nanmin(lidar[175:195])  / 600 # front
+        D_r = np.nanmin(lidar[265:285])  / 600 # right
+        D_l = np.nanmin(lidar[75:105])   / 600 # left
 
         # 결측치 처리
         if np.isinf(D_f) or np.isnan(D_f) or D_f < 0.05:
@@ -141,7 +132,7 @@ def withWall(bot):
         E_prev_r = E_r
 
         control = P + Ki * I_r + Kd * D_term
-        control = np.clip(control, -100, 100)
+        control = np.clip(control, -20, 20)
 
         left_speed = 60 + control
         right_speed = 60 - control
@@ -152,15 +143,12 @@ def withWall(bot):
         print(f"[WallFollow] D_f={D_f:.2f}, D_r={D_r:.2f}, control={control:.2f}")
 
         # 장애물 또는 벽 조건 처리
-        if D_f < 0.6 and D_r < 0.2:
+        if D_f < 0.3 and D_r < 0.1:
             bot.stop_motors()
             turn_left(bot)
-        elif D_f < 0.6 and D_r > 0.5:
+        elif D_f < 0.3 and D_r > 0.6:
             bot.stop_motors()
             turn_right(bot)
-        elif D_f < 0.15 and D_l < 0.3 and D_r < 0.3:
-            parking(bot)
-            break
 
         time.sleep(dt)
 
