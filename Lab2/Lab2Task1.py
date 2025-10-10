@@ -23,7 +23,7 @@ bot = HamBot(lidar_enabled=True, camera_enabled=False)
 
 try:
     while True:
-        scan = bot.get_lidar_scan()
+        scan = bot.get_range_image()
         if scan is not None and len(scan) > 0:
             center_idx = len(scan) // 2
             print(f"Front distance: {scan[center_idx]:.3f} m")
@@ -31,7 +31,7 @@ try:
             print("No LiDAR data received")
         time.sleep(0.1)
         # PID 계산
-        error = forward_distance - target_distance
+        error = scan- target_distance
         proportional = Kp * error
         integral += error * dt
         derivative = (error - prev_error) / dt
