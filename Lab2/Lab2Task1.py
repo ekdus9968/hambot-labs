@@ -5,7 +5,7 @@ import numpy as np
 from robot_systems.robot import HamBot
 
 # PID gains
-Kp = 8.0
+Kp = 10.0
 Ki = 0.5
 Kd = 1.0
 
