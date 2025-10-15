@@ -98,4 +98,4 @@ if __name__ == "__main__":
         withWall(bot)
     except KeyboardInterrupt:
         bot.stop()
-        print("🟥 Wall following stopped safely.")
+        print("Wall following stopped safely.")
