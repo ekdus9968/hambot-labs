@@ -93,7 +93,7 @@ def withWall(bot):
 
         time.sleep(dt)
 if __name__ == "__main__":
-    print("🤖 HamBot Wall Following PID Controller Started.")
+    print("HamBot Wall Following PID Controller Started.")
     try:
         withWall(bot)
     except KeyboardInterrupt:
