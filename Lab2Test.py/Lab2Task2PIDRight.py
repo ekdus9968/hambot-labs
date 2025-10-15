@@ -85,18 +85,17 @@ def withWall(bot):
         left_speed = 60 + control
         right_speed = 60 - control
 
-        bot.set_left_motor_speed(-left_speed)
+        bot.set_left_motor_speed(left_speed)
         bot.set_right_motor_speed(right_speed)
 
         print(f"[WallFollow] D_f={D_f:.2f}, D_r={D_r:.2f}, control={control:.2f}")
 
 
         time.sleep(dt)
-
-
-# ========================
-# Main loop
-# ========================
 if __name__ == "__main__":
     print("🤖 HamBot Wall Following PID Controller Started.")
-    withWall(bot)
+    try:
+        withWall(bot)
+    except KeyboardInterrupt:
+        bot.stop()
+        print("🟥 Wall following stopped safely.")
