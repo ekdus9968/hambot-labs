@@ -42,26 +42,26 @@ print("amBot initialized and ready for wall following.")
 def move_forward(bot, speed=50, duration=2.0):
     """Move straight forward for 'duration' seconds"""
     print("Moving forward...")
-    bot.set_left_motor_speed(-speed)
-    bot.set_right_motor_speed(speed)
-    time.sleep(duration)
+    # bot.set_left_motor_speed(-speed)
+    # bot.set_right_motor_speed(speed)
+    # time.sleep(duration)
     bot.stop_motors()
 
 def turn_right(bot, target_angle=90):
     """Turn right by using IMU heading."""
     print("Turning right...")
-    start_angle = bot.get_heading()
-    target = (start_angle - target_angle) % 360
+    # start_angle = bot.get_heading()
+    # target = (start_angle - target_angle) % 360
 
-    bot.set_left_motor_speed(40)
-    bot.set_right_motor_speed(-40)
+    # bot.set_left_motor_speed(40)
+    # bot.set_right_motor_speed(-40)
 
-    while True:
-        current = bot.get_heading()
-        diff = (target - current + 180) % 360 - 180
-        if abs(diff) < 2:  # 2도 이내 도달 시 정지
-            break
-        time.sleep(0.05)
+    # while True:
+    #     current = bot.get_heading()
+    #     diff = (target - current + 180) % 360 - 180
+    #     if abs(diff) < 2:  # 2도 이내 도달 시 정지
+    #         break
+    #     time.sleep(0.05)
 
     bot.stop_motors()
     print("Right turn complete.")
@@ -71,18 +71,18 @@ def turn_right(bot, target_angle=90):
 def turn_left(bot, target_angle=90):
     """Turn left by using IMU heading."""
     print("Turning left...")
-    start_angle = bot.get_heading()
-    target = (start_angle + target_angle) % 360
+    # start_angle = bot.get_heading()
+    # target = (start_angle + target_angle) % 360
 
-    bot.set_left_motor_speed(-40)
-    bot.set_right_motor_speed(40)
+    # bot.set_left_motor_speed(-40)
+    # bot.set_right_motor_speed(40)
 
-    while True:
-        current = bot.get_heading()
-        diff = (target - current + 180) % 360 - 180
-        if abs(diff) < 2:
-            break
-        time.sleep(0.05)
+    # while True:
+    #     current = bot.get_heading()
+    #     diff = (target - current + 180) % 360 - 180
+    #     if abs(diff) < 2:
+    #         break
+    #     time.sleep(0.05)
 
     bot.stop_motors()
     print(" Left turn complete.")
@@ -157,6 +157,6 @@ def withWall(bot):
 # Main loop
 # ========================
 if __name__ == "__main__":
-    print("🤖 HamBot Wall Following PID Controller Started.")
+    print("HamBot Wall Following PID Controller Started.")
     move_forward(bot)
     withWall(bot)
