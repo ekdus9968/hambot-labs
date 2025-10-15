@@ -137,7 +137,7 @@ def withWall(bot):
         left_speed = 60 + control
         right_speed = 60 - control
 
-        bot.set_left_motor_speed(left_speed)
+        bot.set_left_motor_speed(left_speed * 1.01)
         bot.set_right_motor_speed(right_speed)
 
         print(f"[WallFollow] D_f={D_f:.2f}, D_r={D_r:.2f}, control={control:.2f}")
