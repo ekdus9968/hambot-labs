@@ -48,7 +48,7 @@ def forwardPID(target_distance=0.4):
     global prev_error, integral
     print("ForwardPID")
     lidar = bot.get_range_image()
-    actual_distance = np.mean([safe_distance(v) for v in lidar[175:185]/600])
+    actual_distance = np.mean([safe_distance(v) for v in lidar[175:185]])
     error = actual_distance - target_distance
 
     Kp = 3.0
@@ -73,8 +73,8 @@ def sidePID(wall="left"):
     Ki = 0.00019
     Kd = 1
 
-    actual_left = safe_distance(np.min(lidar[90:115]/600))
-    actual_right = safe_distance(np.min(lidar[265:290]/600))
+    actual_left = safe_distance(np.min(lidar[90:115]))
+    actual_right = safe_distance(np.min(lidar[265:290]))
 
     if wall == "left" and actual_left > 2.5:
         return 0.0
@@ -122,8 +122,8 @@ def rotate(radianAngle):
 def wall_follow(wall="left"):
     print("Wall_Following")
     lidar = bot.get_range_image()
-    left_distance = safe_distance(np.min(lidar[90:115]/600))
-    right_distance = safe_distance(np.min(lidar[265:290]/600))
+    left_distance = safe_distance(np.min(lidar[90:115]))
+    right_distance = safe_distance(np.min(lidar[265:290]))
     target = 0.4
 
     linear_velocity = forwardPID(target_distance=target)
@@ -169,7 +169,8 @@ while True:
     bot.set_left_motor_speed(leftv)
     bot.set_right_motor_speed(rightv)
 
-    front_distance = safe_distance(np.min(bot.get_range_image()[175:185] / 600))
+    front_distance = safe_distance(np.min(bot.get_range_image()[175:185] ))
+    front_distance = front_distance / 600
     print(f"Front distance: {front_distance:.3f} m")
     print("-"*50)
 
