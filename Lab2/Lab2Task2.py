@@ -113,7 +113,7 @@ def withWall(bot):
 
 
         # 센서 데이터 (degrees 기준)
-        D_f = np.nanmin(lidar[175:195])  / 600 # front
+        D_f = np.nanmin(lidar[175:185])  / 600 # front
         D_r = np.nanmin(lidar[265:285])  / 600 # right
         D_l = np.nanmin(lidar[75:105])   / 600 # left
 
@@ -140,7 +140,7 @@ def withWall(bot):
             control = 0.0
         control = np.clip(control, -20, 20)
 
-        bot.set_left_motor_speed(control * 1.01)
+        bot.set_left_motor_speed(control * 1.005)
         bot.set_right_motor_speed(control)
 
         print(f"[WallFollow] D_f={D_f:.2f}, E_f={E_f:.2f}, D_r={D_r:.2f}, E_r={E_r:.2f}, control={control:.2f}")
