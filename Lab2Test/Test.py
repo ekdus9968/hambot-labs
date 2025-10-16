@@ -61,6 +61,7 @@ def move_forward(bot, speed=10, duration=2.0):
     bot.set_right_motor_speed(speed)
     time.sleep(duration)
     bot.stop_motors()
+    withWall(bot)
     
     
 # ========================
