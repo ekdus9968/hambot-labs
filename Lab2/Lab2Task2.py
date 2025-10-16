@@ -25,17 +25,20 @@ angleIntegral = 0
 # ========================
 def resetPID():
     global prev_error, integral, prev_angle_error, angleIntegral
+    print("restPID")
     prev_error = 0
     integral = 0
     prev_angle_error = 0
     angleIntegral = 0
 
 def safe_distance(value, max_range=9.5):
+    print("safe_distance")
     if math.isinf(value) or math.isnan(value):
         return max_range
     return min(value, max_range)
 
 def saturation(speed, max_speed=20):
+    print("saturation")
     return max(min(speed, max_speed), -max_speed)
 
 # ========================
@@ -43,6 +46,7 @@ def saturation(speed, max_speed=20):
 # ========================
 def forwardPID(target_distance=0.4):
     global prev_error, integral
+    print("ForwardPID")
     lidar = bot.get_range_image()
     actual_distance = np.mean([safe_distance(v) for v in lidar[175:185]])
     error = actual_distance - target_distance
@@ -61,9 +65,10 @@ def forwardPID(target_distance=0.4):
     return saturation(v)
 
 def sidePID(wall="left"):
+    print("SidePID")
     global prev_angle_error, angleIntegral
     lidar = bot.get_range_image()
-    side_distance = 0.4
+    side_distance = 0.3
     Kp = 0.45
     Ki = 0.00019
     Kd = 1
@@ -91,6 +96,7 @@ def sidePID(wall="left"):
 # Rotation for corners
 # ========================
 def rotate(radianAngle):
+    print("Rotate")
     resetPID()
     base_speed = 1.0
     left_direction = 1 if radianAngle > 0 else -1
@@ -114,10 +120,11 @@ def rotate(radianAngle):
 # Wall following
 # ========================
 def wall_follow(wall="left"):
+    print("Wall_Following")
     lidar = bot.get_range_image()
     left_distance = safe_distance(np.min(lidar[90:115]))
     right_distance = safe_distance(np.min(lidar[265:290]))
-    target = 0.4
+    target = 0.3
 
     linear_velocity = forwardPID(target_distance=target)
     angular_velocity = sidePID(wall)
@@ -166,9 +173,9 @@ while True:
     print(f"Front distance: {front_distance:.3f} m")
     print("-"*50)
 
-    if front_distance < 0.45 and wall == "right":
+    if front_distance < 0.5 and wall == "right":
         rotate(-math.pi/2)
-    elif front_distance < 0.45 and wall == "left":
+    elif front_distance < 0.5 and wall == "left":
         rotate(math.pi/2)
 
     time.sleep(dt)
