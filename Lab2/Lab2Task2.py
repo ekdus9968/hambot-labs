@@ -96,10 +96,10 @@ def rotate(radianAngle):
     left_direction = 1 if radianAngle > 0 else -1
     right_direction = -left_direction
 
-    initial_yaw = bot.imu.getRollPitchYaw()[2]   # radians
+    initial_yaw = bot.get_heading()   # radians
 
     while True:
-        current_yaw = bot.imu.getRollPitchYaw()[2] 
+        current_yaw = bot.get_heading()
         delta = (current_yaw - initial_yaw + math.pi) % (2*math.pi) - math.pi
         if abs(delta) >= abs(radianAngle):
             bot.set_left_motor_speed(0)
