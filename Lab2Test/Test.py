@@ -23,7 +23,7 @@ Kd = 1
 
 # Target distances (meters)
 target_D_f = 0.3
-target_D_r = 0.4
+target_D_r = 0.3
 
 # PID state variables
 I_f = 0.0
@@ -162,7 +162,7 @@ def withWall(bot):
 
         print(f"[WallFollow] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
 
-        if D_f < 0.4:
+        if D_f < 0.4 or D_f > 1.5:
             bot.stop_motors()
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
