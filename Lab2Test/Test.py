@@ -64,13 +64,13 @@ def move_forward(bot, speed=20, duration=2.0):
     bot.stop_motors()
     withWall(bot)
 
-def safe_distance(value, max_range=9.5):
-    """
-    LiDAR 값에서 NaN, Inf를 처리하고 최대 거리 제한.
-    """
-    if math.isinf(value) or math.isnan(value) or value < 0.05:
-        return max_range
-    return min(value, max_range)
+# def safe_distance(value, max_range=9.5):
+#     """
+#     LiDAR 값에서 NaN, Inf를 처리하고 최대 거리 제한.
+#     """
+#     if math.isinf(value) or math.isnan(value) or value < 0.05:
+#         return max_range
+#     return min(value, max_range)
 
     
     
@@ -138,85 +138,168 @@ def withWall(bot):
 
 
         # # 센서 데이터 (degrees 기준)
-        # D_ㄹ = np.nanmin(lidar[175:185])  / 600 # front
+        # D_f = np.nanmin(lidar[175:185])  / 600 # front
         
         # D_r = np.nanmin(lidar[265:285])  / 600 # right
         # D_l = np.nanmin(lidar[75:105])   / 600 # left
         
-        lidar = bot.get_range_image()  # HamBot LiDAR 360° 배열
+        # lidar = bot.get_range_image()  # HamBot LiDAR 360° 배열
 
-        if lidar is None or len(lidar) < 360:
-            print("No LiDAR data received, skipping this step")
-            time.sleep(dt)
-            continue
+        # if lidar is None or len(lidar) < 360:
+        #     print("No LiDAR data received, skipping this step")
+        #     time.sleep(dt)
+        #     continue
 
-        # front 구간 평균 거리 계산 (safe_distance 적용)
-        D_f = sum([safe_distance(v) for v in lidar[175:185]]) / 60.0
-        D_r = sum([safe_distance(v) for v in lidar[265:285]]) / 600.0
-        D_l = sum([safe_distance(v) for v in lidar[75:105]]) / 600.0
+        # # front 구간 평균 거리 계산 (safe_distance 적용)
+        # D_f = sum([safe_distance(v) for v in lidar[175:185]]) / 60.0
+        # D_r = sum([safe_distance(v) for v in lidar[265:285]]) / 600.0
+        # D_l = sum([safe_distance(v) for v in lidar[75:105]]) / 600.0
 
-        print(f"[SUMMMM]Front={D_f:.2f}, Right={D_r:.2f}, Left={D_l:.2f}")
+        # print(f"[SUMMMM]Front={D_f:.2f}, Right={D_r:.2f}, Left={D_l:.2f}")
 
-        # 결측치 처리
-        if np.isinf(D_f) or np.isnan(D_f) or D_f < 0.05:
-            D_f = 1.0
-        if np.isinf(D_r) or np.isnan(D_r) or D_r < 0.05:
-            D_r = 1.0
-        if np.isinf(D_l) or np.isnan(D_l):
-            D_l = 1.0
+        # # 결측치 처리
+        # if np.isinf(D_f) or np.isnan(D_f) or D_f < 0.05:
+        #     D_f = 1.0
+        # if np.isinf(D_r) or np.isnan(D_r) or D_r < 0.05:
+        #     D_r = 1.0
+        # if np.isinf(D_l) or np.isnan(D_l):
+        #     D_l = 1.0
 
-        # 에러 계산
-        E_f = D_f - target_D_f
-        E_r = D_r - target_D_r
+        # # 에러 계산
+        # E_f = D_f - target_D_f
+        # E_r = D_r - target_D_r
 
-        # PID 계산 (오른쪽 벽 기준)
-        P = Kp * E_r
-        I_r += E_r * dt
-        D_term = (E_r - E_prev_r) / dt
-        E_prev_r = E_r
+        # # PID 계산 (오른쪽 벽 기준)
+        # P = Kp * E_r
+        # I_r += E_r * dt
+        # D_term = (E_r - E_prev_r) / dt
+        # E_prev_r = E_r
 
-        control = P + Ki * I_r + Kd * D_term
-        if np.isnan(control) or np.isinf(control):
-            control = 0.0
-        control = np.clip(control, -1, 1)
-        base_speed = 10
-        left_speed  = base_speed + control
-        right_speed = base_speed - control
-        bot.set_left_motor_speed(left_speed)
-        bot.set_right_motor_speed(right_speed)
+        # control = P + Ki * I_r + Kd * D_term
+        # if np.isnan(control) or np.isinf(control):
+        #     control = 0.0
+        # control = np.clip(control, -1, 1)
+        # base_speed = 10
+        # left_speed  = base_speed + control
+        # right_speed = base_speed - control
+        # bot.set_left_motor_speed(left_speed)
+        # bot.set_right_motor_speed(right_speed)
 
 
-        print(f"[WallFollow] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+        # print(f"[WallFollow] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
 
-        if D_f < 1.5 :
-            print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
-            print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
-            print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
-            print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
-            print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
-            bot.stop_motors()
-            bot.set_left_motor_speed(0)
-            bot.set_right_motor_speed(0)
-            if D_r < D_l:
-                print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
-                rotate(bot, -math.pi / 2)
-                move_forward(bot)
-                break
-            elif D_r > D_l:
-                print("Right:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+        # if D_f < 1.5 :
+        #     print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+        #     print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+        #     print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+        #     print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+        #     print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+        #     bot.stop_motors()
+        #     bot.set_left_motor_speed(0)
+        #     bot.set_right_motor_speed(0)
+        #     if D_r < D_l:
+        #         print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+        #         rotate(bot, -math.pi / 2)
+        #         move_forward(bot)
+        #         break
+        #     elif D_r > D_l:
+        #         print("Right:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+        #         rotate(bot, math.pi / 2)
+        #         move_forward(bot)
+        #         break
+        # elif D_r > 1.2:
+        #     bot.stop_motors()
+        #     bot.set_left_motor_speed(0)
+        #     bot.set_right_motor_speed(0)
+        #     print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+        #     print("Right wall is far from at least 1.2")
+        #     rotate(bot, math.pi / 2)
+        #     move_forward(bot)
+            
+        # time.sleep(dt)
+        
+        
+        """Right wall following using PID."""
+        global I_f, E_prev_f, I_r, E_prev_r, E_r, E_f
+
+        print(" Starting wall following mode...")
+
+        while True:
+            lidar = bot.get_range_image()
+
+            # 기본 예외 처리 (라이다 데이터 존재 확인)
+            if lidar is None or len(lidar) < 360:
+                center_idx = len(lidar) // 2
+                print(f"Front distance: {lidar[center_idx]:.3f} m")
+            else:
+                print("No LiDAR data received")
+
+
+            # 센서 데이터 (degrees 기준)
+            D_f = np.nanmin(lidar[177:182])  / 600 # front
+            D_r = np.nanmin(lidar[265:285])  / 600 # right
+            D_l = np.nanmin(lidar[75:105])   / 600 # left
+
+            # 결측치 처리
+            if np.isinf(D_f) or np.isnan(D_f) or D_f < 0.05:
+                D_f = 1.0
+            if np.isinf(D_r) or np.isnan(D_r) or D_r < 0.05:
+                D_r = 1.0
+            if np.isinf(D_l) or np.isnan(D_l):
+                D_l = 1.0
+
+            # 에러 계산
+            E_f = D_f - target_D_f
+            E_r = D_r - target_D_r
+
+            # PID 계산 (오른쪽 벽 기준)
+            P = Kp * E_r
+            I_r += E_r * dt
+            D_term = (E_r - E_prev_r) / dt
+            E_prev_r = E_r
+
+            control = P + Ki * I_r + Kd * D_term
+            if np.isnan(control) or np.isinf(control):
+                control = 0.0
+            control = np.clip(control, -1, 1)
+            base_speed = 10
+            left_speed  = base_speed + control
+            right_speed = base_speed - control
+            bot.set_left_motor_speed(left_speed)
+            bot.set_right_motor_speed(right_speed)
+
+
+            print(f"[WallFollow] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+
+            if D_f < 0.4 :
+                print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                bot.stop_motors()
+                bot.set_left_motor_speed(0)
+                bot.set_right_motor_speed(0)
+                if D_r < D_l:
+                    print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+                    rotate(bot, -math.pi / 2)
+                    move_forward(bot)
+                    break
+                elif D_r > D_l:
+                    print("Right:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+                    rotate(bot, math.pi / 2)
+                    move_forward(bot)
+                    break
+            elif D_r > 1.2:
+                bot.stop_motors()
+                bot.set_left_motor_speed(0)
+                bot.set_right_motor_speed(0)
+                print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                print("Right wall is far from at least 1.2")
                 rotate(bot, math.pi / 2)
                 move_forward(bot)
-                break
-        elif D_r > 1.2:
-            bot.stop_motors()
-            bot.set_left_motor_speed(0)
-            bot.set_right_motor_speed(0)
-            print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
-            print("Right wall is far from at least 1.2")
-            rotate(bot, math.pi / 2)
-            move_forward(bot)
-            
-        time.sleep(dt)
+                
+            time.sleep(dt)
         #Turing 
         # if E_f < 0.5 and (D_r > D_l):
         #     print("RIGHT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
