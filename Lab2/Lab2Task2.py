@@ -11,9 +11,9 @@ from robot_systems.robot import HamBot  # HamBot 실물용 라이브러리
 # ========================
 # PID gains
 # ========================
-Kp = 10.0
-Ki = 0.5
-Kd = 1.0
+Kp = 2.0
+Ki = 0.05
+Kd = 0.5
 
 # Target distances (meters)
 target_D_f = 0.3
@@ -138,7 +138,7 @@ def withWall(bot):
         control = P + Ki * I_r + Kd * D_term
         if np.isnan(control) or np.isinf(control):
             control = 0.0
-        control = np.clip(control, -40, 40)
+        control = np.clip(control, -20, 20)
         base_speed = 10
         left_speed  = base_speed + control
         right_speed = base_speed - control
