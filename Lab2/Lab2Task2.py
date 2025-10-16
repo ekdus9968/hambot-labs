@@ -140,7 +140,7 @@ def withWall(bot):
             control = 0.0
         control = np.clip(control, -20, 20)
 
-        bot.set_left_motor_speed(control * 1.008)
+        bot.set_left_motor_speed(control * 1.01)
         bot.set_right_motor_speed(control)
 
         print(f"[WallFollow] D_f={D_f:.2f}, E_f={E_f:.2f}, D_r={D_r:.2f}, E_r={E_r:.2f}, control={control:.2f}")
