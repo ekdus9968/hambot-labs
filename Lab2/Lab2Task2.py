@@ -139,7 +139,7 @@ def withWall(bot):
         if np.isnan(control) or np.isinf(control):
             control = 0.0
         control = np.clip(control, -40, 40)
-        base_speed = 30
+        base_speed = 10
         left_speed  = base_speed + control
         right_speed = base_speed - control
         bot.set_left_motor_speed(left_speed)
