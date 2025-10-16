@@ -148,6 +148,7 @@ def withWall(bot):
         
         # 장애물 또는 벽 조건 처리
         if E_f < 1.0 and E_r < 0.3:
+            print("STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
             bot.stop_motors()
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
