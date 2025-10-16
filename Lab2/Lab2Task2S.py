@@ -15,10 +15,9 @@ axel_length = 0.184
 # ========================
 # PID gains
 # ========================
-Kp = 1.0
-Ki = 0.05
-Kd = 0.5
-
+p = 0.45
+Ki = 0.00019
+Kd = 1
 # Target distances (meters)
 target_D_f = 0.3
 target_D_r = 0.3
