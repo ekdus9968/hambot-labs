@@ -151,8 +151,8 @@ def withWall(bot):
 
         # front 구간 평균 거리 계산 (safe_distance 적용)
         D_f = sum([safe_distance(v) for v in lidar[175:185]]) / 60.0
-        D_r = sum([safe_distance(v) for v in lidar[265:285]]) / 60.0
-        D_l = sum([safe_distance(v) for v in lidar[75:105]]) / 60.0
+        D_r = sum([safe_distance(v) for v in lidar[265:285]]) / 600.0
+        D_l = sum([safe_distance(v) for v in lidar[75:105]]) / 600.0
 
         print(f"[SUMMMM]Front={D_f:.2f}, Right={D_r:.2f}, Left={D_l:.2f}")
 
