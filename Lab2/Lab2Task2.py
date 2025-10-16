@@ -90,8 +90,10 @@ def turn_right(bot, target_angle=90):
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
             bot.stop_motors()
-            move_forward(bot, speed=10, duration=2.0)
             break
+        bot.stop_motors()
+        print(" Right turn complete.")
+        move_forward(bot, speed=10, duration=2.0)
         
         time.sleep(0.01)
 
