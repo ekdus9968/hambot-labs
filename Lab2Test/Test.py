@@ -168,12 +168,12 @@ def withWall(bot):
             bot.set_right_motor_speed(0)
             if D_r < D_l:
                 print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
-                rotate(bot, -math.pi / 4)
+                rotate(bot, -math.pi / 2)
                 move_forward(bot)
                 break
             elif D_r > D_l:
                 print("Right:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
-                rotate(bot, math.pi / 4)
+                rotate(bot, math.pi / 2)
                 move_forward(bot)
                 break
         time.sleep(dt)
