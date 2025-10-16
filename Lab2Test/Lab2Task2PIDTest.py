@@ -11,10 +11,9 @@ from robot_systems.robot import HamBot  # HamBot 실물용 라이브러리
 # ========================
 # PID gains
 # ========================
-Kp = 10.0
-Ki = 0.5
-Kd = 1.0
-
+Kp = 0.45
+Ki = 0.00019
+Kd = 1
 # Target distances (meters)
 target_D_f = 0.3
 target_D_r = 0.3
