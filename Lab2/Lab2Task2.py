@@ -8,6 +8,9 @@ import time
 import numpy as np
 from robot_systems.robot import HamBot  # HamBot 실물용 라이브러리
 #change 22222
+
+axel_length = 0.184
+
 # ========================
 # PID gains
 # ========================
@@ -41,7 +44,7 @@ print("HamBot initialized and ready for wall following.")
 
 
 
-def move_forward(bot, speed=5, duration=2.0):
+def move_forward(bot, speed=10, duration=2.0):
     """Move straight forward for 'duration' seconds"""
     print("Moving forward...")
     bot.set_left_motor_speed(speed)
@@ -52,23 +55,22 @@ def move_forward(bot, speed=5, duration=2.0):
 def turn_right(bot, target_angle=90):
     """Turn right by using IMU heading."""
     print("Turning right...")
-    # start_angle = bot.get_heading()
-    # target = (start_angle - target_angle) % 360
+    start_angle = bot.get_heading()
+    target = (start_angle - target_angle) % 360
 
-    # bot.set_left_motor_speed(40)
-    # bot.set_right_motor_speed(-40)
+    bot.set_left_motor_speed(40)
+    bot.set_right_motor_speed(-40)
 
-    # while True:
-    #     current = bot.get_heading()
-    #     diff = (target - current + 180) % 360 - 180
-    #     if abs(diff) < 2:  # 2도 이내 도달 시 정지
-    #         break
-    #     time.sleep(0.05)
+    while True:
+        current = bot.get_heading()
+        diff = (target - current + 180) % 360 - 180
+        if abs(diff) < 2:  # 2도 이내 도달 시 정지
+            break
+        time.sleep(0.05)
 
     bot.stop_motors()
     print("Right turn complete.")
     move_forward(bot)
-
 
 def turn_left(bot, target_angle=90):
     """Turn left by using IMU heading."""
@@ -155,7 +157,7 @@ def withWall(bot):
             bot.stop_motors()
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
-            turn_left(bot)
+            turn_right(bot)
         # elif D_f < 0.3 and D_r > 0.6:
         #     bot.stop_motors()
         #     turn_right(bot)
