@@ -147,7 +147,7 @@ def withWall(bot):
 
         
         # 장애물 또는 벽 조건 처리
-        if D_f < 0.3 and D_r < 0.1:
+        if D_f < 0.3 and E_r < 0.1:
             bot.stop_motors()
             # turn_left(bot)
         # elif D_f < 0.3 and D_r > 0.6:
