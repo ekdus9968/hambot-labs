@@ -127,7 +127,7 @@ def withWall(bot):
 
 
         # 센서 데이터 (degrees 기준)
-        D_f = np.nanmin(lidar[175:185])  / 600 # front
+        D_f = np.nanmin(lidar[177:182])  / 600 # front
         D_r = np.nanmin(lidar[265:285])  / 600 # right
         D_l = np.nanmin(lidar[75:105])   / 600 # left
 
