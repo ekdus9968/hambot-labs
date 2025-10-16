@@ -76,9 +76,7 @@ def rotate(bot, radianAngle):
     resetPID(bot)
     base_speed = 5 # 회전 속도 (너무 빠르면 overshoot)
 
-    # radianAngle (+ left / - right)
-    left_direction = 1 if radianAngle > 0 else -1
-    right_direction = -left_direction
+    
 
     # HamBot의 heading은 'degrees from East'
     initial_yaw = bot.get_heading()  # degrees
@@ -91,20 +89,21 @@ def rotate(bot, radianAngle):
         delta = (target_yaw - current_yaw + 540) % 360 - 180
 
         print(f"Rotate:: current={current_yaw:.2f}, target={target_yaw:.2f}, delta={delta:.2f}")
-
+        error = target_yaw - delta
         # 목표 각도에 거의 도달하면 정지
-        if abs(delta) < 2.0:  # ±2 허용 오차
+        if abs(error) < 5.0:  # ±2 허용 오차
             bot.stop_motors()
             print("Rotation complete.")
             break
 
         # 회전 속도 적용
-        bot.set_left_motor_speed(left_direction * base_speed)
-        bot.set_right_motor_speed(right_direction * base_speed)
-
+        rotation_speed = base_speed if delta > 0 else -base_speed
+        bot.set_left_motor_speed(rotation_speed)
+        bot.set_right_motor_speed(-rotation_speed)
         time.sleep(dt)
     
     resetPID(bot)
+
 
 # ========================
 # PID withWall
