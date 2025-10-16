@@ -166,14 +166,14 @@ def withWall(bot):
             bot.stop_motors()
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
-            if D_r > D_l:
-                print("RIGHT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
-                rotate(bot, -math.pi)
+            if D_r < D_l:
+                print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+                rotate(bot, -math.pi / 2)
                 move_forward(bot)
                 break
-            elif D_r < D_l:
-                print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
-                rotate(bot, math.pi)
+            elif D_r > D_l:
+                print("Right:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+                rotate(bot, math.pi / 2)
                 move_forward(bot)
                 break
         time.sleep(dt)

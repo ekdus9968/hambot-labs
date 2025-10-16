@@ -71,7 +71,7 @@ def rotate(bot, radianAngle):
     """
     print("Rotate start...")
     resetPID(bot)
-    base_speed = 1.0  # 회전 속도 (너무 빠르면 overshoot)
+    base_speed = 5 # 회전 속도 (너무 빠르면 overshoot)
 
     # radianAngle (+ left / - right)
     left_direction = 1 if radianAngle > 0 else -1
@@ -108,5 +108,5 @@ def rotate(bot, radianAngle):
 # ========================
 if __name__ == "__main__":
     print("HamBot Wall Following PID Controller Started.")
-    rotate(bot, math.pi)
+    rotate(bot, -math.pi)
     move_forward(bot)
