@@ -11,7 +11,7 @@ from robot_systems.robot import HamBot  # HamBot 실물용 라이브러리
 # ========================
 # PID gains
 # ========================
-Kp = 0.5
+Kp = 1.0
 Ki = 0.05
 Kd = 0.5
 
