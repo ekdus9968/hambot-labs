@@ -174,7 +174,7 @@ def withWall(bot):
             elif D_r < D_l:
                 print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
                 rotate(bot, math.pi)
-                move_forward(bot)   
+                move_forward(bot)
                 break
         time.sleep(dt)
         #Turing 

@@ -108,5 +108,5 @@ def rotate(bot, radianAngle):
 # ========================
 if __name__ == "__main__":
     print("HamBot Wall Following PID Controller Started.")
-    rotate(bot)
+    rotate(bot, math.pi)
     move_forward(bot)
