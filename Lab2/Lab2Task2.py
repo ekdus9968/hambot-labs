@@ -139,9 +139,12 @@ def withWall(bot):
         if np.isnan(control) or np.isinf(control):
             control = 0.0
         control = np.clip(control, -40, 40)
+        base_speed = 30
+        left_speed  = base_speed + control
+        right_speed = base_speed - control
+        bot.set_left_motor_speed(left_speed)
+        bot.set_right_motor_speed(right_speed)
 
-        bot.set_left_motor_speed(control * 1.1)
-        bot.set_right_motor_speed(control)
 
         print(f"[WallFollow] D_f={D_f:.2f}, E_f={E_f:.2f}, D_r={D_r:.2f}, E_r={E_r:.2f}, control={control:.2f}")
 
