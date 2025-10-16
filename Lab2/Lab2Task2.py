@@ -138,7 +138,7 @@ def withWall(bot):
         control = P + Ki * I_r + Kd * D_term
         if np.isnan(control) or np.isinf(control):
             control = 0.0
-        control = np.clip(control, -5, 5)
+        control = np.clip(control, -1, 1)
         base_speed = 10
         left_speed  = base_speed + control
         right_speed = base_speed - control
