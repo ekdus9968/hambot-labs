@@ -123,7 +123,9 @@ def wall_follow(wall="left"):
     print("Wall_Following")
     lidar = bot.get_range_image()
     left_distance = safe_distance(np.min(lidar[90:115]))
+    print("LEFT D: ", left_distance)
     right_distance = safe_distance(np.min(lidar[265:290]))
+    print("Right D: ", right_distance)
     target = 0.4
 
     linear_velocity = forwardPID(target_distance=target)
@@ -165,13 +167,16 @@ def wall_follow(wall="left"):
 wall = "left"
 
 while True:
+    
+    lidar = bot.get_range_image()
+
+    # 기본 예외 처리 (라이다 데이터 존재 확인)
     rightv, leftv = wall_follow(wall)
     bot.set_left_motor_speed(leftv)
     bot.set_right_motor_speed(rightv)
 
-    front_distance = safe_distance(np.min(bot.get_range_image()[175:185] ))
-    front_distance = front_distance 
-    print(f"Front distance: {front_distance:.3f} m")
+    front_distance = np.nanmin(lidar[175:185])  # front
+    print(front_distance)
     print("-"*50)
 
     if front_distance < 0.45 and wall == "right":
