@@ -169,6 +169,13 @@ wall = "left"
 while True:
     
     lidar = bot.get_range_image()
+    if lidar is None or len(lidar) < 360:
+        center_idx = len(lidar) // 2
+        print(f"Front distance: {lidar[center_idx]:.3f} m")
+    else:
+        print("No LiDAR data received")
+        
+    
 
     # 기본 예외 처리 (라이다 데이터 존재 확인)
     rightv, leftv = wall_follow(wall)
