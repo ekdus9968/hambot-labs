@@ -53,24 +53,46 @@ def move_forward(bot, speed=10, duration=2.0):
     bot.stop_motors()
 
 def turn_right(bot, target_angle=90):
-    """Turn right by using IMU heading."""
-    print("Turning right...")
-    start_angle = bot.get_heading()
-    target = (start_angle - target_angle) % 360
-
-    bot.set_left_motor_speed(40)
-    bot.set_right_motor_speed(-40)
-
+    delta_theta = -math.pi / 2  # 오른쪽 회전은 음수 각도
+    max_v = 10
+    wheel_radius = 0.090
+    
+    # 바퀴 이동 거리 계산
+    l_dist = -delta_theta * (axel_length / 2)
+    r_dist = delta_theta * (axel_length / 2)
+    
+    # 초기 엔코더 값 저장
+    init_l = bot.get_left_encoder_reading()
+    init_r = bot.get_right_encoder_reading()
+    
+    # 속도 설정
+    max_dist = max(abs(l_dist), abs(r_dist))
+    v_l = max_v * l_dist / max_dist
+    v_r = max_v * r_dist / max_dist
+    bot.set_left_motor_speed(v_l)
+    bot.set_right_motor_speed(v_r)
+    
+    # 회전 루프
     while True:
-        current = bot.get_heading()
-        diff = (target - current + 180) % 360 - 180
-        if abs(diff) < 2:  # 2도 이내 도달 시 정지
+        l_delta = bot.get_left_encoder_reading() - init_l
+        r_delta = bot.get_right_encoder_reading() - init_r
+        
+        l_d = wheel_radius * l_delta
+        r_d = wheel_radius * r_delta
+        
+        # 디버깅용 출력
+        curr_theta = (r_d - l_d) / axel_length
+        print(f"ROT:: L_D: {l_d:.3f}, R_D: {r_d:.3f}, Approx theta: {curr_theta:.3f}")
+        
+        # 목표 각도 도달 시 종료
+        if abs(l_d) >= abs(l_dist) or abs(r_d) >= abs(r_dist):
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+            bot.stop_motors()
+            move_forward(bot, speed=10, duration=2.0)
             break
-        time.sleep(0.05)
-
-    bot.stop_motors()
-    print("Right turn complete.")
-    move_forward(bot)
+        
+        time.sleep(0.01)
 
 def turn_left(bot, target_angle=90):
     """Turn left by using IMU heading."""
@@ -152,7 +174,7 @@ def withWall(bot):
 
         
         # 장애물 또는 벽 조건 처리
-        if E_f < 0.7 and E_r < 0.5:
+        if E_f < 0.6 and E_r > 0.5:
             print("STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
             bot.stop_motors()
             bot.set_left_motor_speed(0)
@@ -160,7 +182,7 @@ def withWall(bot):
             turn_right(bot)
         # elif D_f < 0.3 and D_r > 0.6:
         #     bot.stop_motors()
-        #     turn_right(bot)
+        #     turn_left(bot)
 
         time.sleep(dt)
 
