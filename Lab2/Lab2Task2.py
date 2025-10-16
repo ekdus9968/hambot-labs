@@ -138,21 +138,21 @@ def withWall(bot):
         control = P + Ki * I_r + Kd * D_term
         if np.isnan(control) or np.isinf(control):
             control = 0.0
-        control = np.clip(control, -20, 20)
+        control = np.clip(control, -40, 40)
 
-        bot.set_left_motor_speed(control * 1.01)
+        bot.set_left_motor_speed(control * 1.1)
         bot.set_right_motor_speed(control)
 
         print(f"[WallFollow] D_f={D_f:.2f}, E_f={E_f:.2f}, D_r={D_r:.2f}, E_r={E_r:.2f}, control={control:.2f}")
 
         
         # 장애물 또는 벽 조건 처리
-        if E_f < 1.0 and E_r < 0.3:
+        if E_f < 0.5 and E_r < 0.3:
             print("STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
             bot.stop_motors()
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
-            # turn_left(bot)
+            turn_left(bot)
         # elif D_f < 0.3 and D_r > 0.6:
         #     bot.stop_motors()
         #     turn_right(bot)
