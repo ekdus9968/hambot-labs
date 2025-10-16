@@ -35,7 +35,7 @@ def safe_distance(value, max_range=9.5):
         return max_range
     return min(value, max_range)
 
-def saturation(speed, max_speed=bot.max_motor_speed):
+def saturation(speed, max_speed=20):
     return max(min(speed, max_speed), -max_speed)
 
 # ========================
