@@ -23,7 +23,7 @@ Kd = 1
 
 # Target distances (meters)
 target_D_f = 0.3
-target_D_r = 0.3
+target_D_r = 0.4
 
 # PID state variables
 I_f = 0.0
