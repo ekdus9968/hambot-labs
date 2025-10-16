@@ -88,7 +88,7 @@ def rotate(bot, radianAngle):
         current_yaw = bot.get_heading()  # degrees
 
         # 차이 계산 (−180~180 범위로 정규화)
-        delta = (target_yaw - current_yaw + 540) % 360 - 180
+        delta = (current_yaw - initial_yaw + 540) % 360 - 180
 
         print(f"Rotate:: current={current_yaw:.2f}, target={target_yaw:.2f}, delta={delta:.2f}")
 
@@ -168,12 +168,12 @@ def withWall(bot):
             bot.set_right_motor_speed(0)
             if D_r < D_l:
                 print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
-                rotate(bot, -math.pi / 2)
+                rotate(bot, -math.pi / 4)
                 move_forward(bot)
                 break
             elif D_r > D_l:
                 print("Right:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
-                rotate(bot, math.pi / 2)
+                rotate(bot, math.pi / 4)
                 move_forward(bot)
                 break
         time.sleep(dt)
