@@ -48,7 +48,7 @@ def forwardPID(target_distance=0.4):
     global prev_error, integral
     print("ForwardPID")
     lidar = bot.get_range_image()
-    actual_distance = np.mean([safe_distance(v) for v in lidar[175:185]])
+    actual_distance = np.mean([safe_distance(v) for v in lidar[175:185]/600])
     error = actual_distance - target_distance
 
     Kp = 3.0
@@ -68,13 +68,13 @@ def sidePID(wall="left"):
     print("SidePID")
     global prev_angle_error, angleIntegral
     lidar = bot.get_range_image()
-    side_distance = 0.3
+    side_distance = 0.4
     Kp = 0.45
     Ki = 0.00019
     Kd = 1
 
-    actual_left = safe_distance(np.min(lidar[90:115]))
-    actual_right = safe_distance(np.min(lidar[265:290]))
+    actual_left = safe_distance(np.min(lidar[90:115]/600))
+    actual_right = safe_distance(np.min(lidar[265:290]/600))
 
     if wall == "left" and actual_left > 2.5:
         return 0.0
@@ -122,9 +122,9 @@ def rotate(radianAngle):
 def wall_follow(wall="left"):
     print("Wall_Following")
     lidar = bot.get_range_image()
-    left_distance = safe_distance(np.min(lidar[90:115]))
-    right_distance = safe_distance(np.min(lidar[265:290]))
-    target = 0.3
+    left_distance = safe_distance(np.min(lidar[90:115]/600))
+    right_distance = safe_distance(np.min(lidar[265:290]/600))
+    target = 0.4
 
     linear_velocity = forwardPID(target_distance=target)
     angular_velocity = sidePID(wall)
@@ -169,13 +169,13 @@ while True:
     bot.set_left_motor_speed(leftv)
     bot.set_right_motor_speed(rightv)
 
-    front_distance = safe_distance(np.min(bot.get_range_image()[175:185]))
+    front_distance = safe_distance(np.min(bot.get_range_image()[175:185] / 600))
     print(f"Front distance: {front_distance:.3f} m")
     print("-"*50)
 
-    if front_distance < 0.5 and wall == "right":
+    if front_distance < 0.45 and wall == "right":
         rotate(-math.pi/2)
-    elif front_distance < 0.5 and wall == "left":
+    elif front_distance < 0.45 and wall == "left":
         rotate(math.pi/2)
 
     time.sleep(dt)
