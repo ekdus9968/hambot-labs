@@ -91,7 +91,7 @@ def rotate(bot, radianAngle):
         print(f"Rotate:: current={current_yaw:.2f}, target={target_yaw:.2f}, delta={delta:.2f}")
         error = target_yaw - delta
         # 목표 각도에 거의 도달하면 정지
-        if abs(error) < 5.0 or abs(delta) < 5.0:  # ±2 허용 오차
+        if abs(error) < 5.0 or abs(delta - 180) < 5.0:  # ±2 허용 오차
             bot.stop_motors()
             print("Rotation complete.")
             break
