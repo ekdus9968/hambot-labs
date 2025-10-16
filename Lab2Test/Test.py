@@ -66,14 +66,15 @@ def move_forward(bot, speed=10, duration=2.0):
 # ========================
 # Rotation
 # ========================
+
 def rotate(bot, radianAngle):
     """
     Rotate the robot by a given angle (in radians).
     Positive angle -> left (CCW), Negative angle -> right (CW)
     """
     print("Rotate start...")
-    #resetPID(bot)
-    base_speed = 1.0  # 회전 속도 (너무 빠르면 overshoot)
+    resetPID(bot)
+    base_speed = 5 # 회전 속도 (너무 빠르면 overshoot)
 
     # radianAngle (+ left / - right)
     left_direction = 1 if radianAngle > 0 else -1
@@ -86,12 +87,13 @@ def rotate(bot, radianAngle):
     while True:
         current_yaw = bot.get_heading()  # degrees
 
+        # 차이 계산 (−180~180 범위로 정규화)
         delta = (target_yaw - current_yaw + 540) % 360 - 180
 
         print(f"Rotate:: current={current_yaw:.2f}, target={target_yaw:.2f}, delta={delta:.2f}")
 
         # 목표 각도에 거의 도달하면 정지
-        if abs(delta) < 2.0:  
+        if abs(delta) < 2.0:  # ±2 허용 오차
             bot.stop_motors()
             print("Rotation complete.")
             break
@@ -103,8 +105,6 @@ def rotate(bot, radianAngle):
         time.sleep(dt)
     
     resetPID(bot)
-    
-
 
 # ========================
 # PID withWall
@@ -168,12 +168,12 @@ def withWall(bot):
             bot.set_right_motor_speed(0)
             if D_r < D_l:
                 print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
-                rotate(bot, -math.pi / 2)
+                rotate(bot, math.pi / 2)
                 move_forward(bot)
                 break
             elif D_r > D_l:
                 print("Right:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
-                rotate(bot, math.pi / 2)
+                rotate(bot, -math.pi / 2)
                 move_forward(bot)
                 break
         time.sleep(dt)
