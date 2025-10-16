@@ -98,11 +98,11 @@ def rotate(bot, radianAngle):
 
         # 차이 계산 (−180~180 범위로 정규화)
         delta = (target_yaw - current_yaw + 540) % 360 - 180
-
-        print(f"Rotate:: current={current_yaw:.2f}, target={target_yaw:.2f}, delta={delta:.2f}")
         error = target_yaw - delta
+
+        print(f"Rotate:: current={current_yaw:.2f}, target={target_yaw:.2f}, delta={delta:.2f}, errer={error:.2f}")
         # 목표 각도에 거의 도달하면 정지
-        if abs(error) < 10.0 or abs(delta - 180) < 10.0:  # ±2 허용 오차
+        if abs(error) < 7.5 or abs(delta - 180) < 7.5:  # ±2 허용 오차
             bot.stop_motors()
             print("Rotation complete.")
             break
