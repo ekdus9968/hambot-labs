@@ -96,7 +96,7 @@ def withWall(bot):
 
         
         #Turing 
-        if E_f < 0.5:
+        if D_f < 0.5:
             bot.stop_motors()
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
