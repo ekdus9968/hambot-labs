@@ -176,13 +176,11 @@ while True:
         print("No LiDAR data received")
         
     
-
-    # 기본 예외 처리 (라이다 데이터 존재 확인)
     rightv, leftv = wall_follow(wall)
     bot.set_left_motor_speed(leftv)
     bot.set_right_motor_speed(rightv)
 
-    front_distance = np.nanmin(lidar[175:185]) / 600 # front
+    front_distance = min(lidar[175:185]) / 600 # front
     print(front_distance)
     print("-"*50)
 

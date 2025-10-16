@@ -108,7 +108,6 @@ def withWall(bot):
             bot.stop_motors()
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
-            bot.stop_motors()
             break
         time.sleep(dt)
 

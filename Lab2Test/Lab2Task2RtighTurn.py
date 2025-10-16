@@ -101,7 +101,6 @@ def rotate(bot, radianAngle):
         time.sleep(dt)
     
     resetPID(bot)
-    move_forward(bot)
 
 # ========================
 # Main loop
@@ -109,3 +108,4 @@ def rotate(bot, radianAngle):
 if __name__ == "__main__":
     print("HamBot Wall Following PID Controller Started.")
     rotate(bot)
+    move_forward(bot)

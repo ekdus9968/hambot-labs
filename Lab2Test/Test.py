@@ -8,9 +8,11 @@ import time
 import math
 import numpy as np
 from robot_systems.robot import HamBot  # HamBot 실물용 라이브러리
-#change
-
+# ========================
+# ROBOT Parameters
+# ========================
 axel_length = 0.184
+dt = 0.032 
 
 # ========================
 # PID gains
@@ -22,8 +24,6 @@ Kd = 1
 # Target distances (meters)
 target_D_f = 0.3
 target_D_r = 0.3
-target_D_l = 1.0
-dt = 0.032  # 제어 주기 (초)
 
 # PID state variables
 I_f = 0.0
@@ -61,9 +61,8 @@ def move_forward(bot, speed=10, duration=2.0):
     bot.set_right_motor_speed(speed)
     time.sleep(duration)
     bot.stop_motors()
-    withWall(bot)
-
-
+    
+    
 # ========================
 # Rotation
 # ========================
@@ -73,7 +72,7 @@ def rotate(bot, radianAngle):
     Positive angle -> left (CCW), Negative angle -> right (CW)
     """
     print("Rotate start...")
-    resetPID(bot)
+    #resetPID(bot)
     base_speed = 1.0  # 회전 속도 (너무 빠르면 overshoot)
 
     # radianAngle (+ left / - right)
@@ -87,13 +86,12 @@ def rotate(bot, radianAngle):
     while True:
         current_yaw = bot.get_heading()  # degrees
 
-        # 차이 계산 (−180~180 범위로 정규화)
         delta = (target_yaw - current_yaw + 540) % 360 - 180
 
         print(f"Rotate:: current={current_yaw:.2f}, target={target_yaw:.2f}, delta={delta:.2f}")
 
         # 목표 각도에 거의 도달하면 정지
-        if abs(delta) < 2.0:  # ±2° 허용 오차
+        if abs(delta) < 2.0:  
             bot.stop_motors()
             print("Rotation complete.")
             break
@@ -105,7 +103,7 @@ def rotate(bot, radianAngle):
         time.sleep(dt)
     
     resetPID(bot)
-    move_forward(bot)
+    
 
 
 # ========================
@@ -172,6 +170,7 @@ def withWall(bot):
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
             rotate(bot, -math.pi)
+            move_forward(bot)
         elif D_f < 0.3 and (D_r < D_l):
             print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
             bot.stop_motors()
@@ -179,6 +178,7 @@ def withWall(bot):
             bot.set_right_motor_speed(0)
             bot.stop_motors()
             rotate(bot, math.pi)
+            move_forward(bot)
         time.sleep(dt)
 
 
