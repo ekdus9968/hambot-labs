@@ -5,6 +5,7 @@ Date: 2025-10-10
 """
 
 import time
+import math
 import numpy as np
 from robot_systems.robot import HamBot  # HamBot 실물용 라이브러리
 #change 22222
