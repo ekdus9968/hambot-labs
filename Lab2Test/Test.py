@@ -154,7 +154,7 @@ def withWall(bot):
         D_r = sum([safe_distance(v) for v in lidar[265:285]]) / 10.0
         D_l = sum([safe_distance(v) for v in lidar[75:105]]) / 10.0
 
-        print(f"Front={D_f:.2f}, Right={D_r:.2f}, Left={D_l:.2f}")
+        print(f"[SUMMMM]Front={D_f:.2f}, Right={D_r:.2f}, Left={D_l:.2f}")
 
         # 결측치 처리
         if np.isinf(D_f) or np.isnan(D_f) or D_f < 0.05:
