@@ -17,7 +17,7 @@ Kd = 0.5
 
 # Target distances (meters)
 target_D_f = 0.3
-target_D_r = 0.25
+target_D_r = 0.3
 target_D_l = 1.0
 dt = 0.032  # 제어 주기 (초)
 
@@ -73,18 +73,18 @@ def turn_right(bot, target_angle=90):
 def turn_left(bot, target_angle=90):
     """Turn left by using IMU heading."""
     print("Turning left...")
-    # start_angle = bot.get_heading()
-    # target = (start_angle + target_angle) % 360
+    start_angle = bot.get_heading()
+    target = (start_angle + target_angle) % 360
 
-    # bot.set_left_motor_speed(-40)
-    # bot.set_right_motor_speed(40)
+    bot.set_left_motor_speed(-40)
+    bot.set_right_motor_speed(40)
 
-    # while True:
-    #     current = bot.get_heading()
-    #     diff = (target - current + 180) % 360 - 180
-    #     if abs(diff) < 2:
-    #         break
-    #     time.sleep(0.05)
+    while True:
+        current = bot.get_heading()
+        diff = (target - current + 180) % 360 - 180
+        if abs(diff) < 2:
+            break
+        time.sleep(0.05)
 
     bot.stop_motors()
     print(" Left turn complete.")
@@ -150,7 +150,7 @@ def withWall(bot):
 
         
         # 장애물 또는 벽 조건 처리
-        if E_f < 0.5 and E_r < 0.3:
+        if E_f < 0.5 and E_r < 0.5:
             print("STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
             bot.stop_motors()
             bot.set_left_motor_speed(0)
