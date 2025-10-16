@@ -92,7 +92,7 @@ def withWall(bot):
         bot.set_right_motor_speed(right_speed)
 
 
-        print(f"[WallFollow] D_f={D_f:.2f}, E_f={E_f:.2f}, D_r={D_r:.2f}, E_r={E_r:.2f}, control={control:.2f}")
+        print(f"[WallFollow] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
 
         
         #Turing 
