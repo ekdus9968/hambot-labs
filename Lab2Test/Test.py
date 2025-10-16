@@ -88,7 +88,7 @@ def rotate(bot, radianAngle):
         current_yaw = bot.get_heading()  # degrees
 
         # 차이 계산 (−180~180 범위로 정규화)
-        delta = (current_yaw - initial_yaw + 540) % 360 - 180
+        delta = (target_yaw - current_yaw + 540) % 360 - 180
 
         print(f"Rotate:: current={current_yaw:.2f}, target={target_yaw:.2f}, delta={delta:.2f}")
 
