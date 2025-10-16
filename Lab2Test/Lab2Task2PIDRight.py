@@ -42,7 +42,6 @@ print("HamBot initialized and ready for wall following.")
 # ========================
 # Wall following control
 # ========================
-
 def withWall(bot):
     """Right wall following using PID."""
     global I_f, E_prev_f, I_r, E_prev_r, E_r, E_f
@@ -59,10 +58,11 @@ def withWall(bot):
         else:
             print("No LiDAR data received")
 
+
         # 센서 데이터 (degrees 기준)
-        D_f = np.nanmin(lidar[175:195]) / 600 # front
-        D_r = np.nanmin(lidar[265:285]) /600  # right
-        D_l = np.nanmin(lidar[75:105]) /600  # left
+        D_f = np.nanmin(lidar[175:185])  / 600 # front
+        D_r = np.nanmin(lidar[265:285])  / 600 # right
+        D_l = np.nanmin(lidar[75:105])   / 600 # left
 
         # 결측치 처리
         if np.isinf(D_f) or np.isnan(D_f) or D_f < 0.05:
@@ -85,18 +85,37 @@ def withWall(bot):
         control = P + Ki * I_r + Kd * D_term
         if np.isnan(control) or np.isinf(control):
             control = 0.0
-        control = np.clip(control, -20, 20)
+        control = np.clip(control, -1, 1)
+        base_speed = 10
+        left_speed  = base_speed + control
+        right_speed = base_speed - control
+        bot.set_left_motor_speed(left_speed)
+        bot.set_right_motor_speed(right_speed)
 
-        bot.set_left_motor_speed(control * 1.01)
-        bot.set_right_motor_speed(control)
 
         print(f"[WallFollow] D_f={D_f:.2f}, E_f={E_f:.2f}, D_r={D_r:.2f}, E_r={E_r:.2f}, control={control:.2f}")
 
+        
+        #Turing 
+        if E_f < 0.5 and (D_r > D_l):
+            print("RIGHT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+            bot.stop_motors()
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+            break
+        elif D_f < 0.3 and (D_r < D_l):
+            print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+            bot.stop_motors()
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+            bot.stop_motors()
+            break
         time.sleep(dt)
+
+
+# ========================
+# Main loop
+# ========================
 if __name__ == "__main__":
     print("HamBot Wall Following PID Controller Started.")
-    try:
-        withWall(bot)
-    except KeyboardInterrupt:
-        bot.stop()
-        print("Wall following stopped safely.")
+    withWall(bot)

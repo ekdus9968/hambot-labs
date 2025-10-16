@@ -61,8 +61,12 @@ def move_forward(bot, speed=10, duration=2.0):
     bot.set_right_motor_speed(speed)
     time.sleep(duration)
     bot.stop_motors()
+    withWall(bot)
 
 
+# ========================
+# Rotation
+# ========================
 def rotate(bot, radianAngle):
     """
     Rotate the robot by a given angle (in radians).
@@ -103,9 +107,84 @@ def rotate(bot, radianAngle):
     resetPID(bot)
     move_forward(bot)
 
+
+# ========================
+# PID withWall
+# ========================
+def withWall(bot):
+    """Right wall following using PID."""
+    global I_f, E_prev_f, I_r, E_prev_r, E_r, E_f
+
+    print(" Starting wall following mode...")
+
+    while True:
+        lidar = bot.get_range_image()
+
+        # 기본 예외 처리 (라이다 데이터 존재 확인)
+        if lidar is None or len(lidar) < 360:
+            center_idx = len(lidar) // 2
+            print(f"Front distance: {lidar[center_idx]:.3f} m")
+        else:
+            print("No LiDAR data received")
+
+
+        # 센서 데이터 (degrees 기준)
+        D_f = np.nanmin(lidar[175:185])  / 600 # front
+        D_r = np.nanmin(lidar[265:285])  / 600 # right
+        D_l = np.nanmin(lidar[75:105])   / 600 # left
+
+        # 결측치 처리
+        if np.isinf(D_f) or np.isnan(D_f) or D_f < 0.05:
+            D_f = 1.0
+        if np.isinf(D_r) or np.isnan(D_r) or D_r < 0.05:
+            D_r = 1.0
+        if np.isinf(D_l) or np.isnan(D_l):
+            D_l = 1.0
+
+        # 에러 계산
+        E_f = D_f - target_D_f
+        E_r = D_r - target_D_r
+
+        # PID 계산 (오른쪽 벽 기준)
+        P = Kp * E_r
+        I_r += E_r * dt
+        D_term = (E_r - E_prev_r) / dt
+        E_prev_r = E_r
+
+        control = P + Ki * I_r + Kd * D_term
+        if np.isnan(control) or np.isinf(control):
+            control = 0.0
+        control = np.clip(control, -1, 1)
+        base_speed = 10
+        left_speed  = base_speed + control
+        right_speed = base_speed - control
+        bot.set_left_motor_speed(left_speed)
+        bot.set_right_motor_speed(right_speed)
+
+
+        print(f"[WallFollow] D_f={D_f:.2f}, E_f={E_f:.2f}, D_r={D_r:.2f}, E_r={E_r:.2f}, control={control:.2f}")
+
+        
+        #Turing 
+        if E_f < 0.5 and (D_r > D_l):
+            print("RIGHT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+            bot.stop_motors()
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+            rotate(bot, -math.pi)
+        elif D_f < 0.3 and (D_r < D_l):
+            print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+            bot.stop_motors()
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+            bot.stop_motors()
+            rotate(bot, math.pi)
+        time.sleep(dt)
+
+
 # ========================
 # Main loop
 # ========================
 if __name__ == "__main__":
-    print("🤖 HamBot Wall Following PID Controller Started.")
-    rotate(bot)
+    print("HamBot Wall Following PID Controller Started.")
+    withWall(bot)
