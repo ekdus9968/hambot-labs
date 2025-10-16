@@ -140,15 +140,16 @@ def withWall(bot):
             control = 0.0
         control = np.clip(control, -20, 20)
 
-        bot.set_left_motor_speed(control * 1.005)
+        bot.set_left_motor_speed(control * 1.008)
         bot.set_right_motor_speed(control)
 
         print(f"[WallFollow] D_f={D_f:.2f}, E_f={E_f:.2f}, D_r={D_r:.2f}, E_r={E_r:.2f}, control={control:.2f}")
 
+        
         # 장애물 또는 벽 조건 처리
-        # if D_f < 0.3 and D_r < 0.1:
-        #     bot.stop_motors()
-        #     turn_left(bot)
+        if D_f < 0.3 and D_r < 0.1:
+            bot.stop_motors()
+            # turn_left(bot)
         # elif D_f < 0.3 and D_r > 0.6:
         #     bot.stop_motors()
         #     turn_right(bot)
