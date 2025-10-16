@@ -17,7 +17,7 @@ Kd = 0.5
 
 # Target distances (meters)
 target_D_f = 0.3
-target_D_r = 0.15
+target_D_r = 0.25
 target_D_l = 1.0
 dt = 0.032  # 제어 주기 (초)
 
