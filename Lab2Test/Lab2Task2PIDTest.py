@@ -96,18 +96,17 @@ def withWall(bot):
 
         
         #Turing 
-        if E_f < 0.5 and (D_r > D_l):
-            print("RIGHT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+        if E_f < 0.5:
             bot.stop_motors()
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
-            break
-        elif D_f < 0.3 and (D_r < D_l):
-            print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
-            bot.stop_motors()
-            bot.set_left_motor_speed(0)
-            bot.set_right_motor_speed(0)
-            break
+            if D_r > D_l:
+                print("RIGHT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+                break
+            elif D_r < D_l:
+                print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+            
+                break
         time.sleep(dt)
 
 
