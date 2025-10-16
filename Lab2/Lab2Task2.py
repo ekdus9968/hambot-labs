@@ -170,7 +170,7 @@ while True:
     bot.set_right_motor_speed(rightv)
 
     front_distance = safe_distance(np.min(bot.get_range_image()[175:185] ))
-    front_distance = front_distance / 600
+    front_distance = front_distance 
     print(f"Front distance: {front_distance:.3f} m")
     print("-"*50)
 
