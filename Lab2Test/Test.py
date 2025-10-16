@@ -62,6 +62,15 @@ def move_forward(bot, speed=20, duration=2.0):
     time.sleep(duration)
     bot.stop_motors()
     withWall(bot)
+
+def safe_distance(value, max_range=9.5):
+    """
+    LiDAR 값에서 NaN, Inf를 처리하고 최대 거리 제한.
+    """
+    if math.isinf(value) or math.isnan(value) or value < 0.05:
+        return max_range
+    return min(value, max_range)
+
     
     
 # ========================
@@ -110,26 +119,42 @@ def rotate(bot, radianAngle):
 # PID withWall
 # ========================
 def withWall(bot):
+    
     """Right wall following using PID."""
     global I_f, E_prev_f, I_r, E_prev_r, E_r, E_f
 
     print(" Starting wall following mode...")
 
     while True:
-        lidar = bot.get_range_image()
+        # lidar = bot.get_range_image()
 
-        # 기본 예외 처리 (라이다 데이터 존재 확인)
+        # # 기본 예외 처리 (라이다 데이터 존재 확인)
+        # if lidar is None or len(lidar) < 360:
+        #     center_idx = len(lidar) // 2
+        #     print(f"Front distance: {lidar[center_idx]:.3f} m")
+        # else:
+        #     print("No LiDAR data received")
+
+
+        # # 센서 데이터 (degrees 기준)
+        # D_ㄹ = np.nanmin(lidar[175:185])  / 600 # front
+        
+        # D_r = np.nanmin(lidar[265:285])  / 600 # right
+        # D_l = np.nanmin(lidar[75:105])   / 600 # left
+        
+        lidar = bot.get_range_image()  # HamBot LiDAR 360° 배열
+
         if lidar is None or len(lidar) < 360:
-            center_idx = len(lidar) // 2
-            print(f"Front distance: {lidar[center_idx]:.3f} m")
-        else:
-            print("No LiDAR data received")
+            print("No LiDAR data received, skipping this step")
+            time.sleep(dt)
+            continue
 
+        # front 구간 평균 거리 계산 (safe_distance 적용)
+        D_f = sum([safe_distance(v) for v in lidar[175:185]]) / 10.0
+        D_r = sum([safe_distance(v) for v in lidar[265:285]]) / 10.0
+        D_l = sum([safe_distance(v) for v in lidar[75:105]]) / 10.0
 
-        # 센서 데이터 (degrees 기준)
-        D_f = np.nanmin(lidar[177:182])  / 600 # front
-        D_r = np.nanmin(lidar[265:285])  / 600 # right
-        D_l = np.nanmin(lidar[75:105])   / 600 # left
+        print(f"Front={D_f:.2f}, Right={D_r:.2f}, Left={D_l:.2f}")
 
         # 결측치 처리
         if np.isinf(D_f) or np.isnan(D_f) or D_f < 0.05:
