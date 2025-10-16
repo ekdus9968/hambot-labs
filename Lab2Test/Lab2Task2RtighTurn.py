@@ -63,43 +63,50 @@ def move_forward(bot, speed=10, duration=2.0):
     time.sleep(duration)
     bot.stop_motors()
 
-
 def rotate(bot, radianAngle):
     """
     Rotate the robot by a given angle (in radians).
     Positive angle -> left (CCW), Negative angle -> right (CW)
+    Stops precisely and avoids oscillation after reaching target.
     """
     print("Rotate start...")
     resetPID(bot)
-    base_speed = 5 # 회전 속도 (너무 빠르면 overshoot)
+    base_speed = 5  # Rotation speed (too fast may overshoot)
 
-    
+    # Convert target angle to degrees
+    angle_deg = math.degrees(radianAngle)
+    initial_yaw = bot.get_heading()
+    target_yaw = (initial_yaw + angle_deg) % 360
 
-    # HamBot의 heading은 'degrees from East'
-    initial_yaw = bot.get_heading()  # degrees
-    target_yaw = (initial_yaw + math.degrees(radianAngle)) % 360
+    settle_time = 0.2  # seconds to wait after within tolerance
+    within_tolerance_start = None
 
     while True:
-        current_yaw = bot.get_heading()  # degrees
-
-        # 차이 계산 (−180~180 범위로 정규화)
+        current_yaw = bot.get_heading()
         delta = (target_yaw - current_yaw + 540) % 360 - 180
 
         print(f"Rotate:: current={current_yaw:.2f}, target={target_yaw:.2f}, delta={delta:.2f}")
 
-        # 목표 각도에 거의 도달하면 정지
-        if abs(delta) < 2.0:  # ±2 허용 오차
-            bot.stop_motors()
-            print("Rotation complete.")
-            break
+        if abs(delta) < 2.0:  # within ±2° tolerance
+            if within_tolerance_start is None:
+                within_tolerance_start = time.time()
+            elif time.time() - within_tolerance_start >= settle_time:
+                bot.stop_motors()
+                print("Rotation complete and stabilized.")
+                break
+            # Still hold motors lightly to avoid drift
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+        else:
+            within_tolerance_start = None
+            rotation_speed = base_speed if delta > 0 else -base_speed
+            bot.set_left_motor_speed(rotation_speed)
+            bot.set_right_motor_speed(-rotation_speed)
 
-        # 회전 속도 적용
-        rotation_speed = base_speed if delta > 0 else -base_speed
-        bot.set_left_motor_speed(rotation_speed)
-        bot.set_right_motor_speed(-rotation_speed)
         time.sleep(dt)
-    
+
     resetPID(bot)
+
 
 # ========================
 # Main loop
