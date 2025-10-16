@@ -41,12 +41,12 @@ print("HamBot initialized and ready for wall following.")
 
 
 
-def move_forward(bot, speed=50, duration=2.0):
+def move_forward(bot, speed=5, duration=2.0):
     """Move straight forward for 'duration' seconds"""
     print("Moving forward...")
-    # bot.set_left_motor_speed(-speed)
-    # bot.set_right_motor_speed(speed)
-    # time.sleep(duration)
+    bot.set_left_motor_speed(speed)
+    bot.set_right_motor_speed(speed)
+    time.sleep(duration)
     bot.stop_motors()
 
 def turn_right(bot, target_angle=90):
@@ -76,8 +76,8 @@ def turn_left(bot, target_angle=90):
     start_angle = bot.get_heading()
     target = (start_angle + target_angle) % 360
 
-    bot.set_left_motor_speed(-40)
-    bot.set_right_motor_speed(40)
+    bot.set_left_motor_speed(40)
+    bot.set_right_motor_speed(-40)
 
     while True:
         current = bot.get_heading()
