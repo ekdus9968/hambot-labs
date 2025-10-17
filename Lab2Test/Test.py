@@ -140,7 +140,7 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
             bot.stop_motors
             print("MAKE TURN GIVEN THETA")
             break
-        elif abs(D_r) < 0.4:
+        elif abs(D_r) < 0.5:
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
             bot.stop_motors()
