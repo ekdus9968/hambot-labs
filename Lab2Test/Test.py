@@ -56,7 +56,7 @@ def resetPID(bot):
 # ========================
 # move_forward
 # ========================
-def move_forward(bot, speed=5, duration=4):
+def move_forward(bot, speed=7, duration=4):
     """Move straight forward for 'duration' seconds"""
     print("Moving forward...")
     bot.set_left_motor_speed(speed)
@@ -389,7 +389,7 @@ def withWall(bot):
 
             print(f"[WallFollow] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
 
-            if D_f < 0.5:
+            if D_f < 0.7:
                 print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
                 print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
                 print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
