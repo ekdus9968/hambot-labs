@@ -63,7 +63,6 @@ def move_forward(bot, speed=10, duration=2.0):
     time.sleep(duration)
     bot.stop_motors()
 
-
 def rotate(bot, radianAngle):
     """
     Rotate the robot by a given angle (in radians).
@@ -71,9 +70,7 @@ def rotate(bot, radianAngle):
     """
     print("Rotate start...")
     resetPID(bot)
-    base_speed = 5 # 회전 속도 (너무 빠르면 overshoot)
-
-    
+    base_speed = 5  # 회전 속도
 
     # HamBot의 heading은 'degrees from East'
     initial_yaw = bot.get_heading()  # degrees
@@ -81,30 +78,34 @@ def rotate(bot, radianAngle):
 
     while True:
         current_yaw = bot.get_heading()  # degrees
-
-        # 차이 계산 (−180~180 범위로 정규화)
-        delta = (target_yaw - current_yaw + 540) % 360 - 180
+        delta = (target_yaw - current_yaw + 540) % 360 - 180  # -180~180 범위
 
         print(f"Rotate:: current={current_yaw:.2f}, target={target_yaw:.2f}, delta={delta:.2f}")
-        error = target_yaw - delta
-        # 목표 각도에 거의 도달하면 정지
-        if abs(error) < 5.0:  # ±2 허용 오차
+
+        # 오른쪽 벽 거리 확인 (단위 보정)
+        lidar = bot.get_range_image()
+        if lidar is not None and len(lidar) >= 360:
+            D_r = min(lidar[265:285]) / 1000.0  # m 단위
+            print(f"Right wall distance: {D_r:.2f} m")
+            if D_r < 0.6:
+                bot.stop_motors()
+                print("Right wall too close, stopping rotation.")
+                break
+
+        # 목표 각도 도달 시 정지
+        if abs(delta) < 5.0:
             bot.stop_motors()
             print("Rotation complete.")
             break
-        D_r = min(bot.get_range_image()[265:285])
-        print(f"Dr:: Dr={D_r:.2f}")
-        if D_r < 0.6:
-            bot.stop_motors()
-            print("Right wall too close, stopping rotation.")
-            break
-
 
         # 회전 속도 적용
         rotation_speed = base_speed if delta > 0 else -base_speed
         bot.set_left_motor_speed(rotation_speed)
         bot.set_right_motor_speed(-rotation_speed)
         time.sleep(dt)
+    
+    resetPID(bot)
+
     
 #     resetPID(bot)
 def rotate_90(bot, direction="right", speed=5, stop_if_right_wall_close=True, min_D_r=0.6):
