@@ -161,7 +161,45 @@ def move_arc(bot, R, theta, direction="CCW", max_v=20):
 #     resetPID(bot)
 #     base_speed = 5 # 회전 속도 (너무 빠르면 overshoot)
 
+def rotate(bot, delta_theta = np.pi / 2, max_v=50):
+
+    # cal Orientation
+    l_dist = -delta_theta * (axel_length / 2)
+    r_dist = delta_theta * (axel_length / 2)
     
+    init_l = bot.get_left_encoder_reading()
+    init_r = bot.get_right_encoder_reading()
+    
+    max_dist = max(abs(l_dist), abs(r_dist))
+    v_l = max_v * l_dist / max_dist
+    v_r = max_v * r_dist / max_dist
+    
+    # speed
+    bot.set_left_motor_speed(v_l)
+    bot.set_right_motor_speed(v_r)
+    
+    # loop
+    while True:
+        
+        l_delta = bot.get_left_encoder_reading() - init_l
+        r_delta = bot.get_right_encoder_reading() - init_r
+        
+        l_d = wheel_radius * l_delta
+        r_d = wheel_radius * r_delta
+        
+        curr_theta = (r_d -l_d) / axel_length
+        
+        print("ROT:: L_D: ", l_d)
+        print("ROT:: R_D: ", r_d)
+        print("ROT:: Approx theta: ", curr_theta)
+        
+        if abs(l_d) >= abs(l_dist) or abs(r_d) >= abs(r_dist):
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+            bot.stop_motors()
+            break        
+        time.sleep(0.01)
+
 
 #     # HamBot의 heading은 'degrees from East'
 #     initial_yaw = bot.get_heading()  # degrees
@@ -362,15 +400,15 @@ def withWall(bot):
                 bot.set_right_motor_speed(0)
                 if D_r < D_l:
                     print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
-                    #rotate(bot, -math.pi / 2)
-                    move_arc(bot, R = 0.2, theta = np.pi , direction="CCW", max_v=15)
-                    #move_forward(bot)
+                    rotate(bot, math.pi / 2)
+                    #move_arc(bot, R = 0.2, theta = np.pi , direction="CCW", max_v=15)
+                    move_forward(bot)
                     break
                 elif D_r > D_l:
                     print("Right:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
-                    #rotate(bot, math.pi / 2)
-                    move_arc(bot, R = 0.2, theta = np.pi , direction="CW", max_v=15)
-                    #move_forward(bot)
+                    rotate(bot, -math.pi / 2)
+                    #move_arc(bot, R = 0.2, theta = np.pi , direction="CW", max_v=15)
+                    move_forward(bot)
                     break
             elif D_r > 1.0:
                 bot.stop_motors()
@@ -378,8 +416,9 @@ def withWall(bot):
                 bot.set_right_motor_speed(0)
                 print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
                 print("Right wall is far from at least 1.2")
-                move_arc(bot, R = 0.2, theta = np.pi , direction="CW", max_v=10)
-                #move_forward(bot)
+                #move_arc(bot, R = 0.2, theta = np.pi , direction="CW", max_v=10)
+                rotate(bot, -math.pi / 2)
+                move_forward(bot)
                 
             time.sleep(dt)
         #Turing 
