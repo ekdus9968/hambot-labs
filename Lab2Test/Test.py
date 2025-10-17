@@ -129,6 +129,7 @@ def move_arc(bot, R, theta, direction="CCW", max_v=20):
         bot.set_left_motor_speed(max_v * v_ratio_l)
         bot.set_right_motor_speed(max_v * v_ratio_r)
         
+        
         print("ARC:: L: ", d_l)
         print("ARC:: Target L: ", d_left )
         print("ARC:: Target R: ", d_right )
