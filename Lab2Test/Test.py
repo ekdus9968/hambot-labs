@@ -56,7 +56,7 @@ def resetPID(bot):
 # ========================
 # move_forward
 # ========================
-def move_forward(bot, speed=7, duration=2.0):
+def move_forward(bot, speed=10, duration=2.0):
     """Move straight forward for 'duration' seconds"""
     print("Moving forward...")
     bot.set_left_motor_speed(speed)
@@ -79,7 +79,7 @@ def move_forward(bot, speed=7, duration=2.0):
 # Rotation
 # ========================
 
-def move_arc(bot, R, theta, direction="CCW", max_v=50):
+def move_arc(bot, R, theta, direction="CCW", max_v=20):
     # cal r/l turn
     if direction.upper() == "CCW":
         d_left = (R - axel_length/2) * theta
@@ -362,13 +362,13 @@ def withWall(bot):
                 if D_r < D_l:
                     print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
                     #rotate(bot, -math.pi / 2)
-                    move_arc(bot, R = 0.2, theta = np.pi , direction="CCW", max_v=10)
+                    move_arc(bot, R = 0.24, theta = np.pi , direction="CCW", max_v=15)
                     #move_forward(bot)
                     break
                 elif D_r > D_l:
                     print("Right:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
                     #rotate(bot, math.pi / 2)
-                    move_arc(bot, R = 0.2, theta = np.pi , direction="CW", max_v=10)
+                    move_arc(bot, R = 0.24, theta = np.pi , direction="CW", max_v=15)
                     #move_forward(bot)
                     break
             elif D_r > 1.0:
@@ -377,7 +377,7 @@ def withWall(bot):
                 bot.set_right_motor_speed(0)
                 print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
                 print("Right wall is far from at least 1.2")
-                move_arc(bot, R = 0.2, theta = np.pi , direction="CW", max_v=10)
+                move_arc(bot, R = 0.24, theta = np.pi , direction="CW", max_v=10)
                 #move_forward(bot)
                 
             time.sleep(dt)
