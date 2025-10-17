@@ -19,8 +19,8 @@ dt = 0.032
 # PID gains
 # ========================
 Kp = 3
-Ki = 0.03
-Kd = 0.75
+Ki = 0.01
+Kd = 3
 
 # Target distances (meters)
 target_D_f = 0.5
@@ -316,7 +316,7 @@ def withWall(bot):
 
             # 센서 데이터 (degrees 기준)
             D_f = np.nanmin(lidar[179:181])  / 600 # front
-            D_r = np.nanmax(lidar[268:278])  / 600 # right
+            D_r = np.nanmin(lidar[268:278])  / 600 # right
             D_l = np.nanmin(lidar[75:105])   / 600 # left
 
             # 결측치 처리
@@ -350,7 +350,7 @@ def withWall(bot):
 
             print(f"[WallFollow] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
 
-            if D_f < 0.55:
+            if D_f < 0.6:
                 print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
                 print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
                 print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
