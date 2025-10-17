@@ -56,7 +56,7 @@ def resetPID(bot):
 # ========================
 # move_forward
 # ========================
-def move_forward(bot, speed=10, duration=1.0):
+def move_forward(bot, speed=7, duration=1.0):
     """Move straight forward for 'duration' seconds"""
     print("Moving forward...")
     bot.set_left_motor_speed(speed)
@@ -322,7 +322,7 @@ def withWall(bot):
             if np.isinf(D_f) or np.isnan(D_f) or D_f < 0.05:
                 D_f = 1.0
             if np.isinf(D_r) or np.isnan(D_r) or D_r < 0.05:
-                D_r = 0.5
+                D_r = 0.33333
             if np.isinf(D_l) or np.isnan(D_l):
                 D_l = 1.0
 
@@ -349,7 +349,7 @@ def withWall(bot):
 
             print(f"[WallFollow] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
 
-            if D_f < 0.4 :
+            if D_f < 0.5:
                 print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
                 print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
                 print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
@@ -370,7 +370,7 @@ def withWall(bot):
                     move_arc(bot, R = 0.2, theta = np.pi , direction="CW", max_v=10)
                     move_forward(bot)
                     break
-            elif D_r > 0.6:
+            elif D_r > 1.0:
                 bot.stop_motors()
                 bot.set_left_motor_speed(0)
                 bot.set_right_motor_speed(0)
