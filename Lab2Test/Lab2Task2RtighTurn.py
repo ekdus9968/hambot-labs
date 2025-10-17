@@ -156,5 +156,5 @@ def rotate_90(bot, direction="right", speed=5, stop_if_right_wall_close=True, mi
 # ========================
 if __name__ == "__main__":
     print("HamBot Wall Following PID Controller Started.")
-    rotate_90(bot,  math.pi / 2) #-오른쪽
+    rotate(bot,  math.pi / 2) #-오른쪽
     move_forward(bot)
