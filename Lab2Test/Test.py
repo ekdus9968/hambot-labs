@@ -22,7 +22,7 @@ Ki = 0.0
 Kd = 8
 
 # Target distances (meters)
-target_D_f = 0.3
+target_D_f = 0.4
 target_D_r = 0.3
 
 
