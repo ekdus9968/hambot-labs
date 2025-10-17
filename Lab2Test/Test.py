@@ -132,6 +132,7 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
         print("ARC:: L: ", d_l)
         print("ARC:: Target L: ", d_left )
         print("ARC:: Target R: ", d_right )
+        print(f"[BEFORETURN] D_r={D_r:.4f}")
         
         if abs(d_l) >= abs(d_left) and abs(d_r) >= abs(d_right):
             bot.set_left_motor_speed(0)
