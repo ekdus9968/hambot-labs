@@ -359,7 +359,7 @@ def withWall(bot):
                     move_arc(bot, R = 0.1, theta = np.pi / 2, direction="CW", max_v=50)
                     move_forward(bot)
                     break
-            elif D_r > 1.2:
+            elif D_r > 0.6:
                 bot.stop_motors()
                 bot.set_left_motor_speed(0)
                 bot.set_right_motor_speed(0)
