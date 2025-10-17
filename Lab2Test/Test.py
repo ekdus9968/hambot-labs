@@ -18,7 +18,7 @@ dt = 0.032
 # ========================
 # PID gains
 # ========================
-Kp = 3
+Kp = 2.5
 Ki = 0.0
 Kd = 1
 
@@ -56,7 +56,7 @@ def resetPID(bot):
 # ========================
 # move_forward
 # ========================
-def move_forward(bot, speed=10, duration=4):
+def move_forward(bot, speed=10, duration=5):
     """Move straight forward for 'duration' seconds"""
     print("Moving forward...")
     bot.set_left_motor_speed(speed)
