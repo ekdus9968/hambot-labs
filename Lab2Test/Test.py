@@ -92,6 +92,7 @@ def rotate(bot, radianAngle):
     # HamBot의 heading은 'degrees from East'
     initial_yaw = bot.get_heading()  # degrees
     target_yaw = (initial_yaw + math.degrees(radianAngle)) % 360
+    D_r = min(bot.get_range_image()[265:285])
 
     while True:
         current_yaw = bot.get_heading()  # degrees
@@ -105,6 +106,12 @@ def rotate(bot, radianAngle):
         if abs(delta) < 7.5:  # ±2 허용 오차
             bot.stop_motors()
             print("Rotation complete.")
+            break
+        
+        print(f"Dr:: Dr={D_r:.2f}")
+        if D_r < 0.6:
+            bot.stop_motors()
+            print("Right wall too close, stopping rotation.")
             break
 
         # 회전 속도 적용
