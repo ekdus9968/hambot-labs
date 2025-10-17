@@ -400,13 +400,13 @@ def withWall(bot):
                 bot.set_right_motor_speed(0)
                 if D_r < D_l:
                     print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
-                    rotate(bot, np.deg2rad(100) / 2)
+                    rotate(bot, np.deg2rad(115) / 2)
                     #move_arc(bot, R = 0.2, theta = np.pi , direction="CCW", max_v=15)
                     move_forward(bot)
                     break
                 elif D_r > D_l:
                     print("Right:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
-                    rotate(bot,np.deg2rad(100) / 2)
+                    rotate(bot,np.deg2rad(115) / 2)
                     #move_arc(bot, R = 0.2, theta = np.pi , direction="CW", max_v=15)
                     move_forward(bot)
                     break
