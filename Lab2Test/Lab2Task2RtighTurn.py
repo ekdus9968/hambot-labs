@@ -125,6 +125,7 @@ def rotate_90(bot, direction="right", speed=5, stop_if_right_wall_close=True, mi
         #             print(f"Right wall too close (D_r={D_r:.2f}), stopping rotation early")
         #             break
         D_r = min(bot.get_range_image()[265:285])
+        print(f"Dr:: Dr={D_r:.2f}")
         if D_r < 0.6:
             bot.stop_motors()
             print("Right wall too close, stopping rotation.")
