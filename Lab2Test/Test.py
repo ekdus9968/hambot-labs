@@ -311,7 +311,7 @@ def withWall(bot):
             if np.isinf(D_f) or np.isnan(D_f) or D_f < 0.05:
                 D_f = 1.0
             if np.isinf(D_r) or np.isnan(D_r) or D_r < 0.05:
-                D_r = 1.0
+                D_r = 0.5
             if np.isinf(D_l) or np.isnan(D_l):
                 D_l = 1.0
 
