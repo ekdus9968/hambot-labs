@@ -12,6 +12,7 @@ from robot_systems.robot import HamBot  # HamBot 실물용 라이브러리
 #change
 
 axel_length = 0.184
+wheel_radius = 0.090
 
 # ========================
 # PID gains
@@ -63,99 +64,72 @@ def move_forward(bot, speed=10, duration=2.0):
     time.sleep(duration)
     bot.stop_motors()
 
-def rotate(bot, radianAngle):
-    """
-    Rotate the robot by a given angle (in radians).
-    Positive angle -> left (CCW), Negative angle -> right (CW)
-    """
-    print("Rotate start...")
-    resetPID(bot)
-    base_speed = 5  # 회전 속도
 
-    # HamBot의 heading은 'degrees from East'
-    initial_yaw = bot.get_heading()  # degrees
-    target_yaw = (initial_yaw + math.degrees(radianAngle)) % 360
-
-    while True:
-        current_yaw = bot.get_heading()  # degrees
-        delta = (target_yaw - current_yaw + 540) % 360 - 180  # -180~180 범위
-
-        print(f"Rotate:: current={current_yaw:.2f}, target={target_yaw:.2f}, delta={delta:.2f}")
-
-        # 오른쪽 벽 거리 확인 (단위 보정)
-        lidar = bot.get_range_image()
-        if lidar is not None and len(lidar) >= 360:
-            D_r = min(lidar[265:285]) / 1000.0  # m 단위
-            print(f"Right wall distance: {D_r:.2f} m")
-            if D_r < 0.6:
-                bot.stop_motors()
-                print("Right wall too close, stopping rotation.")
-                break
-
-        # 목표 각도 도달 시 정지
-        if abs(delta) < 5.0:
-            bot.stop_motors()
-            print("Rotation complete.")
-            break
-
-        # 회전 속도 적용
-        rotation_speed = base_speed if delta > 0 else -base_speed
-        bot.set_left_motor_speed(rotation_speed)
-        bot.set_right_motor_speed(-rotation_speed)
-        time.sleep(dt)
+def move_arc(bot, R, theta, direction="CCW", max_v=50):
+    # cal r/l turn
+    if direction.upper() == "CCW":
+        d_left = (R - axel_length/2) * theta
+        d_right = (R + axel_length/2) * theta
+    else:
+        d_left = (R + axel_length/2) * theta
+        d_right = (R - axel_length/2) * theta
     
-    resetPID(bot)
-
+    bot.reset_encoders()  
+    init_l = bot.get_left_encoder_reading()
+    init_r = bot.get_right_encoder_reading()
     
-#     resetPID(bot)
-def rotate_90(bot, direction="right", speed=5, stop_if_right_wall_close=True, min_D_r=0.6):
-    """
-    Rotate robot exactly 90°.
-    direction: "right" (CW) or "left" (CCW)
-    speed: motor speed for rotation
-    stop_if_right_wall_close: True이면 D_r < min_D_r이면 회전 중지
-    """
-    initial_yaw = bot.get_heading()  # degrees
-    angle_change = 90 if direction == "left" else -90
-    target_yaw = (initial_yaw + angle_change) % 360
+    v_ratio_l = d_left / max(abs(d_left), abs(d_right))
+    v_ratio_r = d_right / max(abs(d_left), abs(d_right))
+    
+    bot.set_left_motor_speed(max_v * v_ratio_l)
+    bot.set_right_motor_speed(max_v * v_ratio_r)
+    
+    lidar = bot.get_range_image()
 
+        # 기본 예외 처리 (라이다 데이터 존재 확인)
+    if lidar is None or len(lidar) < 360:
+        center_idx = len(lidar) // 2
+        print(f"Front distance: {lidar[center_idx]:.3f} m")
+    else:
+        print("No LiDAR data received")
+
+    D_r = np.nanmin(lidar[265:285])  / 600 # right
+    if np.isinf(D_r) or np.isnan(D_r) or D_r < 0.05:
+        D_r = 1.0
+    
     while True:
-        current_yaw = bot.get_heading()
-        delta = (target_yaw - current_yaw + 540) % 360 - 180  # -180~180 범위
-
-        # 오른쪽 벽 체크
-        # if stop_if_right_wall_close:
-        #     lidar = bot.get_range_image()
-        #     if lidar is not None and len(lidar) >= 360:
-        #         D_r = min(lidar[265:285]) / 600
-        #         if D_r < min_D_r:
-        #             bot.stop_motors()
-        #             print(f"Right wall too close (D_r={D_r:.2f}), stopping rotation early")
-        #             break
-        D_r = min(bot.get_range_image()[265:285])
-        print(f"Dr:: Dr={D_r:.2f}")
-        if D_r < 0.6:
+        l_delta = bot.get_left_encoder_reading() - init_l
+        r_delta = bot.get_right_encoder_reading() - init_r
+        
+        d_l = wheel_radius * l_delta
+        d_r = wheel_radius * r_delta
+        
+        #each loop, cal rest of D ratio in live 
+        #when i only use ratio var, it stops faster
+        l_remain = d_left - d_l
+        r_remain = d_right - d_r
+        
+        v_ratio_l = l_remain / max(abs(l_remain), abs(r_remain))
+        v_ratio_r = r_remain / max(abs(l_remain), abs(r_remain))
+        
+        bot.set_left_motor_speed(max_v * v_ratio_l)
+        bot.set_right_motor_speed(max_v * v_ratio_r)
+        
+        print("ARC:: L: ", d_l)
+        print("ARC:: Target L: ", d_left )
+        print("ARC:: Target R: ", d_right )
+        
+        if (abs(d_l) >= abs(d_left) and abs(d_r) >= abs(d_right)) or D_r < 0.6:
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
             bot.stop_motors()
-            print("Right wall too close, stopping rotation.")
             break
-
-
-        # 목표 각도 도달 시 정지
-        if abs(delta) < 2.0:
-            bot.stop_motors()
-            print(f"Rotation {direction} complete.")
-            break
-
-        # 회전 속도 적용
-        rotation_speed = speed if delta > 0 else -speed
-        bot.set_left_motor_speed(rotation_speed)
-        bot.set_right_motor_speed(-rotation_speed)
-        time.sleep(0.032)
+        time.sleep(0.01)       
 
 # ========================
 # Main loop
 # ========================
 if __name__ == "__main__":
     print("HamBot Wall Following PID Controller Started.")
-    rotate(bot,  math.pi / 2) #-오른쪽
+    move_arc(bot, R=0.3, theta = math.pi, direction="CCW", max_v=10)
     move_forward(bot)

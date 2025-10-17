@@ -92,8 +92,6 @@ def rotate(bot, radianAngle):
     # HamBot의 heading은 'degrees from East'
     initial_yaw = bot.get_heading()  # degrees
     target_yaw = (initial_yaw + math.degrees(radianAngle)) % 360
-    D_r = min(bot.get_range_image()[275:285])
-
     while True:
         current_yaw = bot.get_heading()  # degrees
 
