@@ -18,9 +18,9 @@ dt = 0.032
 # ========================
 # PID gains
 # ========================
-Kp = 5
-Ki = 0.0
-Kd = 5
+Kp = 3
+Ki = 0.03
+Kd = 3
 
 # Target distances (meters)
 target_D_f = 0.5
