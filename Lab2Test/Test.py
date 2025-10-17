@@ -56,7 +56,7 @@ def resetPID(bot):
 # ========================
 # move_forward
 # ========================
-def move_forward(bot, speed=10, duration=2.0):
+def move_forward(bot, speed=5, duration=3.5):
     """Move straight forward for 'duration' seconds"""
     print("Moving forward...")
     bot.set_left_motor_speed(speed)
