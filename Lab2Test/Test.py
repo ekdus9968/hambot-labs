@@ -109,7 +109,7 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
 
     D_r = np.nanmin(lidar[265:285])  / 600 # right
     if np.isinf(D_r) or np.isnan(D_r) or D_r < 0.05:
-        D_r = 1.0
+        D_r = 0.3
     
     while True:
         l_delta = bot.get_left_encoder_reading() - init_l
@@ -296,12 +296,11 @@ def withWall(bot):
             lidar = bot.get_range_image()
 
             # 기본 예외 처리 (라이다 데이터 존재 확인)
-            if lidar is not None and len(lidar) >= 360:
+            if lidar is None or len(lidar) < 360:
                 center_idx = len(lidar) // 2
                 print(f"Front distance: {lidar[center_idx]:.3f} m")
             else:
                 print("No LiDAR data received")
-                lidar = np.ones(360) * np.inf
 
 
             # 센서 데이터 (degrees 기준)
