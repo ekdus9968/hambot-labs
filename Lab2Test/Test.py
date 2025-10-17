@@ -12,6 +12,7 @@ from robot_systems.robot import HamBot  # HamBot 실물용 라이브러리
 # ROBOT Parameters
 # ========================
 axel_length = 0.184
+wheel_radius = 0.090
 dt = 0.032 
 
 # ========================
