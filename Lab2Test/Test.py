@@ -328,8 +328,8 @@ def withWall(bot):
                 D_l = 1.0
 
             # 에러 계산
-            E_f = target_D_f - D_f 
-            E_r = target_D_r - D_r 
+            E_f = D_f -target_D_f
+            E_r = D_r - target_D_r 
 
             # PID 계산 (오른쪽 벽 기준)
             P = Kp * E_r
