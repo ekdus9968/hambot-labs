@@ -131,5 +131,5 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
 # ========================
 if __name__ == "__main__":
     print("HamBot Wall Following PID Controller Started.")
-    move_arc(bot, R=0.3, theta = -math.pi, direction="CW", max_v=10)
+    move_arc(bot, R=0.3, theta = math.pi, direction="CW", max_v=10)
     move_forward(bot)
