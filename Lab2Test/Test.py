@@ -144,6 +144,7 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
             bot.set_right_motor_speed(0)
             bot.stop_motors()
             print("SMALLER THAN 0.6")
+            print(f"[WallFollow] D_r={D_r:.4f}")
             break
             
         time.sleep(0.01)       
