@@ -19,7 +19,7 @@ dt = 0.032
 # ========================
 Kp = 5
 Ki = 0.0
-Kd = 8
+Kd = 5
 
 # Target distances (meters)
 target_D_f = 0.4
