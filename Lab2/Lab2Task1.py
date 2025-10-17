@@ -55,7 +55,7 @@ try:
         # 디버깅 출력
         print(f"Forward: {forward_distance:.3f}, Error: {error:.3f}, PID u: {u:.2f}")
 
-        if abs(error) < 0.01 and abs(u) < 0.5:
+        if abs(error) < 0.05 and abs(u) < 0.5:
             print("Reached target distance. Stopping robot.")
             bot.stop_motors()
             break
