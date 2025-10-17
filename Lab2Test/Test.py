@@ -22,7 +22,7 @@ Ki = 0.0
 Kd = 5
 
 # Target distances (meters)
-target_D_f = 0.4
+target_D_f = 0.5
 target_D_r = 0.3
 
 
@@ -92,7 +92,7 @@ def rotate(bot, radianAngle):
     # HamBot의 heading은 'degrees from East'
     initial_yaw = bot.get_heading()  # degrees
     target_yaw = (initial_yaw + math.degrees(radianAngle)) % 360
-    D_r = min(bot.get_range_image()[265:285])
+    D_r = min(bot.get_range_image()[275:285])
 
     while True:
         current_yaw = bot.get_heading()  # degrees
@@ -243,7 +243,7 @@ def withWall(bot):
 
 
             # 센서 데이터 (degrees 기준)
-            D_f = np.nanmin(lidar[177:182])  / 600 # front
+            D_f = np.nanmin(lidar[179:181])  / 600 # front
             D_r = np.nanmin(lidar[265:285])  / 600 # right
             D_l = np.nanmin(lidar[75:105])   / 600 # left
 
@@ -278,7 +278,7 @@ def withWall(bot):
 
             print(f"[WallFollow] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
 
-            if D_f < 0.4 :
+            if D_f < 0.5 :
                 print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
                 print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
                 print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
