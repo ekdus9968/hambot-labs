@@ -109,7 +109,7 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
 
     D_r = np.nanmin(lidar[265:285])  / 600 # right
     if np.isinf(D_r) or np.isnan(D_r) or D_r < 0.05:
-        D_r = 0.3
+        D_r = 1.0
     
     while True:
         l_delta = bot.get_left_encoder_reading() - init_l
@@ -133,11 +133,19 @@ def move_arc(bot, R, theta, direction="CCW", max_v=50):
         print("ARC:: Target L: ", d_left )
         print("ARC:: Target R: ", d_right )
         
-        if (abs(d_l) >= abs(d_left) and abs(d_r) >= abs(d_right)) or D_r < 0.6:
+        if abs(d_l) >= abs(d_left) and abs(d_r) >= abs(d_right):
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+            bot.stop_motors
+            print("MAKE TURN GIVEN THETA")
+            break
+        elif abs(D_r) < 0.6:
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
             bot.stop_motors()
+            print("SMALLER THAN 0.6")
             break
+            
         time.sleep(0.01)       
  
 # def rotate(bot, radianAngle):
