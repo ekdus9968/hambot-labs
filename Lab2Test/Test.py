@@ -56,7 +56,7 @@ def resetPID(bot):
 # ========================
 # move_forward
 # ========================
-def move_forward(bot, speed=10, duration=5):
+def move_forward(bot, speed=10, duration=7):
     """Move straight forward for 'duration' seconds"""
     print("Moving forward...")
     bot.set_left_motor_speed(speed)
@@ -402,13 +402,13 @@ def withWall(bot):
                     print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
                     rotate(bot, np.deg2rad(100) )
                     #move_arc(bot, R = 0.2, theta = np.pi , direction="CCW", max_v=15)
-                    move_forward(bot)
+                    #move_forward(bot)
                     break
                 elif D_r > D_l:
                     print("Right:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
                     rotate(bot,np.deg2rad(100) )
                     #move_arc(bot, R = 0.2, theta = np.pi , direction="CW", max_v=15)
-                    move_forward(bot)
+                    #move_forward(bot)
                     break
             elif D_r > 1.0:
                 bot.stop_motors()
