@@ -54,6 +54,7 @@ class BUG0:
 
         
         self.lidar = None
+        self.bot.get_range_image() 
 
     def stop_motors(self):
         self.bot.set_left_motor_speed(0)
@@ -125,10 +126,6 @@ class BUG0:
         print("read_lidar()")
         self.lidar = self.bot.get_range_image() 
         
-        if self.lidar is None or len(self.lidar) < 360:
-            print("LiDAR data missing")
-            return
-
         if self.lidar is None or len(self.lidar) < 360:
             print("LiDAR data missing")
             return
