@@ -169,6 +169,33 @@ class BUG0:
             self.bot.set_left_motor_speed(-speed)
             self.bot.set_right_motor_speed(speed)
             return False
+        
+    def turn_to_goal_left_only(self, target_angle):
+            """
+            왼쪽(반시계)으로만 회전하면서 목표 각도까지 도는 함수
+            target_angle: 목표 heading (0~360°)
+            """
+            current_heading = self.bot.get_heading()
+
+            # 왼쪽 회전 전용 error 계산 (0~180°)
+            error = (current_heading - target_angle + 360) % 360
+            if error > 180:
+                error = 360 - error  # 항상 최소 각도
+
+            print(f"[DEBUG] Turning left only - Current: {current_heading:.2f}, Target: {target_angle:.2f}, Error: {error:.2f}")
+
+            # 허용 오차 내에 들어오면 멈춤
+            if error < 3:  # ±3°
+                self.stop_motors()
+                print("[DEBUG] Reached target heading, motors stopped")
+                return True
+            else:
+                # 속도 비례 제어: error 크면 빠르게, 작으면 느리게
+                speed = max(min(error * 0.01, 1.0), 0.2)
+                # 왼쪽(반시계) 회전: 왼쪽 모터 뒤, 오른쪽 모터 앞으로
+                self.bot.set_left_motor_speed(-speed)
+                self.bot.set_right_motor_speed(speed)
+                return False
 
 
     # -------------------------------
@@ -210,7 +237,7 @@ class BUG0:
                     print(f"[DEBUG] Fixed turn target_angle: {self.turn_target_angle:.2f}")
 
                 # 왼쪽 회전 전용 함수 호출
-                if self.turn_to_goal(self.turn_target_angle):
+                if self.turn_to_goal_left_only(self.turn_target_angle):
                     self.change_state('move_to_goal')
 
             elif self.state == 'move_to_goal':
