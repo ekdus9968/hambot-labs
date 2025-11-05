@@ -12,11 +12,17 @@ SAMPLE_X = 320                 # 테스트할 X 좌표 (프레임 중앙 등)
 SAMPLE_Y = 240                 # 테스트할 Y 좌표
 
 def detect_color_post(bot):
+    """
+    HamBot 카메라를 사용해 목표 색상(TARGET_COLOR)을 탐지합니다.
+    반환값:
+        True  - 목표 색상을 발견했을 때
+        False - 발견하지 못했을 때
+    """
     try:
-        posts = bot.camera.find_landmarks(color=TARGET_COLOR)
-        print("find_landmarks() result:", posts)
-        
-        if posts:
+        # landmarks 가져오기
+        landmarks = bot.camera.find_landmarks()
+
+        if landmarks:  # 하나라도 발견되면 True
             print("FINDFIND")
             return True
         else:
@@ -24,7 +30,7 @@ def detect_color_post(bot):
             return False
 
     except Exception as e:
-        print("Error in detect_color_post:", repr(e))
+        print(f"Error in detect_color_post: {e}")
         return False
 
 
