@@ -141,6 +141,16 @@ class BUG0:
             self.bot.set_right_motor_velocity(1)
             return False
         
+    def turn_to_str(self, speed_left, speed_right):
+        while self.front_dist < self.front_dist_left and self.front_dist < self.front_dist_right:
+            self.bot.set_left_motor_velocity(speed_left)
+            self.bot.set_right_motor_velocity(speed_right)
+            break
+        return 
+        
+        
+            
+        
     # -------------------------------
     # Find the goal
     # -------------------------------
@@ -232,10 +242,18 @@ class BUG0:
                 print("/////////WALL FOLLOWING/////////")
                 print("/////////WALL FOLLOWING/////////")
                 print("/////////WALL FOLLOWING/////////")
-                while self.left_dist > 600:
+                if self.left_dist < 600:
                     self.bot.set_left_motor_velocity(4)
                     self.bot.set_right_motor_velocity(4)
-                self.state = 'turn_to_goal'
+                    if self.front_dist_left < self.front_dist_right:
+                        self.stop_motors()
+                        self.turn_to_str(1, -1)
+                    if self.front_dist_left < self.front_dist_right:
+                        self.stop_motors()
+                        self.turn_to_str(-1, 1)
+                        
+                else :
+                    self.state = 'turn_to_goal'
                 
             elif self.state == 'go_close':
                 print("~~~~~~~~~GO CLOSER~~~~~~~~~~")

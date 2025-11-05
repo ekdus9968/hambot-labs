@@ -3,190 +3,227 @@ HamBot Wall Following PID Controller (Real Robot Version)
 Author: Seyoung Kan
 Date: 2025-10-10
 """
+
 import time
 import math
 import numpy as np
-from robot_systems.robot import HamBot  # HamBot 라이브러리
+from robot_systems.robot import HamBot  # HamBot 실물용 라이브러리
+# ========================
+# ROBOT Parameters
+# ========================
+axel_length = 0.184
+wheel_radius = 0.090
+dt = 0.032 
 
 # ========================
-# HamBot Setup
+# PID gains
 # ========================
-bot = HamBot(lidar_enabled=True, camera_enabled=False)
-dt = 0.032
+Kp = 2.75
+Ki = 0.0
+Kd = 1
+
+# Target distances (meters)
+target_D_f = 0.5
+target_D_r = 0.3
+
 
 # PID state variables
-prev_error = 0
-integral = 0
-prev_angle_error = 0
-angleIntegral = 0
+I_f = 0.0
+E_prev_f = 0.0
+I_r = 0.0
+E_prev_r = 0.0
+E_f = 0.0
+E_r = 0.0
 
 # ========================
-# Utility functions
+# Robot setup
 # ========================
-def resetPID():
+bot = HamBot(lidar_enabled=True, camera_enabled=False)
+print("HamBot initialized and ready for wall following.")
+
+
+# ========================
+# REST PID
+# ========================
+def resetPID(bot):
     global prev_error, integral, prev_angle_error, angleIntegral
     print("restPID")
-    prev_error = 0
-    integral = 0
-    prev_angle_error = 0
-    angleIntegral = 0
-
-def safe_distance(value, max_range=9.5):
-    print("safe_distance")
-    if math.isinf(value) or math.isnan(value):
-        return max_range
-    return min(value, max_range)
-
-def saturation(speed, max_speed=20):
-    print("saturation")
-    return max(min(speed, max_speed), -max_speed)
+    prev_error = 0.0
+    integral = 0.0
+    prev_angle_error = 0.0
+    angleIntegral = 0.0
 
 # ========================
-# PID Controllers
+# move_forward
 # ========================
-def forwardPID(target_distance=0.4):
-    global prev_error, integral
-    print("ForwardPID")
-    lidar = bot.get_range_image()
-    actual_distance = np.mean([safe_distance(v) for v in lidar[175:185]]) / 600
-    error = actual_distance - target_distance
+def move_forward(bot, speed=10, duration=7):
+    """Move straight forward for 'duration' seconds"""
+    print("Moving forward...")
+    bot.set_left_motor_speed(speed)
+    bot.set_right_motor_speed(speed)
+    time.sleep(duration)
+    bot.stop_motors()
+    #withWall(bot)
 
-    Kp = 3.0
-    Ki = 0
-    Kd = 0.15
 
-    P = Kp * error
-    I = Ki * integral
-    D = Kd * (error - prev_error) / dt
-    prev_error = error
-    integral += error * dt
+def rotate(bot, delta_theta = np.pi / 2, max_v=50):
 
-    v = P + I + D
-    return saturation(v)
-
-def sidePID(wall="left"):
-    print("SidePID")
-    global prev_angle_error, angleIntegral
-    lidar = bot.get_range_image()
-    side_distance = 0.4
-    Kp = 0.45
-    Ki = 0.00019
-    Kd = 1
-
-    actual_left = safe_distance(np.min(lidar[90:115]))/ 600
-    actual_right = safe_distance(np.min(lidar[265:290]))/600
-
-    if wall == "left" and actual_left > 2.5:
-        return 0.0
-    if wall == "right" and actual_right > 2.5:
-        return 0.0
-
-    error = (actual_right - side_distance) if wall == "right" else (actual_left - side_distance)
-    P = Kp * error
-    angleIntegral += error * dt
-    angleIntegral = np.clip(angleIntegral, -1.0, 1.0)
-    I = Ki * angleIntegral
-    D = Kd * (error - prev_angle_error) / dt
-    prev_angle_error = error
-
-    angular_velocity = P + I + D
-    return saturation(angular_velocity)
-
-# ========================
-# Rotation for corners
-# ========================
-def rotate(radianAngle):
-    print("Rotate")
-    resetPID()
-    base_speed = 1.0
-    left_direction = 1 if radianAngle > 0 else -1
-    right_direction = -left_direction
-
-    initial_yaw = bot.get_heading()   # radians
-
+    # cal Orientation
+    l_dist = -delta_theta * (axel_length / 2)
+    r_dist = delta_theta * (axel_length / 2)
+    
+    init_l = bot.get_left_encoder_reading()
+    init_r = bot.get_right_encoder_reading()
+    
+    max_dist = max(abs(l_dist), abs(r_dist))
+    v_l = max_v * l_dist / max_dist
+    v_r = max_v * r_dist / max_dist
+    
+    # speed
+    bot.set_left_motor_speed(v_l)
+    bot.set_right_motor_speed(v_r)
+    
+    # loop
     while True:
-        current_yaw = bot.get_heading()
-        delta = (current_yaw - initial_yaw + math.pi) % (2*math.pi) - math.pi
-        if abs(delta) >= abs(radianAngle):
+        
+        l_delta = bot.get_left_encoder_reading() - init_l
+        r_delta = bot.get_right_encoder_reading() - init_r
+        
+        l_d = wheel_radius * l_delta
+        r_d = wheel_radius * r_delta
+        
+        curr_theta = (r_d -l_d) / axel_length
+        
+        print("ROT:: L_D: ", l_d)
+        print("ROT:: R_D: ", r_d)
+        print("ROT:: Approx theta: ", curr_theta)
+        
+        if abs(l_d) >= abs(l_dist) or abs(r_d) >= abs(r_dist):
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
-            break
-        bot.set_left_motor_speed(left_direction * base_speed)
-        bot.set_right_motor_speed(right_direction * base_speed)
-        time.sleep(dt)
-    resetPID()
+            bot.stop_motors()
+            break        
+        time.sleep(0.01)
+
+
 
 # ========================
-# Wall following
+# PID withWall
 # ========================
-def wall_follow(wall="left"):
-    print("Wall_Following")
-    lidar = bot.get_range_image()
-    left_distance = safe_distance(np.min(lidar[90:115]))/600
-    print("LEFT D: ", left_distance)
-    right_distance = safe_distance(np.min(lidar[265:290]))/600
-    print("Right D: ", right_distance)
-    target = 0.4
+def withWall(bot):
+    
+    """Right wall following using PID."""
+    global I_f, E_prev_f, I_r, E_prev_r, E_r, E_f
 
-    linear_velocity = forwardPID(target_distance=target)
-    angular_velocity = sidePID(wall)
+    print(" Starting wall following mode...")
 
-    rightv = leftv = linear_velocity
+    while True:
+        
+        """Right wall following using PID."""
+        global I_f, E_prev_f, I_r, E_prev_r, E_r, E_f
 
-    search_sign = +1 if wall == "right" else -1
-    side_distance = right_distance if wall == "right" else left_distance
+        print(" Starting wall following mode...")
 
-    if side_distance >= 2.5:
-        # No wall detected → gentle arc
-        base = 0.6 * linear_velocity
-        bias = 0.4
-        rightv = base - search_sign * bias
-        leftv = base + search_sign * bias
-    else:
-        # Wall-following PID adjustment
-        if wall == "right":
-            if right_distance < target:
-                rightv = linear_velocity + abs(angular_velocity)
-                leftv = linear_velocity - abs(angular_velocity)
-            elif right_distance < 2.0:
-                rightv = linear_velocity - abs(angular_velocity)
-                leftv = linear_velocity + abs(angular_velocity)
-        else:
-            if left_distance < target:
-                rightv = linear_velocity - abs(angular_velocity)
-                leftv = linear_velocity + abs(angular_velocity)
-            elif left_distance > target and left_distance < 2.0:
-                rightv = linear_velocity + abs(angular_velocity)
-                leftv = linear_velocity - abs(angular_velocity)
+        while True:
+            lidar = bot.get_range_image()
 
-    return saturation(rightv), saturation(leftv)
+            # 기본 예외 처리 (라이다 데이터 존재 확인)
+            if lidar is None or len(lidar) < 360:
+                center_idx = len(lidar) // 2
+                print(f"Front distance: {lidar[center_idx]:.3f} m")
+            else:
+                print("No LiDAR data received")
+
+
+            # 센서 데이터 (degrees 기준)
+            D_f = np.nanmin(lidar[179:181])  / 600 # front
+            D_r = np.nanmin(lidar[268:271])  / 600 # right
+            D_l = np.nanmin(lidar[75:105])   / 600 # left
+
+            # 결측치 처리
+            if np.isinf(D_f) or np.isnan(D_f) or D_f < 0.05:
+                D_f = 1.0
+            if np.isinf(D_r) or np.isnan(D_r) or D_r < 0.05:
+                D_r = 0.33333
+            if np.isinf(D_l) or np.isnan(D_l):
+                D_l = 1.0
+
+            # 에러 계산
+            E_f = D_f -target_D_f
+            E_r = D_r - target_D_r 
+
+            # PID 계산 (오른쪽 벽 기준)
+            P = Kp * E_r
+            I_r += E_r * dt
+            D_term = (E_r - E_prev_r) / dt
+            E_prev_r = E_r
+
+            control = P + Ki * I_r + Kd * D_term
+            if np.isnan(control) or np.isinf(control):
+                control = 0.0
+            control = np.clip(control, -1, 1)
+            base_speed = 10
+            left_speed  = base_speed + control
+            right_speed = base_speed - control
+            bot.set_left_motor_speed(left_speed)
+            bot.set_right_motor_speed(right_speed)
+
+
+            print(f"[WallFollow] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+
+            if D_f < 0.5:
+                print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                bot.stop_motors()
+                bot.set_left_motor_speed(0)
+                bot.set_right_motor_speed(0)
+                if D_r < D_l:
+                    print("LEFT:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+                    rotate(bot, np.deg2rad(100) )
+                    #move_arc(bot, R = 0.2, theta = np.pi , direction="CCW", max_v=15)
+                    #move_forward(bot)
+                    bot.set_left_motor_speed(0)
+                    bot.set_right_motor_speed(0)
+                    print(f"[AfterTURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                    print(f"[AfterTURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                    print(f"[AfterTURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                    print(f"[AfterTURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                    print(f"[AfterTURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                    break
+                elif D_r > D_l:
+                    print("Right:::STOPSTOPSTOPSTOPSTOPSTOPSTOSPTOSPTOPSTOPSTOSPTOPOSP")
+                    rotate(bot,np.deg2rad(100) )
+                    #move_arc(bot, R = 0.2, theta = np.pi , direction="CW", max_v=15)
+                    #move_forward(bot)
+                    bot.set_left_motor_speed(0)
+                    bot.set_right_motor_speed(0)
+                    print(f"[AfterTURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                    print(f"[AfterTURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                    print(f"[AfterTURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                    print(f"[AfterTURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                    print(f"[AfterTURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                    print()
+                    break
+            elif D_r > 1.0:
+                bot.stop_motors()
+                bot.set_left_motor_speed(0)
+                bot.set_right_motor_speed(0)
+                print(f"[BEFORETURN] D_f={D_f:.4f}, E_f={E_f:.4f}, D_r={D_r:.4f}, E_r={E_r:.4f}, control={control:.4f}, D_l={D_l:.4f}")
+                print("Right wall is far from at least 1.2")
+                #move_arc(bot, R = 0.2, theta = np.pi , direction="CW", max_v=10)
+                rotate(bot, -np.deg2rad(100) )
+                move_forward(bot)
+                
+            time.sleep(dt)
+    
+
 
 # ========================
 # Main loop
 # ========================
-wall = "left"
-
-while True:
-    
-    lidar = bot.get_range_image()
-    if lidar is None or len(lidar) < 360:
-        center_idx = len(lidar) // 2
-        print(f"Front distance: {lidar[center_idx]:.3f} m")
-    else:
-        print("No LiDAR data received")
-        
-    
-    rightv, leftv = wall_follow(wall)
-    bot.set_left_motor_speed(leftv)
-    bot.set_right_motor_speed(rightv)
-
-    front_distance = min(lidar[175:185]) / 600 # front
-    print(front_distance)
-    print("-"*50)
-
-    if front_distance < 0.45 and wall == "right":
-        rotate(-math.pi/2)
-    elif front_distance < 0.45 and wall == "left":
-        rotate(math.pi/2)
-
-    time.sleep(dt)
+if __name__ == "__main__":
+    print("HamBot Wall Following PID Controller Started.")
+    withWall(bot)
