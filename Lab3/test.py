@@ -3,8 +3,7 @@ import numpy as np
 import math
 from robot_systems.robot import HamBot
 
-COLOR = (180, 150, 170)   # attempting to make yellow
-COLOR_TOLERANCE  = 50
+
 
 class BUG0:
     def __init__(self, bot: HamBot):
@@ -44,11 +43,10 @@ class BUG0:
         self.prev_right_enc = right
         
         # CAMERA
-        self.bot.camera.enable(32)  # 32 ms timestep
-        self.bot.camera.set_target_colors([(255, 255, 0)], tolerance=45) #color
-        self.cam = self.bot.camera.get_image()
-        self.frame_height = 0.0
-        self.frame_width = 0.0
+        self.cam = None
+        
+        self.COLOR = (180, 150, 170)   # attempting to make yellow
+        self.COLOR_TOLERANCE  = 50
 
     def stop_motors(self):
         self.bot.set_left_motor_velocity(0)
@@ -182,9 +180,9 @@ class BUG0:
     # -------------------------------
     #if cqmera see pink
     def detect_color_post(self):
-        print("detect_yellow_post()")
-        posts = self.bot.camera.find_landmarks(COLOR, tolerance=COLOR_TOLERANCE)
+        posts = self.bot.camera.find_landmarks(self.COLOR, tolerance=self.COLOR_TOLERANCE)
         return bool(posts)
+
     
     def check_in_goal(self):
         print("check_in_goal()")
