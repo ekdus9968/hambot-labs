@@ -156,41 +156,11 @@ class BUG0:
     # -------------------------------
     # Find the goal
     # -------------------------------
-    #get frame size from the camera
-    def get_frame_size(self):
-        self.cam = self.bot.camera.get_image()  # (H, W, 3) 또는 None
-        if self.cam is None:
-            return None  # 아직 프레임 준비 안 됨
-
-        # 전체 프레임 크기
-        H, W = self.cam.shape[:2]  # height, width
-        self.frame_height = H
-        self.frame_width = W
-
-        # 필요하면 프레임 첫 행도 따로 저장 가능
-        self.first_row = self.cam[0]  # shape = (W, 3)
-
-        # 반환값은 전체 프레임
-        return self.cam
-
-    
     #if cqmera see yellow 
     def detect_yellow_post(self):
         print("detect_yellow_post()")
         posts = self.bot.camera.find_landmarks(YELLOW, tolerance=color_tolerance)
-        if not posts:
-            return None
-        # post_fields func
-        def post_fields(p):
-            x = p.get("x", 0)
-            y = p.get("y", 0)
-            w = p.get("w", 0)
-            h = p.get("h", 0)
-            return int(x), int(y), int(w), int(h)
-
-        yposts = [post_fields(p) for p in posts]
-        x, y, w, h = max(yposts, key=lambda t: t[2]*t[3])  # 가장 큰 노란 영역 선택
-        return (x, y, w, h)
+        return bool(posts)
     
     def check_in_goal(self):
         print("check_in_goal()")
