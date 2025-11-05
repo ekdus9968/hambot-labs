@@ -3,7 +3,6 @@ import numpy as np
 import math
 from robot_systems.robot import HamBot
 
-
 class BUG0:
     def __init__(self, bot: HamBot):
         self.bot = bot
@@ -141,14 +140,9 @@ class BUG0:
         print(f"[DEBUG] LiDAR - Front: {self.front_dist:.1f}, Left: {self.left_dist:.1f}, Right: {self.right_dist:.1f}")
 
     # -------------------------------
-    # Turn to goal with proportional control
+    # Turn to goal - 왼쪽(반시계) 고정 속도 회전
     # -------------------------------
     def turn_to_goal(self, target_angle):
-        
-        """
-        왼쪽(반시계)으로만 회전하면서 목표 각도까지 도는 함수
-        target_angle: 목표 heading (0~360°)
-        """
         current_heading = self.bot.get_heading()
 
         # 왼쪽 회전 전용 error 계산 (0~180°)
@@ -158,36 +152,17 @@ class BUG0:
 
         print(f"[DEBUG] Turning left only - Current: {current_heading:.2f}, Target: {target_angle:.2f}, Error: {error:.2f}")
 
-        # 허용 오차 내에 들어오면 멈춤
-        if error < 3:  # ±3°
+        if error < 3:  # ±3° 안이면 멈춤
             self.bot.set_left_motor_speed(0)
             self.bot.set_right_motor_speed(0)
             print("[DEBUG] Reached target heading, motors stopped")
             return True
         else:
-            # 속도 비례 제어: error 크면 빠르게, 작으면 느리게
-            # 왼쪽(반시계) 회전: 왼쪽 모터 뒤, 오른쪽 모터 앞으로
-            self.bot.set_left_motor_speed(-2)
-            self.bot.set_right_motor_speed(2)
+            # HamBot 모터 범위 내 고정 속도
+            fixed_speed = 0.5
+            self.bot.set_left_motor_speed(-fixed_speed)   # 왼쪽 모터 뒤
+            self.bot.set_right_motor_speed(fixed_speed)   # 오른쪽 모터 앞으로
             return False
-
-
-
-
-    # -------------------------------
-    # Camera: detect landmarks
-    # -------------------------------
-    def detect_landmark(self):
-        self.frame = self.bot.camera.get_frame()
-        if self.frame is None:
-            print("[DEBUG] Camera frame not available")
-            return False
-
-        landmarks = self.bot.camera.find_landmarks()
-        if landmarks is not None and len(landmarks) > 0:
-            print("[DEBUG] Landmark detected!")
-            return True
-        return False
 
     # -------------------------------
     # Main state machine
@@ -195,6 +170,10 @@ class BUG0:
     def run_state(self):
         self.update_position_and_distance()
         self.change_state('start')
+
+        # goal angle 한 번만 계산
+        self.goal_angle = self.calculate_goal_angle()
+
         while self.state != 'end':
             self.get_current_position()
             self.read_lidar()
@@ -203,20 +182,15 @@ class BUG0:
 
             if self.state == 'start':
                 self.change_state('turn_to_goal')
-                self.goal_angle = self.calculate_goal_angle()
-                print(f"[DEBUG]goal_angle: {self.goal_angle:.2f}")
-                
 
             elif self.state == 'turn_to_goal':
-
-                target_angle = (self.goal_angle - self.initial_heading) % 360
-                if self.turn_to_goal(target_angle):
+                if self.turn_to_goal(self.goal_angle):
                     self.change_state('move_to_goal')
 
             elif self.state == 'move_to_goal':
                 if self.front_dist > 200:
-                    self.bot.set_left_motor_speed(1.0)
-                    self.bot.set_right_motor_speed(1.0)
+                    self.bot.set_left_motor_speed(0.5)
+                    self.bot.set_right_motor_speed(0.5)
                     print("[DEBUG] Moving forward")
                 else:
                     self.stop_motors()
@@ -227,11 +201,11 @@ class BUG0:
 
             elif self.state == 'wall_following':
                 if self.right_dist > 200:
-                    self.bot.set_left_motor_speed(1.0)
-                    self.bot.set_right_motor_speed(0.5)
-                else:
                     self.bot.set_left_motor_speed(0.5)
-                    self.bot.set_right_motor_speed(1.0)
+                    self.bot.set_right_motor_speed(0.25)
+                else:
+                    self.bot.set_left_motor_speed(0.25)
+                    self.bot.set_right_motor_speed(0.5)
 
                 if self.dist_to_goal < 50:
                     self.change_state('end')
@@ -241,7 +215,9 @@ class BUG0:
         self.stop_motors()
         print("[DEBUG] Reached goal, stopping.")
 
-
+# -------------------------------
+# Main
+# -------------------------------
 def main():
     try:
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
