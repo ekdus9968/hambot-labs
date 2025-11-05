@@ -22,6 +22,9 @@ class BUG0:
         # ROBOT PARAMETER
         self.wheel_r = 0.045
         self.wheel_d = 0.092
+        
+        self.bot.set_left_motor_velocity(0)
+        self.bot.set_right_motor_velocity(0)
 
         # DISTANCE
         self.front_dist = 0.0
