@@ -152,9 +152,7 @@ class BUG0:
         current_heading = self.bot.get_heading()
 
         # 왼쪽 회전 전용 error 계산 (0~180°)
-        error = (current_heading - target_angle + 360) % 360
-        if error > 180:
-            error = 360 - error  # 항상 최소 각도
+        error = (target_angle - current_heading + 540) % 360 - 180
 
         print(f"[DEBUG] Turning left only - Current: {current_heading:.2f}, Target: {target_angle:.2f}, Error: {error:.2f}")
 
