@@ -158,11 +158,11 @@ class BUG0:
         error = (target_angle - current_heading + 540) % 360 - 180
 
         if abs(error) < 5 :
-            self.bot.stop()
+            self.bot.stop_motors()
             return True
         elif self.front_dist_left < 500 :
             self.state = 'wall_following'
-            self.bot.stop()
+            self.bot.stop_motors()
             return True
             
         else:
@@ -343,7 +343,7 @@ def main():
         follower.run_state()
         
         # Cleanup
-        follower.stop()
+        follower.stop_motors()
         
     except Exception as e:
         print(f"Error: {e}")
