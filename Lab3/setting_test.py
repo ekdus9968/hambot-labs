@@ -143,12 +143,9 @@ class BUG0:
         else:
             # Simple proportional control
             speed = 1.0
-            if error > 0:
-                self.bot.set_left_motor_speed(-speed)
-                self.bot.set_right_motor_speed(speed)
-            else:
-                self.bot.set_left_motor_speed(speed)
-                self.bot.set_right_motor_speed(-speed)
+            error > 0
+            self.bot.set_left_motor_speed(-speed)
+            self.bot.set_right_motor_speed(speed)
             return False
 
     # -------------------------------
