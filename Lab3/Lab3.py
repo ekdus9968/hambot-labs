@@ -164,7 +164,7 @@ class BUG0:
     
     def check_in_goal(self):
         print("check_in_goal()")
-        dist = self.front_dist - 300 
+        dist = self.front_dist 
         if dist > 25:
             self.state = 'go_close'
             return 
@@ -246,8 +246,7 @@ class BUG0:
                 print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
                 print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
                 print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
-                target_dist = 300
-                if abs(self.front_dist - target_dist) > 250:
+                if self.front_dist> 250:
                     self.bot.set_left_motor_velocity(2)
                     self.bot.set_right_motor_velocity(2)
                 else:
@@ -260,8 +259,7 @@ class BUG0:
                 print("~~~~~~~~~GO FAR~~~~~~~~~~")
                 print("~~~~~~~~~GO FAR~~~~~~~~~~")
                 print("~~~~~~~~~GO FAR~~~~~~~~~~")
-                target_dist = 300
-                if abs(self.front_dist - target_dist) < 250:
+                if self.front_dist  < 250:
                     self.bot.set_left_motor_velocity(-2)
                     self.bot.set_right_motor_velocity(-2)
                 else:
