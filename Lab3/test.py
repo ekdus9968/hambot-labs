@@ -46,6 +46,8 @@ class BUG0:
         self.cam = None
         self.COLOR = (180, 150, 170)   # attempting to make yellow
         self.COLOR_TOLERANCE  = 50
+        self.bot.camera.set_target_colors([self.COLOR], tolerance=self.COLOR_TOLERANCE)
+
         
         self.lidar = None
 
