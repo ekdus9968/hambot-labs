@@ -152,7 +152,9 @@ class BUG0:
         current_heading = self.bot.get_heading()
 
         # 왼쪽 회전 전용 error 계산 (0~180°)
-        error = (target_angle - current_heading + 540) % 360 - 180
+        error = (current_heading - target_angle + 360) % 360
+        if error > 180:
+            error = 360 - error  # 항상 최소 각도
 
         print(f"[DEBUG] Turning left only - Current: {current_heading:.2f}, Target: {target_angle:.2f}, Error: {error:.2f}")
 
@@ -202,9 +204,11 @@ class BUG0:
             if self.state == 'start':
                 self.change_state('turn_to_goal')
                 self.goal_angle = self.calculate_goal_angle()
+                print(f"[DEBUG]goal_angle: {self.goal_angle:.2f}")
                 
 
             elif self.state == 'turn_to_goal':
+
                 target_angle = (self.goal_angle - self.initial_heading) % 360
                 if self.turn_to_goal(target_angle):
                     self.change_state('move_to_goal')
