@@ -123,6 +123,7 @@ class BUG0:
     # -------------------------------
     def read_lidar(self):
         print("read_lidar()")
+        self.lidar = self.bot.get_range_image() 
         
         if self.lidar is None or len(self.lidar) < 360:
             print("LiDAR data missing")
