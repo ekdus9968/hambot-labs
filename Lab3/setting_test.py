@@ -144,17 +144,17 @@ class BUG0:
     # -------------------------------
     def turn_to_goal(self, target_angle):
         current_heading = self.bot.get_heading()
-        error = (target_angle - current_heading + 540) % 360 - 180
-        print(f"[DEBUG] Turn to goal - Current heading: {current_heading:.2f}, Target: {target_angle:.2f}, Error: {error:.2f}")
-
-        if abs(error) < 3:  # 허용 오차 3도
+        # 항상 왼쪽으로 회전하도록 error 계산
+        error = (target_angle - current_heading + 360) % 360  # 0~360
+        if error == 0:
             self.stop_motors()
             return True
         else:
-            # 항상 왼쪽(반시계) 회전
-            speed = 0.5  # 회전 속도 조절
+            speed = 2
+            # 왼쪽으로만 회전: 오른쪽이 앞으로, 왼쪽은 뒤로
             self.bot.set_left_motor_speed(-speed)
             self.bot.set_right_motor_speed(speed)
+            print(f"[DEBUG] Turning left - Current: {current_heading:.2f}, Target: {target_angle:.2f}, Error: {error:.2f}")
             return False
 
     # -------------------------------
