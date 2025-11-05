@@ -12,7 +12,7 @@ SAMPLE_X = 320                 # 테스트할 X 좌표 (프레임 중앙 등)
 SAMPLE_Y = 240                 # 테스트할 Y 좌표
 
 def detect_color_post(bot):
-    posts = bot.camera.find_landmarks(TARGET_COLOR)  # bot.TARGET_COLOR ❌
+    posts = bot.camera.find_landmarks(color=TARGET_COLOR)
     if posts:
         print("FINDFIND")
         return True
