@@ -210,7 +210,7 @@ class BUG0:
                     print(f"[DEBUG] Fixed turn target_angle: {self.turn_target_angle:.2f}")
 
                 # 왼쪽 회전 전용 함수 호출
-                if self.turn_to_goal_left_only(self.turn_target_angle):
+                if self.turn_to_goal(self.turn_target_angle):
                     self.change_state('move_to_goal')
 
             elif self.state == 'move_to_goal':
