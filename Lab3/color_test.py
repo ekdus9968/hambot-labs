@@ -12,12 +12,19 @@ SAMPLE_X = 320                 # 테스트할 X 좌표 (프레임 중앙 등)
 SAMPLE_Y = 240                 # 테스트할 Y 좌표
 
 def detect_color_post(bot):
-    posts = bot.camera.find_landmarks(color=TARGET_COLOR)
-    if posts:
-        print("FINDFIND")
-        return True
-    else:
-        print("NONENONE")
+    try:
+        posts = bot.camera.find_landmarks(color=TARGET_COLOR)
+        print("find_landmarks() result:", posts)
+        
+        if posts:
+            print("FINDFIND")
+            return True
+        else:
+            print("NONENONE")
+            return False
+
+    except Exception as e:
+        print("Error in detect_color_post:", repr(e))
         return False
 
 
