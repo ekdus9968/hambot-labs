@@ -47,6 +47,7 @@ class BUG0:
         self.COLOR = (180, 150, 170)   # attempting to make yellow
         self.COLOR_TOLERANCE  = 50
         self.bot.camera.set_target_colors([self.COLOR], tolerance=self.COLOR_TOLERANCE)
+        self.bot.camera.find_landmarks()
 
         
         self.lidar = None
@@ -178,15 +179,18 @@ class BUG0:
             break
         return 
         
-        
     # -------------------------------
     # Find the goal
     # -------------------------------
     #if cqmera see pink
     def detect_color_post(self):
-        posts = self.bot.camera.find_landmarks([self.COLOR])
-        return bool(posts)
-
+        landmarks = self.bot.camera.find_landmarks()
+        if landmarks:  # 하나라도 발견되면 True
+            print("FINDFIND")
+            return True
+        else:
+            print("NONENONE")
+            return False
     
     def check_in_goal(self):
         print("check_in_goal()")
