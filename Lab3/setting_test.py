@@ -45,6 +45,9 @@ class BUG0:
         self.frame = None
         self.bot.camera.set_target_colors([self.COLOR], tolerance=self.TOLERANCE)
 
+        # IMU initial heading
+        self.initial_heading = self.bot.get_heading()
+
     # -------------------------------
     # Motor control
     # -------------------------------
@@ -131,7 +134,7 @@ class BUG0:
         self.max_front = max(self.front_dist, self.front_dist_left, self.front_dist_right)
 
     # -------------------------------
-    # Turn to goal
+    # Turn to goal with proportional control
     # -------------------------------
     def turn_to_goal(self, target_angle):
         current_heading = self.bot.get_heading()
@@ -169,7 +172,6 @@ class BUG0:
         self.update_position_and_distance()
         self.change_state('start')
         while self.state != 'end':
-            print(f"Current state: {self.state}")
             self.get_current_position()
             self.read_lidar()
 
@@ -177,7 +179,9 @@ class BUG0:
                 self.change_state('turn_to_goal')
 
             elif self.state == 'turn_to_goal':
-                target_angle = self.calculate_goal_angle()
+                goal_angle = self.calculate_goal_angle()
+                # adjust with initial heading
+                target_angle = (goal_angle - self.initial_heading) % 360
                 if self.turn_to_goal(target_angle):
                     self.change_state('move_to_goal')
 
@@ -190,7 +194,6 @@ class BUG0:
                     self.stop_motors()
                     self.change_state('wall_following')
 
-                # check if goal reached
                 if self.dist_to_goal < 50:
                     self.change_state('end')
 
