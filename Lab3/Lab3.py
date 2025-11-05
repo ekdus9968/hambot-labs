@@ -55,13 +55,15 @@ class BUG0:
         # CAMERA
         self.bot.camera.enable(32)  # 32 ms timestep
         self.bot.camera.set_target_colors([(255, 255, 0)], tolerance=45) #color
-        
-        # OBJECT
-        self.obj_inf = []
+        self.cam = self.bot.camera.get_image()
+        self.frame_height = 0.0
+        self.frame_width = 0.0
 
         
 
-
+    def stop_motors(self):
+        self.bot.set_left_motor_velocity(0)
+        self.bot.set_right_motor_velocity(0)
     # -------------------------------
     # GPS
     # -------------------------------
@@ -156,13 +158,21 @@ class BUG0:
     # -------------------------------
     #get frame size from the camera
     def get_frame_size(self):
-        print("get_frame_size()")
-        cam = self.bot.camera.get_image()  # most recent frame (threaded)
-        if cam is None:
-            return None
-        #infer shape and height of tqrget
-        H, W = cam.shape[0], cam.shape[1]
-        return (W, H)
+        self.cam = self.bot.camera.get_image()  # (H, W, 3) 또는 None
+        if self.cam is None:
+            return None  # 아직 프레임 준비 안 됨
+
+        # 전체 프레임 크기
+        H, W = self.cam.shape[:2]  # height, width
+        self.frame_height = H
+        self.frame_width = W
+
+        # 필요하면 프레임 첫 행도 따로 저장 가능
+        self.first_row = self.cam[0]  # shape = (W, 3)
+
+        # 반환값은 전체 프레임
+        return self.cam
+
     
     #if cqmera see yellow 
     def detect_yellow_post(self):
@@ -184,11 +194,11 @@ class BUG0:
     
     def check_in_goal(self):
         print("check_in_goal()")
-        dist = abs(self.front_dist - self.obj_inf[0] )
-        if dist - 250 > 25:
+        dist = self.front_dist - 300 
+        if dist > 25:
             self.state = 'go_close'
             return 
-        elif dist - 250 < 25 :
+        elif dist < 25 :
             self.state = 'go_far'
             return 
         else :
@@ -201,6 +211,7 @@ class BUG0:
             print(":::::::::START STATE:::::::::")
             
             if self.state == 'start':
+                self.read_lidar()
                 print(":::::::::START STATE:::::::::")
                 print(":::::::::START STATE:::::::::")
                 print(":::::::::START STATE:::::::::")
@@ -210,6 +221,7 @@ class BUG0:
                 self.state = 'turn_to_goal'
                 
             elif self.state == 'turn_to_goal':
+                self.read_lidar()
                 print(":::::::::TURN TO GOAL:::::::::")
                 print(":::::::::TURN TO GOAL:::::::::")
                 print(":::::::::TURN TO GOAL:::::::::")
@@ -220,6 +232,7 @@ class BUG0:
                     self.state = 'move_to_goal'
                 
             elif self.state == 'move_to_goal':
+                self.read_lidar()
                 print(":::::::::MOVE TO GOAL:::::::::")
                 print(":::::::::MOVE TO GOAL:::::::::")
                 print(":::::::::MOVE TO GOAL:::::::::")
@@ -237,6 +250,7 @@ class BUG0:
                         self.state = 'wall_following'
                 
             elif self.state == 'wall_following':
+                self.read_lidar()
                 print("/////////WALL FOLLOWING/////////")
                 print("/////////WALL FOLLOWING/////////")
                 print("/////////WALL FOLLOWING/////////")
@@ -248,7 +262,7 @@ class BUG0:
                     if self.front_dist_left < self.front_dist_right:
                         self.stop_motors()
                         self.turn_to_str(1, -1)
-                    if self.front_dist_left < self.front_dist_right:
+                    elif self.front_dist_left < self.front_dist_right:
                         self.stop_motors()
                         self.turn_to_str(-1, 1)
                         
@@ -256,6 +270,7 @@ class BUG0:
                     self.state = 'turn_to_goal'
                 
             elif self.state == 'go_close':
+                self.read_lidar()
                 print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
                 print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
                 print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
@@ -269,6 +284,7 @@ class BUG0:
                     self.state = 'check_in_goal'
                 
             elif self.state == 'go_far':
+                self.read_lidar()
                 print("~~~~~~~~~GO FAR~~~~~~~~~~")
                 print("~~~~~~~~~GO FAR~~~~~~~~~~")
                 print("~~~~~~~~~GO FAR~~~~~~~~~~")
@@ -282,6 +298,7 @@ class BUG0:
                     self.state = 'check_in_goal'
                 
             elif self.state == 'check_in_goal':
+                self.read_lidar()
                 print("-------CHECK IN GOAL---------")
                 print("-------CHECK IN GOAL---------")
                 print("-------CHECK IN GOAL---------")
@@ -303,7 +320,7 @@ def main():
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
         print("HamBot initialized and ready for wall following.")
         # Create wall follower
-        follower = BUG0()
+        follower = BUG0(bot)
         
         # Follow wall for 20 seconds
         follower.run_state()
