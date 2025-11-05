@@ -146,7 +146,7 @@ class BUG0:
         current_heading = self.bot.get_heading()
 
         # 왼쪽 회전 전용 error 계산 (0~180°)
-        error = (current_heading - target_angle + 360) % 360 - 180
+        error = abs((current_heading - target_angle + 360) % 360 - 180)
         if error > 180:
             error = 360 - error  # 항상 최소 각도
 
