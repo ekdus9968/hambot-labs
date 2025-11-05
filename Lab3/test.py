@@ -55,6 +55,17 @@ class BUG0:
         
         self.lidar = None
         self.bot.get_range_image() 
+        
+        try:
+            scan = self.bot.get_range_image()
+            if scan is None or not hasattr(scan, 'get_current_scan'):
+                print("LiDAR not ready, using dummy scan")
+                self.lidar = [1000.0]*360  # 1m 거리로 더미
+            else:
+                self.lidar = scan
+        except Exception as e:
+            print(f"LiDAR init failed: {e}")
+            self.lidar = [1000.0]*360
 
     def stop_motors(self):
         try:
@@ -127,11 +138,16 @@ class BUG0:
     # -------------------------------
     def read_lidar(self):
         print("read_lidar()")
-        self.lidar = self.bot.get_range_image() 
-        
-        if self.lidar is None or len(self.lidar) < 360:
-            print("LiDAR data missing")
-            self.lidar = [1000.0] * 360
+        try:
+            scan = self.bot.get_range_image()
+            if scan is None or not hasattr(scan, 'get_current_scan'):
+                print("LiDAR not ready, using dummy scan")
+                self.lidar = [1000.0]*360  # 1m 거리로 더미
+            else:
+                self.lidar = scan
+        except Exception as e:
+            print(f"LiDAR init failed: {e}")
+            self.lidar = [1000.0]*360
 
         # distance from each anlge
         self.front_dist = np.nanmin(self.lidar[175:185])  
