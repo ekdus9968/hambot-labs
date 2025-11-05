@@ -12,8 +12,8 @@ SAMPLE_Y = 240                 # 테스트할 Y 좌표
 
 def main():
     try:
-        bot = HamBot(camera_enabled=True)
-        bot.camera.enable(32)  # 32 ms timestep
+        bot = HamBot(lidar_enabled=True, camera_enabled=True)
+        
         time.sleep(1)  # 카메라 초기화 대기
 
         print("Camera color test started. Press Ctrl+C to stop.")
