@@ -47,6 +47,7 @@ class BUG0:
 
         # IMU initial heading
         self.initial_heading = self.bot.get_heading()
+        print(f"[DEBUG] Initial heading: {self.initial_heading:.2f}°")
 
     # -------------------------------
     # Motor control
@@ -55,8 +56,9 @@ class BUG0:
         try:
             self.bot.set_left_motor_speed(0)
             self.bot.set_right_motor_speed(0)
+            print("[DEBUG] Motors stopped")
         except AttributeError:
-            print("Motor stop failed")
+            print("[DEBUG] Motor stop failed")
 
     # -------------------------------
     # Encoder + IMU based dead reckoning
@@ -79,6 +81,7 @@ class BUG0:
         self.prev_left_enc = left_enc
         self.prev_right_enc = right_enc
 
+        print(f"[DEBUG] Position updated: x={self.x:.1f}, y={self.y:.1f}, heading={self.bot.get_heading():.2f}°")
         return self.x, self.y
 
     # -------------------------------
@@ -87,6 +90,7 @@ class BUG0:
     def update_position_and_distance(self):
         self.get_current_position()
         self.dist_to_goal = self.calculate_distance_to_goal()
+        print(f"[DEBUG] Distance to goal: {self.dist_to_goal:.1f} mm")
 
     # -------------------------------
     # Change state
@@ -95,7 +99,7 @@ class BUG0:
         self.update_position_and_distance()
         self.visited_points.append((new_state, self.x, self.y, self.dist_to_goal))
         self.state = new_state
-        print(f"State changed to: {new_state}, Position: ({self.x:.1f}, {self.y:.1f}), Distance to goal: {self.dist_to_goal:.1f}")
+        print(f"[DEBUG] State changed to: {new_state}")
 
     # -------------------------------
     # Goal calculations
@@ -104,6 +108,7 @@ class BUG0:
         dx = self.goal_x - self.x
         dy = self.goal_y - self.y
         goal_angle = math.degrees(math.atan2(dy, dx)) % 360
+        print(f"[DEBUG] Goal angle: {goal_angle:.2f}°")
         return goal_angle
 
     def calculate_distance_to_goal(self):
@@ -115,7 +120,7 @@ class BUG0:
     def read_lidar(self):
         self.lidar = self.bot.get_range_image()
         if self.lidar is None or len(self.lidar) < 360:
-            print("No LiDAR data received")
+            print("[DEBUG] No LiDAR data received")
             return
 
         # Front and side distances
@@ -132,6 +137,7 @@ class BUG0:
                 setattr(self, name, 666.666)
 
         self.max_front = max(self.front_dist, self.front_dist_left, self.front_dist_right)
+        print(f"[DEBUG] LiDAR - Front: {self.front_dist:.1f}, Left: {self.left_dist:.1f}, Right: {self.right_dist:.1f}")
 
     # -------------------------------
     # Turn to goal with proportional control
@@ -139,14 +145,14 @@ class BUG0:
     def turn_to_goal(self, target_angle):
         current_heading = self.bot.get_heading()
         error = (target_angle - current_heading + 540) % 360 - 180
+        print(f"[DEBUG] Turn to goal - Current heading: {current_heading:.2f}, Target: {target_angle:.2f}, Error: {error:.2f}")
 
-        if abs(error) < 5:
+        if abs(error) < 3:  # 허용 오차 3도
             self.stop_motors()
             return True
         else:
-            # Simple proportional control
-            speed = 1.0
-            error > 0
+            # 항상 왼쪽(반시계) 회전
+            speed = 0.5  # 회전 속도 조절
             self.bot.set_left_motor_speed(-speed)
             self.bot.set_right_motor_speed(speed)
             return False
@@ -157,11 +163,12 @@ class BUG0:
     def detect_landmark(self):
         self.frame = self.bot.camera.get_frame()
         if self.frame is None:
+            print("[DEBUG] Camera frame not available")
             return False
 
         landmarks = self.bot.camera.find_landmarks()
         if landmarks is not None and len(landmarks) > 0:
-            print("Landmark detected!")
+            print("[DEBUG] Landmark detected!")
             return True
         return False
 
@@ -175,21 +182,22 @@ class BUG0:
             self.get_current_position()
             self.read_lidar()
 
+            print(f"[DEBUG] Current state: {self.state}")
+
             if self.state == 'start':
                 self.change_state('turn_to_goal')
 
             elif self.state == 'turn_to_goal':
                 goal_angle = self.calculate_goal_angle()
-                # adjust with initial heading
                 target_angle = (goal_angle - self.initial_heading) % 360
                 if self.turn_to_goal(target_angle):
                     self.change_state('move_to_goal')
 
             elif self.state == 'move_to_goal':
-                # move forward if no obstacle
                 if self.front_dist > 200:
                     self.bot.set_left_motor_speed(1.0)
                     self.bot.set_right_motor_speed(1.0)
+                    print("[DEBUG] Moving forward")
                 else:
                     self.stop_motors()
                     self.change_state('wall_following')
@@ -198,7 +206,6 @@ class BUG0:
                     self.change_state('end')
 
             elif self.state == 'wall_following':
-                # simple right-wall following
                 if self.right_dist > 200:
                     self.bot.set_left_motor_speed(1.0)
                     self.bot.set_right_motor_speed(0.5)
@@ -212,7 +219,7 @@ class BUG0:
             time.sleep(0.05)
 
         self.stop_motors()
-        print("Reached goal, stopping.")
+        print("[DEBUG] Reached goal, stopping.")
 
 
 def main():
@@ -224,7 +231,7 @@ def main():
         follower.run_state()
 
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"[DEBUG] Error: {e}")
         import traceback
         traceback.print_exc()
 
