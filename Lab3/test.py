@@ -3,8 +3,8 @@ import numpy as np
 import math
 from robot_systems.robot import HamBot
 
-YELLOW = (255, 220, 0)   # attempting to make yellow
-color_tolerance  = 45  
+COLOR = (180, 150, 170)   # attempting to make yellow
+COLOR_TOLERANCE  = 50
 
 class BUG0:
     def __init__(self, bot: HamBot):
@@ -180,27 +180,27 @@ class BUG0:
     # -------------------------------
     # Find the goal
     # -------------------------------
-    #if cqmera see yellow 
-    # def detect_yellow_post(self):
-    #     print("detect_yellow_post()")
-    #     posts = self.bot.camera.find_landmarks(YELLOW, tolerance=color_tolerance)
-    #     return bool(posts)
+    #if cqmera see pink
+    def detect_color_post(self):
+        print("detect_yellow_post()")
+        posts = self.bot.camera.find_landmarks(COLOR, tolerance=COLOR_TOLERANCE)
+        return bool(posts)
     
-    # def check_in_goal(self):
-    #     print("check_in_goal()")
-    #     dist = self.front_dist 
-    #     if dist > 25:
-    #         self.change_state('check in goal to go close')
-    #         self.state = 'go_close'
-    #         return 
-    #     elif dist < 25 :
-    #         self.change_state('check in goal to go fat')
-    #         self.state = 'go_far'
-    #         return 
-    #     else :
-    #         self.change_state('check in goal to end')
-    #         self.state = 'end'
-    #         return
+    def check_in_goal(self):
+        print("check_in_goal()")
+        dist = self.front_dist 
+        if dist > 25:
+            self.change_state('check in goal to go close')
+            self.state = 'go_close'
+            return 
+        elif dist < 25 :
+            self.change_state('check in goal to go fat')
+            self.state = 'go_far'
+            return 
+        else :
+            self.change_state('check in goal to end')
+            self.state = 'end'
+            return
         
     # -------------------------------
     # STATE
@@ -249,7 +249,7 @@ class BUG0:
                     self.bot.set_left_motor_velocity(4)
                     self.bot.set_right_motor_velocity(4)
                 else: 
-                    post = self.detect_yellow_post()
+                    post = self.detect_color_post()
                     if post:
                         self.change_state('move to goal to go close')
                         self.state = 'go_close'
