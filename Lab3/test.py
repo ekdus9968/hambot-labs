@@ -61,7 +61,7 @@ class BUG0:
     # else : 간 거리 구하기 
     def get_current_position(self):
         if self.state == 'turn_to_goal':
-            return 
+            return self.x, self.y
         left_enc, right_enc = self.bot.get_encoder_readings()
         delta_left = left_enc - self.prev_left_enc
         delta_right = right_enc - self.prev_right_enc
