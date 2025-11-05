@@ -6,8 +6,8 @@ from robot_systems.robot import HamBot
 # 색상 테스트용
 # -------------------------------
 
-TARGET_COLOR = (180, 150, 170)   # 기존 목표 color
-TOLERANCE = 50                 # ± 허용 오차
+TARGET_COLOR = (255, 0, 200)   # 기존 목표 color
+TOLERANCE = 80                 # ± 허용 오차
 SAMPLE_X = 320                 # 테스트할 X 좌표 (프레임 중앙 등)
 SAMPLE_Y = 240                 # 테스트할 Y 좌표
 
