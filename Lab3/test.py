@@ -184,7 +184,7 @@ class BUG0:
     # -------------------------------
     #if cqmera see pink
     def detect_color_post(self):
-        posts = self.bot.camera.find_landmarks(self.COLOR, tolerance=self.COLOR_TOLERANCE)
+        posts = self.bot.camera.find_landmarks([self.COLOR], tolerance=self.COLOR_TOLERANCE)
         return bool(posts)
 
     
