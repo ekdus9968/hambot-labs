@@ -23,8 +23,8 @@ class BUG0:
         self.wheel_r = 0.045
         self.wheel_d = 0.092
         
-        self.bot.set_left_motor_velocity(0)
-        self.bot.set_right_motor_velocity(0)
+        self.bot.set_left_motor_speed(0)
+        self.bot.set_right_motor_speed(0)
 
         # DISTANCE
         self.front_dist = 0.0
@@ -56,8 +56,8 @@ class BUG0:
         self.lidar = None
 
     def stop_motors(self):
-        self.bot.set_left_motor_velocity(0)
-        self.bot.set_right_motor_velocity(0)
+        self.bot.set_left_motor_speed(0)
+        self.bot.set_right_motor_speed(0)
     # -------------------------------
     # GPS : get curr pos
     # -------------------------------
@@ -171,14 +171,14 @@ class BUG0:
             
         else:
             # 왼쪽으로만 회전
-            self.bot.set_left_motor_velocity(-1)
-            self.bot.set_right_motor_velocity(1)
+            self.bot.set_left_motor_speed(-1)
+            self.bot.set_right_motor_speed(1)
             return False
         
     def turn_to_str(self, speed_left, speed_right):
         while self.front_dist < self.front_dist_left and self.front_dist < self.front_dist_right:
-            self.bot.set_left_motor_velocity(speed_left)
-            self.bot.set_right_motor_velocity(speed_right)
+            self.bot.set_left_motor_speed(speed_left)
+            self.bot.set_right_motor_speed(speed_right)
             break
         return 
         
@@ -253,8 +253,8 @@ class BUG0:
                 print(":::::::::MOVE TO GOAL:::::::::")
                 print(":::::::::MOVE TO GOAL:::::::::")
                 if self.max_front > 600 :
-                    self.bot.set_left_motor_velocity(4)
-                    self.bot.set_right_motor_velocity(4)
+                    self.bot.set_left_motor_speed(4)
+                    self.bot.set_right_motor_speed(4)
                 else: 
                     post = self.detect_color_post()
                     if post:
@@ -276,8 +276,8 @@ class BUG0:
             #     print("/////////WALL FOLLOWING/////////")
             #     print("/////////WALL FOLLOWING/////////")
             #     if self.left_dist < 600:
-            #         self.bot.set_left_motor_velocity(4)
-            #         self.bot.set_right_motor_velocity(4)
+            #         self.bot.set_left_motor_speed(4)
+            #         self.bot.set_right_motor_speed(4)
             #         if self.front_dist_left < self.front_dist_right:
             #             self.stop_motors()
             #             self.turn_to_str(1, -1)
@@ -299,8 +299,8 @@ class BUG0:
             #     print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
             #     print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
             #     if self.front_dist> 250:
-            #         self.bot.set_left_motor_velocity(2)
-            #         self.bot.set_right_motor_velocity(2)
+            #         self.bot.set_left_motor_speed(2)
+            #         self.bot.set_right_motor_speed(2)
             #     else:
             #         self.state = 'check_in_goal'
             #         self.change_state('go close to check in goal')
@@ -314,8 +314,8 @@ class BUG0:
             #     print("~~~~~~~~~GO FAR~~~~~~~~~~")
             #     print("~~~~~~~~~GO FAR~~~~~~~~~~")
             #     if self.front_dist  < 250:
-            #         self.bot.set_left_motor_velocity(-2)
-            #         self.bot.set_right_motor_velocity(-2)
+            #         self.bot.set_left_motor_speed(-2)
+            #         self.bot.set_right_motor_speed(-2)
             #     else:
             
             #         self.state = 'check_in_goal'
@@ -334,8 +334,8 @@ class BUG0:
             elif self.state == 'end':
                 self.get_current_position()
                 print("----------END---------")
-                self.bot.set_left_motor_velocity(0)
-                self.bot.set_right_motor_velocity(0)
+                self.bot.set_left_motor_speed(0)
+                self.bot.set_right_motor_speed(0)
                 self.stop_motors()
                 break
                 
