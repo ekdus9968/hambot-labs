@@ -57,8 +57,11 @@ class BUG0:
         self.bot.get_range_image() 
 
     def stop_motors(self):
-        self.bot.set_left_motor_speed(0)
-        self.bot.set_right_motor_speed(0)
+        try:
+            self.bot.set_left_motor_speed(0)
+            self.bot.set_right_motor_speed(0)
+        except AttributeError:
+            print("Motor stop failed, method not found")
     # -------------------------------
     # GPS : get curr pos
     # -------------------------------
@@ -128,7 +131,7 @@ class BUG0:
         
         if self.lidar is None or len(self.lidar) < 360:
             print("LiDAR data missing")
-            return
+            self.lidar = [1000.0] * 360
 
         # distance from each anlge
         self.front_dist = np.nanmin(self.lidar[175:185])  
@@ -342,7 +345,8 @@ def main():
     """Main entry point"""
     try:
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
-        bot.camera.set_target_colors((255, 0, 200), tolerance=80)
+        bot.camera.set_target_colors([(255, 0, 200)], tolerance=80)  # 리스트 형태
+
         bot.lidar = bot.get_range_image()
         
         print("HamBot initialized and ready for wall following.")
