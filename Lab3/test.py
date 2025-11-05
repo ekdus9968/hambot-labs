@@ -62,8 +62,6 @@ class BUG0:
     #if state = 'turn: theta 만 구하기
     # else : 간 거리 구하기 
     def get_current_position(self):
-        if self.state == 'turn_to_goal':
-            return self.x, self.y
         left_enc, right_enc = self.bot.get_encoder_readings()
         delta_left = left_enc - self.prev_left_enc
         delta_right = right_enc - self.prev_right_enc
@@ -224,13 +222,11 @@ class BUG0:
                 print(":::::::::START STATE:::::::::")
                 print(":::::::::START STATE:::::::::")
                 print(":::::::::START STATE:::::::::")
-                self.change_state('start to turn to goal')
                 self.state = 'turn_to_goal'
                 self.change_state('start to turn to goal')
                 
             elif self.state == 'turn_to_goal':
                 self.read_lidar()
-                self.get_current_position()
                 print(":::::::::TURN TO GOAL:::::::::")
                 print(":::::::::TURN TO GOAL:::::::::")
                 print(":::::::::TURN TO GOAL:::::::::")
@@ -238,8 +234,8 @@ class BUG0:
                 print(":::::::::TURN TO GOAL:::::::::")
                 target_angle = self.calculate_goal_angle()
                 if self.turn_to_goal(target_angle):
-                    self.change_state('turn to move to goal')
                     self.state = 'move_to_goal'
+                    self.change_state('turn to move to goal')
                 
             elif self.state == 'move_to_goal':
                 self.read_lidar()
@@ -255,12 +251,14 @@ class BUG0:
                 else: 
                     post = self.detect_color_post()
                     if post:
+                        # self.state = 'go_close'
+                        self.state = 'end'
                         self.change_state('move to goal to go close')
-                        self.state = 'go_close'
                     else :
                         self.turn_to_goal(90)
+                        self.state = 'end'
+                        #self.state = 'wall_following'
                         self.change_state('move to goal to wall following')
-                        self.state = 'wall_following'
                 
             # elif self.state == 'wall_following':
             #     self.read_lidar()
@@ -281,8 +279,9 @@ class BUG0:
             #             self.turn_to_str(-1, 1)
                         
             #     else :
-            #         self.change_state('wall following to turn to goal')
+            
             #         self.state = 'turn_to_goal'
+            #         self.change_state('wall following to turn to goal')
                 
             # elif self.state == 'go_close':
             #     self.get_current_position()
@@ -296,8 +295,8 @@ class BUG0:
             #         self.bot.set_left_motor_velocity(2)
             #         self.bot.set_right_motor_velocity(2)
             #     else:
-            #         self.change_state('go close to check in goal')
             #         self.state = 'check_in_goal'
+            #         self.change_state('go close to check in goal')
                 
             # elif self.state == 'go_far':
             #     self.get_current_position()
@@ -311,8 +310,9 @@ class BUG0:
             #         self.bot.set_left_motor_velocity(-2)
             #         self.bot.set_right_motor_velocity(-2)
             #     else:
-            #         self.change_state('go far to check in goal')
+            
             #         self.state = 'check_in_goal'
+            #         self.change_state('go far to check in goal')
                 
             # elif self.state == 'check_in_goal':
             #     self.get_current_position()
@@ -324,13 +324,13 @@ class BUG0:
             #     print("-------CHECK IN GOAL---------")
             #     self.check_in_goal()
                 
-            # elif self.state == 'end':
-            #     self.get_current_position()
-            #     print("----------END---------")
-            #     self.bot.set_left_motor_velocity(0)
-            #     self.bot.set_right_motor_velocity(0)
-            #     self.stop_motors()
-            #     break
+            elif self.state == 'end':
+                self.get_current_position()
+                print("----------END---------")
+                self.bot.set_left_motor_velocity(0)
+                self.bot.set_right_motor_velocity(0)
+                self.stop_motors()
+                break
                 
 
 def main():
