@@ -189,8 +189,8 @@ class BUG0:
 
             elif self.state == 'move_to_goal':
                 if self.front_dist > 200:
-                    self.bot.set_left_motor_speed(0.5)
-                    self.bot.set_right_motor_speed(0.5)
+                    self.bot.set_left_motor_speed(3)
+                    self.bot.set_right_motor_speed(3)
                     print("[DEBUG] Moving forward")
                 else:
                     self.stop_motors()
