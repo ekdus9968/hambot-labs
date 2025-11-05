@@ -159,7 +159,7 @@ class BUG0:
             return True
         else:
             # HamBot 모터 범위 내 고정 속도
-            fixed_speed = 0.5
+            fixed_speed = 4
             self.bot.set_left_motor_speed(-fixed_speed)   # 왼쪽 모터 뒤
             self.bot.set_right_motor_speed(fixed_speed)   # 오른쪽 모터 앞으로
             return False
