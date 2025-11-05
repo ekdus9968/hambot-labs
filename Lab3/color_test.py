@@ -19,27 +19,28 @@ def main():
         print("Camera color test started. Press Ctrl+C to stop.")
         
         while True:
-            frame = bot.camera.get_image()
-            if frame is None:
-                continue
+            while True:
+                frame = bot.camera.get_frame()  # get_image() → get_frame() 변경
+                if frame is None:
+                    continue
 
-            H, W = frame.shape[:2]
+                H, W = frame.shape[:2]
 
-            # 지정 좌표 픽셀 값 확인
-            x = min(max(SAMPLE_X, 0), W-1)
-            y = min(max(SAMPLE_Y, 0), H-1)
-            pixel_color = frame[y, x]  # (R, G, B)
-            
-            # 목표색과 비교
-            r_diff = abs(int(pixel_color[0]) - TARGET_COLOR[0])
-            g_diff = abs(int(pixel_color[1]) - TARGET_COLOR[1])
-            b_diff = abs(int(pixel_color[2]) - TARGET_COLOR[2])
-            
-            within_tolerance = r_diff <= TOLERANCE and g_diff <= TOLERANCE and b_diff <= TOLERANCE
-            
-            print(f"Pixel ({x},{y}) RGB: {pixel_color}, Diff: (R:{r_diff}, G:{g_diff}, B:{b_diff}), Match: {within_tolerance}")
+                # 지정 좌표 픽셀 값 확인
+                x = min(max(SAMPLE_X, 0), W-1)
+                y = min(max(SAMPLE_Y, 0), H-1)
+                pixel_color = frame[y, x]  # (R, G, B)
+                
+                r_diff = abs(int(pixel_color[0]) - TARGET_COLOR[0])
+                g_diff = abs(int(pixel_color[1]) - TARGET_COLOR[1])
+                b_diff = abs(int(pixel_color[2]) - TARGET_COLOR[2])
+                
+                within_tolerance = r_diff <= TOLERANCE and g_diff <= TOLERANCE and b_diff <= TOLERANCE
+                
+                print(f"Pixel ({x},{y}) RGB: {pixel_color}, Diff: (R:{r_diff}, G:{g_diff}, B:{b_diff}), Match: {within_tolerance}")
 
-            time.sleep(0.2)  # 0.2초 간격
+                time.sleep(0.2)
+
 
     except KeyboardInterrupt:
         print("Test stopped by user.")
