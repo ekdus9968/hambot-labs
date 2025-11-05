@@ -44,9 +44,9 @@ class BUG0:
         
         # CAMERA
         self.cam = None
-        self.COLOR = (180, 150, 170)   # attempting to make yellow
-        self.COLOR_TOLERANCE  = 50
-        self.bot.camera.set_target_colors([self.COLOR], tolerance=self.COLOR_TOLERANCE)
+        self.COLOR = (255, 0, 200)   # 기존 목표 color
+        self.TOLERANCE = 80    
+        self.bot.camera.set_target_colors([self.COLOR], tolerance=self.TOLERANCE)
         self.bot.camera.find_landmarks()
 
         
