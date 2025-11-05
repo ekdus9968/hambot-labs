@@ -220,7 +220,6 @@ class BUG0:
                 print(":::::::::START STATE:::::::::")
                 print(":::::::::START STATE:::::::::")
                 print(":::::::::START STATE:::::::::")
-                self.dist_to_goal = self.calculate_distance_to_goal()
                 self.change_state('start to turn to goal')
                 self.state = 'turn_to_goal'
                 self.change_state('start to turn to goal')
