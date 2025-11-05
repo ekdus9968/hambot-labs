@@ -24,6 +24,7 @@ def detect_color_post(bot):
 def main():
     try:
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
+        bot.camera.set_target_colors([TARGET_COLOR], tolerance=TOLERANCE)
         
         time.sleep(1)  # 카메라 초기화 대기
 
