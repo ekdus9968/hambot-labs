@@ -44,9 +44,10 @@ class BUG0:
         
         # CAMERA
         self.cam = None
-        
         self.COLOR = (180, 150, 170)   # attempting to make yellow
         self.COLOR_TOLERANCE  = 50
+        
+        self.lidar = None
 
     def stop_motors(self):
         self.bot.set_left_motor_velocity(0)
@@ -119,22 +120,22 @@ class BUG0:
     def read_lidar(self):
         print("read_lidar()")
         
-        if lidar is None or len(lidar) < 360:
+        if self.lidar is None or len(self.lidar) < 360:
             print("LiDAR data missing")
             return
 
-        if lidar is None or len(lidar) < 360:
+        if self.lidar is None or len(self.lidar) < 360:
             print("LiDAR data missing")
             return
 
         # distance from each anlge
-        self.front_dist = np.nanmin(lidar[175:185])  
-        self.front_dist_right = np.nanmin(lidar[185:195])
-        self.front_dist_left = np.nanmin(lidar[165:175])
-        self.right_dist = np.nanmin(lidar[265:285])
-        self.left_dist = np.nanmin(lidar[85:95])
-        self.left_dist_front = np.nanmin(lidar[95:105])
-        self.left_dist_back = np.nanmin(lidar[75:85])
+        self.front_dist = np.nanmin(self.lidar[175:185])  
+        self.front_dist_right = np.nanmin(self.lidar[185:195])
+        self.front_dist_left = np.nanmin(self.lidar[165:175])
+        self.right_dist = np.nanmin(self.lidar[265:285])
+        self.left_dist = np.nanmin(self.lidar[85:95])
+        self.left_dist_front = np.nanmin(self.lidar[95:105])
+        self.left_dist_back = np.nanmin(self.lidar[75:85])
 
         # NaN
         for name in ["front_dist", "front_dist_right", "front_dist_left", "right_dist", "left_dist"]:
