@@ -1,12 +1,3 @@
-# 1m = 1000mm, 100cm = 1m
-# 60 cm = 600 mm 
-# get_image() -> np.ndarray | None 최신 RGB 프레임(모양 (H, W, 3)) 을 반환하거나 None아직 사용할 수 없는 경우 반환합니다.
-# Landmark(center=(x, y), width=w, height=h)
-# set_target_colors(colors, tolerance=0.05) 감지할 대상 색상을 하나 이상 설정합니다.
-# colors: (R, G, B)튜플 또는 튜플 목록(채널당 0~255)
-# tolerance: float은 [0, 1]각 채널 주변의 대칭적 ±허용 오차로 해석됩니다.
-#CHECK
-# stop_camera()
 import time
 import numpy as np
 import math
@@ -190,27 +181,30 @@ class BUG0:
     # Find the goal
     # -------------------------------
     #if cqmera see yellow 
-    def detect_yellow_post(self):
-        print("detect_yellow_post()")
-        posts = self.bot.camera.find_landmarks(YELLOW, tolerance=color_tolerance)
-        return bool(posts)
+    # def detect_yellow_post(self):
+    #     print("detect_yellow_post()")
+    #     posts = self.bot.camera.find_landmarks(YELLOW, tolerance=color_tolerance)
+    #     return bool(posts)
     
-    def check_in_goal(self):
-        print("check_in_goal()")
-        dist = self.front_dist 
-        if dist > 25:
-            self.change_state('check in goal to go close')
-            self.state = 'go_close'
-            return 
-        elif dist < 25 :
-            self.change_state('check in goal to go fat')
-            self.state = 'go_far'
-            return 
-        else :
-            self.change_state('check in goal to end')
-            self.state = 'end'
-            return
+    # def check_in_goal(self):
+    #     print("check_in_goal()")
+    #     dist = self.front_dist 
+    #     if dist > 25:
+    #         self.change_state('check in goal to go close')
+    #         self.state = 'go_close'
+    #         return 
+    #     elif dist < 25 :
+    #         self.change_state('check in goal to go fat')
+    #         self.state = 'go_far'
+    #         return 
+    #     else :
+    #         self.change_state('check in goal to end')
+    #         self.state = 'end'
+    #         return
         
+    # -------------------------------
+    # STATE
+    # -------------------------------
     def run_state(self):
         print("run_state()")
         self.get_current_position()
@@ -265,75 +259,75 @@ class BUG0:
                         self.change_state('move to goal to wall following')
                         self.state = 'wall_following'
                 
-            elif self.state == 'wall_following':
-                self.read_lidar()
-                self.get_current_position()
-                print("/////////WALL FOLLOWING/////////")
-                print("/////////WALL FOLLOWING/////////")
-                print("/////////WALL FOLLOWING/////////")
-                print("/////////WALL FOLLOWING/////////")
-                print("/////////WALL FOLLOWING/////////")
-                if self.left_dist < 600:
-                    self.bot.set_left_motor_velocity(4)
-                    self.bot.set_right_motor_velocity(4)
-                    if self.front_dist_left < self.front_dist_right:
-                        self.stop_motors()
-                        self.turn_to_str(1, -1)
-                    elif self.front_dist_left < self.front_dist_right:
-                        self.stop_motors()
-                        self.turn_to_str(-1, 1)
+            # elif self.state == 'wall_following':
+            #     self.read_lidar()
+            #     self.get_current_position()
+            #     print("/////////WALL FOLLOWING/////////")
+            #     print("/////////WALL FOLLOWING/////////")
+            #     print("/////////WALL FOLLOWING/////////")
+            #     print("/////////WALL FOLLOWING/////////")
+            #     print("/////////WALL FOLLOWING/////////")
+            #     if self.left_dist < 600:
+            #         self.bot.set_left_motor_velocity(4)
+            #         self.bot.set_right_motor_velocity(4)
+            #         if self.front_dist_left < self.front_dist_right:
+            #             self.stop_motors()
+            #             self.turn_to_str(1, -1)
+            #         elif self.front_dist_left < self.front_dist_right:
+            #             self.stop_motors()
+            #             self.turn_to_str(-1, 1)
                         
-                else :
-                    self.change_state('wall following to turn to goal')
-                    self.state = 'turn_to_goal'
+            #     else :
+            #         self.change_state('wall following to turn to goal')
+            #         self.state = 'turn_to_goal'
                 
-            elif self.state == 'go_close':
-                self.get_current_position()
-                self.read_lidar()
-                print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
-                print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
-                print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
-                print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
-                print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
-                if self.front_dist> 250:
-                    self.bot.set_left_motor_velocity(2)
-                    self.bot.set_right_motor_velocity(2)
-                else:
-                    self.change_state('go close to check in goal')
-                    self.state = 'check_in_goal'
+            # elif self.state == 'go_close':
+            #     self.get_current_position()
+            #     self.read_lidar()
+            #     print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
+            #     print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
+            #     print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
+            #     print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
+            #     print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
+            #     if self.front_dist> 250:
+            #         self.bot.set_left_motor_velocity(2)
+            #         self.bot.set_right_motor_velocity(2)
+            #     else:
+            #         self.change_state('go close to check in goal')
+            #         self.state = 'check_in_goal'
                 
-            elif self.state == 'go_far':
-                self.get_current_position()
-                self.read_lidar()
-                print("~~~~~~~~~GO FAR~~~~~~~~~~")
-                print("~~~~~~~~~GO FAR~~~~~~~~~~")
-                print("~~~~~~~~~GO FAR~~~~~~~~~~")
-                print("~~~~~~~~~GO FAR~~~~~~~~~~")
-                print("~~~~~~~~~GO FAR~~~~~~~~~~")
-                if self.front_dist  < 250:
-                    self.bot.set_left_motor_velocity(-2)
-                    self.bot.set_right_motor_velocity(-2)
-                else:
-                    self.change_state('go far to check in goal')
-                    self.state = 'check_in_goal'
+            # elif self.state == 'go_far':
+            #     self.get_current_position()
+            #     self.read_lidar()
+            #     print("~~~~~~~~~GO FAR~~~~~~~~~~")
+            #     print("~~~~~~~~~GO FAR~~~~~~~~~~")
+            #     print("~~~~~~~~~GO FAR~~~~~~~~~~")
+            #     print("~~~~~~~~~GO FAR~~~~~~~~~~")
+            #     print("~~~~~~~~~GO FAR~~~~~~~~~~")
+            #     if self.front_dist  < 250:
+            #         self.bot.set_left_motor_velocity(-2)
+            #         self.bot.set_right_motor_velocity(-2)
+            #     else:
+            #         self.change_state('go far to check in goal')
+            #         self.state = 'check_in_goal'
                 
-            elif self.state == 'check_in_goal':
-                self.get_current_position()
-                self.read_lidar()
-                print("-------CHECK IN GOAL---------")
-                print("-------CHECK IN GOAL---------")
-                print("-------CHECK IN GOAL---------")
-                print("-------CHECK IN GOAL---------")
-                print("-------CHECK IN GOAL---------")
-                self.check_in_goal()
+            # elif self.state == 'check_in_goal':
+            #     self.get_current_position()
+            #     self.read_lidar()
+            #     print("-------CHECK IN GOAL---------")
+            #     print("-------CHECK IN GOAL---------")
+            #     print("-------CHECK IN GOAL---------")
+            #     print("-------CHECK IN GOAL---------")
+            #     print("-------CHECK IN GOAL---------")
+            #     self.check_in_goal()
                 
-            elif self.state == 'end':
-                self.get_current_position()
-                print("----------END---------")
-                self.bot.set_left_motor_velocity(0)
-                self.bot.set_right_motor_velocity(0)
-                self.stop_motors()
-                break
+            # elif self.state == 'end':
+            #     self.get_current_position()
+            #     print("----------END---------")
+            #     self.bot.set_left_motor_velocity(0)
+            #     self.bot.set_right_motor_velocity(0)
+            #     self.stop_motors()
+            #     break
                 
 
 def main():
