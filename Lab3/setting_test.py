@@ -144,18 +144,21 @@ class BUG0:
     # -------------------------------
     def turn_to_goal(self, target_angle):
         current_heading = self.bot.get_heading()
-        # 항상 왼쪽으로 회전하도록 error 계산
-        error = (target_angle - current_heading + 360) % 360  # 0~360
-        if error == 0:
+        # 왼쪽 회전 고정: 현재에서 목표까지 반시계 방향 각도
+        error = (current_heading - target_angle + 360) % 360
+
+        print(f"[DEBUG] Turning left - Current: {current_heading:.2f}, Target: {target_angle:.2f}, Error: {error:.2f}")
+
+        if error < 3:  # 허용 오차
             self.stop_motors()
             return True
         else:
             speed = 2
-            # 왼쪽으로만 회전: 오른쪽이 앞으로, 왼쪽은 뒤로
+            # 왼쪽으로만 회전
             self.bot.set_left_motor_speed(-speed)
             self.bot.set_right_motor_speed(speed)
-            print(f"[DEBUG] Turning left - Current: {current_heading:.2f}, Target: {target_angle:.2f}, Error: {error:.2f}")
             return False
+
 
     # -------------------------------
     # Camera: detect landmarks
