@@ -344,6 +344,9 @@ def main():
     """Main entry point"""
     try:
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
+        bot.camera.set_target_colors((255, 0, 200), tolerance=80)
+        bot.lidar = bot.get_range_image()
+        
         print("HamBot initialized and ready for wall following.")
         # Create wall follower
         follower = BUG0(bot)
