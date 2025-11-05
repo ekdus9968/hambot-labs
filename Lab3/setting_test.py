@@ -202,9 +202,15 @@ class BUG0:
                 self.change_state('turn_to_goal')
 
             elif self.state == 'turn_to_goal':
-                goal_angle = self.calculate_goal_angle()
-                target_angle = (goal_angle - self.initial_heading) % 360
-                if self.turn_to_goal(target_angle):
+            # ← 여기가 핵심: 목표 각도 한 번만 계산
+                if not hasattr(self, 'turn_target_angle'):
+                    # 초기 목표 각도 계산 및 고정
+                    goal_angle = math.degrees(math.atan2(self.goal_y - self.y, self.goal_x - self.x)) % 360
+                    self.turn_target_angle = goal_angle
+                    print(f"[DEBUG] Fixed turn target_angle: {self.turn_target_angle:.2f}")
+
+                # 왼쪽 회전 전용 함수 호출
+                if self.turn_to_goal_left_only(self.turn_target_angle):
                     self.change_state('move_to_goal')
 
             elif self.state == 'move_to_goal':
