@@ -266,7 +266,7 @@ class BUG0:
                 self.bot.set_left_motor_speed(1.0)
                 self.bot.set_right_motor_speed(1.0)
                 if self.left_dist > 600:
-                    self.turn_to_goal()
+                    self.turn_to_goal(90)
                 elif self.left_dist_back < self.left_dist_front:
                     self.bot.set_left_motor_speed(1.25)
                     self.bot.set_right_motor_speed(1.5)
