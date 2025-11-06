@@ -277,8 +277,8 @@ class BUG0:
             elif self.state == 'go_close':
                 print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
                 if self.front_dist> 250:
-                    self.bot.set_left_motor_velocity(2) / self.count
-                    self.bot.set_right_motor_velocity(2) / self.count
+                    self.bot.set_left_motor_speed(2) / self.count
+                    self.bot.set_right_motor_speed(2) / self.count
                 else:
                     self.change_state('go close to check in goal')
                     self.state = 'check_in_goal'
@@ -286,8 +286,8 @@ class BUG0:
             elif self.state == 'go_far':
                 print("~~~~~~~~~GO FAR~~~~~~~~~~")
                 if self.front_dist  < 250:
-                    self.bot.set_left_motor_velocity(-2) / self.count
-                    self.bot.set_right_motor_velocity(-2) / self.count
+                    self.bot.set_left_motor_speed(-2) / self.count
+                    self.bot.set_right_motor_speed(-2) / self.count
                 else:
                     self.change_state('go far to check in goal')
                     self.state = 'check_in_goal'
@@ -310,8 +310,8 @@ class BUG0:
             elif self.state == 'end':
                 self.get_current_position()
                 print("----------END---------")
-                self.bot.set_left_motor_velocity(0)
-                self.bot.set_right_motor_velocity(0)
+                self.bot.set_left_motor_speed(0)
+                self.bot.set_right_motor_speed(0)
                 self.stop_motors()
                 break
             
