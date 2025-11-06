@@ -74,6 +74,9 @@ class BUG0:
         d = (delta_left + delta_right) / 2 * self.wheel_r
 
         # heading from IMU
+        if self.bot.get_heading() is None:
+            print("[DEBUG] Warning: current_heading is None, skipping turn")
+            return 
         theta = math.radians(self.bot.get_heading())
 
         # update position
