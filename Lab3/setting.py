@@ -292,16 +292,16 @@ class BUG0:
                         
 #*************************************
             elif self.state == 'wall_following':
-                self.bot.set_left_motor_speed(3.0)
-                self.bot.set_right_motor_speed(3.0)
+                self.bot.set_left_motor_speed(4.0)
+                self.bot.set_right_motor_speed(4.0)
                 if self.left_dist > 600:
                     self.turn_to_wall(90)
                 elif self.left_dist_back < self.left_dist_front:
-                    self.bot.set_left_motor_speed(2.25)
-                    self.bot.set_right_motor_speed(2.5)
+                    self.bot.set_left_motor_speed(3.0)
+                    self.bot.set_right_motor_speed(3.5)
                 elif self.left_dist_back > self.left_dist_front:
-                    self.bot.set_left_motor_speed(2.5)
-                    self.bot.set_right_motor_speed(2.25)
+                    self.bot.set_left_motor_speed(3.0)
+                    self.bot.set_right_motor_speed(3.5)
                 elif self.left_dist >1000:
                     self.turn_to_goal(50)
                     self.change_state('turn_to_goal')
@@ -310,7 +310,7 @@ class BUG0:
             elif self.state == 'go_close':
                 print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
                 if self.front_dist> 250:
-                    speed = 2.0 / self.count
+                    speed = 3.0 / self.count
                     self.bot.set_left_motor_speed(speed) 
                     self.bot.set_right_motor_speed(speed) 
                 else:
@@ -320,7 +320,7 @@ class BUG0:
             elif self.state == 'go_far':
                 print("~~~~~~~~~GO FAR~~~~~~~~~~")
                 if self.front_dist  < 250:
-                    speed = 2.0 / self.count
+                    speed = 3.0 / self.count
                     self.bot.set_left_motor_speed(-speed) 
                     self.bot.set_right_motor_speed(-speed)
                 else:
