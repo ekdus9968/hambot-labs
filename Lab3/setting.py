@@ -243,24 +243,29 @@ class BUG0:
                     self.bot.set_right_motor_speed(5)
                     print("[DEBUG] Moving forward")
                 else:
-                    self.stop_motors()
-                    self.change_state('wall_following')
-
-                if self.dist_to_goal < 600:
-                    self.change_state('end')
+                    if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+                        self.change_state('go_close')
+                    else:
+                        self.stop_motors()
+                        self.change_state('wall_following')
 
             elif self.state == 'wall_following':
-                if self.front_dist_left < self.front_dist_right:
-                    self.bot.set_left_motor_speed(2.5)
-                    self.bot.set_right_motor_speed(2.25)
-                elif self.right_dist > self.left_dist:
-                    self.bot.set_left_motor_speed(2.25)
-                    self.bot.set_right_motor_speed(2.5)
+                # self.bot.set_left_motor_speed(5)
+                # self.bot.set_right_motor_speed(5)
+                # if self.front_dist_left < self.front_dist_right:
+                #     self.bot.set_left_motor_speed(2.5)
+                #     self.bot.set_right_motor_speed(2.25)
+                # elif self.right_dist > self.left_dist:
+                #     self.bot.set_left_motor_speed(2.25)
+                #     self.bot.set_right_motor_speed(2.5)
 
-                if self.dist_to_goal < 250:
-                    self.change_state('end')
+                # if self.dist_to_goal < 250:
+                #     self.change_state('end')
+                print("Wall Folling")
+            elif self.state == 'go_close':
+                print("Go CLOSE")
 
-            time.sleep(0.05)
+            
 
         self.stop_motors()
         print("[DEBUG] Reached goal, stopping.")
