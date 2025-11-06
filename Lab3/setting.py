@@ -246,7 +246,7 @@ class BUG0:
                     self.stop_motors()
                     self.change_state('wall_following')
 
-                if self.dist_to_goal < 50:
+                if self.dist_to_goal < 600:
                     self.change_state('end')
 
             elif self.state == 'wall_following':
@@ -257,7 +257,7 @@ class BUG0:
                     self.bot.set_left_motor_speed(2.25)
                     self.bot.set_right_motor_speed(2.5)
 
-                if self.dist_to_goal < 50:
+                if self.dist_to_goal < 250:
                     self.change_state('end')
 
             time.sleep(0.05)
