@@ -283,13 +283,17 @@ class BUG0:
                     self.bot.set_left_motor_speed(5.0)
                     self.bot.set_right_motor_speed(5.0)
                     print("[DEBUG] Moving forward")
-                else:
+                    
+                elif self.front_dist <= 600:
+                    # 목표 색상 감지
                     if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
                         self.change_state('go_close')
-                    else:
-                        self.stop_motors()
-                        self.change_state('wall_following')
-                        
+                
+                elif self.front_dist <= 400 and self.detect_dist(target_color=self.COLOR, tolerance=self.TOLERANCE) is not None:
+                    self.stop_motors()
+                    self.change_state('wall_following')
+
+                                    
 #*************************************
             elif self.state == 'wall_following':
                 self.bot.set_left_motor_speed(4.0)
