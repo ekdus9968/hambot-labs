@@ -294,13 +294,13 @@ class BUG0:
                 if self.left_dist > 450:
                     self.turn_to_wall(90)
                 elif self.left_dist_back < self.left_dist_front:
-                    self.bot.set_left_motor_speed(3.0)
-                    self.bot.set_right_motor_speed(3.5)
-                elif self.left_dist_back > self.left_dist_front:
-                    self.bot.set_left_motor_speed(3.7)
+                    self.bot.set_left_motor_speed(3.5)
                     self.bot.set_right_motor_speed(3.0)
+                elif self.left_dist_back > self.left_dist_front:
+                    self.bot.set_left_motor_speed(3.0)
+                    self.bot.set_right_motor_speed(3.7)
                 elif self.left_dist >1000:
-                    self.turn_to_goal(10)
+                    self.turn_to_goal(355)
                     self.change_state('turn_to_goal')
                     
                 
