@@ -292,16 +292,16 @@ class BUG0:
                         
 #*************************************
             elif self.state == 'wall_following':
-                self.bot.set_left_motor_speed(1.0)
-                self.bot.set_right_motor_speed(1.0)
+                self.bot.set_left_motor_speed(3.0)
+                self.bot.set_right_motor_speed(3.0)
                 if self.left_dist > 600:
                     self.turn_to_wall(90)
                 elif self.left_dist_back < self.left_dist_front:
-                    self.bot.set_left_motor_speed(1.25)
-                    self.bot.set_right_motor_speed(1.5)
+                    self.bot.set_left_motor_speed(2.25)
+                    self.bot.set_right_motor_speed(2.5)
                 elif self.left_dist_back > self.left_dist_front:
-                    self.bot.set_left_motor_speed(1.5)
-                    self.bot.set_right_motor_speed(1.25)
+                    self.bot.set_left_motor_speed(2.5)
+                    self.bot.set_right_motor_speed(2.25)
                 elif self.left_dist >1000:
                     self.change_state('turn_to_goal')
                     
