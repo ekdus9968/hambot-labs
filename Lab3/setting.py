@@ -303,6 +303,7 @@ class BUG0:
                     self.bot.set_left_motor_speed(2.5)
                     self.bot.set_right_motor_speed(2.25)
                 elif self.left_dist >1000:
+                    self.turn_to_goal(50)
                     self.change_state('turn_to_goal')
                     
                 
