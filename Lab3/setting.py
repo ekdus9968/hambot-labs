@@ -43,7 +43,7 @@ class BUG0:
 
         # CAMERA
         self.COLOR = (255, 0, 200)
-        self.TOLERANCE = 120
+        self.TOLERANCE = 150
         self.frame = None
         self.bot.camera.set_target_colors([self.COLOR], tolerance=self.TOLERANCE)
 
@@ -271,7 +271,7 @@ class BUG0:
                 self.change_state('turn_to_goal')
 
             elif self.state == 'turn_to_goal':
-                
+                self.detect_landmark()
                 if self.turn_to_goal(self.goal_angle):
                     self.change_state('move_to_goal')
                 elif self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
@@ -303,7 +303,7 @@ class BUG0:
                     self.bot.set_left_motor_speed(3.0)
                     self.bot.set_right_motor_speed(3.5)
                 elif self.left_dist >1000:
-                    self.turn_to_goal(20)
+                    self.turn_to_goal(10)
                     self.change_state('turn_to_goal')
                     
                 
