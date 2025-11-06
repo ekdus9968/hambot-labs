@@ -70,7 +70,7 @@ class BUG0:
             elif self.state == 'find':
                 if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
                     print("[DEBUG] Target landmark detected!")
-                    self.change_state('move_to_goal')
+                    
                 else:
                     print("[DEBUG] Keep searching...")
 
