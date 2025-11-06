@@ -20,6 +20,8 @@ class BUG0:
         # ROBOT PARAMETERS
         self.wheel_r = 45.0    # mm
         self.wheel_d = 92.0    # mm
+        self.bot.set_left_motor_speed(0.0)
+        self.bot.set_right_motor_speed(0.0)
         
         # DISTANCE
         self.front_dist = 666.0
@@ -49,15 +51,15 @@ class BUG0:
         self.initial_heading = self.bot.get_heading()
         print(f"[DEBUG] Initial heading: {self.initial_heading:.2f}°")
         
-        self.count = 1
+        self.count = 1.0
 
     # -------------------------------
     # Motor control
     # -------------------------------
     def stop_motors(self):
         try:
-            self.bot.set_left_motor_speed(0)
-            self.bot.set_right_motor_speed(0)
+            self.bot.set_left_motor_speed(0.0)
+            self.bot.set_right_motor_speed(0.0)
             print("[DEBUG] Motors stopped")
         except AttributeError:
             print("[DEBUG] Motor stop failed")
@@ -162,13 +164,13 @@ class BUG0:
         print(f"[DEBUG] Turning left only - Current: {current_heading:.2f}, Target: {target_angle:.2f}, Error: {error:.2f}")
 
         if error < 3:  # ±3° 안이면 멈춤
-            self.bot.set_left_motor_speed(0)
-            self.bot.set_right_motor_speed(0)
+            self.bot.set_left_motor_speed(0.0)
+            self.bot.set_right_motor_speed(0.0)
             print("[DEBUG] Reached target heading, motors stopped")
             return True
         else:
             # HamBot 모터 범위 내 고정 속도
-            fixed_speed = 4
+            fixed_speed = 4.0
             self.bot.set_left_motor_speed(-fixed_speed)   # 왼쪽 모터 뒤
             self.bot.set_right_motor_speed(fixed_speed)   # 오른쪽 모터 앞으로
             return False
@@ -248,8 +250,8 @@ class BUG0:
 
             elif self.state == 'move_to_goal':
                 if self.front_dist > 600:
-                    self.bot.set_left_motor_speed(5)
-                    self.bot.set_right_motor_speed(5)
+                    self.bot.set_left_motor_speed(5.0)
+                    self.bot.set_right_motor_speed(5.0)
                     print("[DEBUG] Moving forward")
                 else:
                     if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
@@ -260,8 +262,8 @@ class BUG0:
                         self.change_state('end')
 
             # elif self.state == 'wall_following':
-            #     # self.bot.set_left_motor_speed(5)
-            #     # self.bot.set_right_motor_speed(5)
+            #     # self.bot.set_left_motor_speed(5.0)
+            #     # self.bot.set_right_motor_speed(5.0)
             #     # if self.front_dist_left < self.front_dist_right:
             #     #     self.bot.set_left_motor_speed(2.5)
             #     #     self.bot.set_right_motor_speed(2.25)
@@ -277,8 +279,8 @@ class BUG0:
             elif self.state == 'go_close':
                 print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
                 if self.front_dist> 250:
-                    self.bot.set_left_motor_speed(2) / self.count
-                    self.bot.set_right_motor_speed(2) / self.count
+                    self.bot.set_left_motor_speed(2.0) / self.count
+                    self.bot.set_right_motor_speed(2.0) / self.count
                 else:
                     self.change_state('go close to check in goal')
                     self.state = 'check_in_goal'
@@ -286,14 +288,14 @@ class BUG0:
             elif self.state == 'go_far':
                 print("~~~~~~~~~GO FAR~~~~~~~~~~")
                 if self.front_dist  < 250:
-                    self.bot.set_left_motor_speed(-2) / self.count
-                    self.bot.set_right_motor_speed(-2) / self.count
+                    self.bot.set_left_motor_speed(-2.0) / self.count
+                    self.bot.set_right_motor_speed(-2.0) / self.count
                 else:
                     self.change_state('go far to check in goal')
                     self.state = 'check_in_goal'
                 
             elif self.state == 'check_in_goal':
-                self.count += 1
+                self.count += 1.0
                 print("-------CHECK IN GOAL---------")
                 if self.front_dist > 500:
                     self.change_state('go close')
