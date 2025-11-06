@@ -42,7 +42,7 @@ class BUG0:
         self.prev_right_enc = right
 
         # CAMERA
-        self.COLOR = (255, 120, 200)
+        self.COLOR = (255, 20, 200)
         self.TOLERANCE = 120
         self.frame = None
         self.bot.camera.set_target_colors([self.COLOR], tolerance=self.TOLERANCE)
@@ -361,7 +361,7 @@ def main():
     try:
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
         TARGET_COLOR = (255, 0, 200)
-        TOLERANCE = 80
+        TOLERANCE = 30
         bot.camera.set_target_colors([TARGET_COLOR], tolerance=TOLERANCE)
         
         follower = BUG0(bot)
