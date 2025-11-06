@@ -41,7 +41,7 @@ class BUG0:
 
         # CAMERA
         self.COLOR = (255, 0, 200)
-        self.TOLERANCE = 80
+        self.TOLERANCE = 120
         self.frame = None
         self.bot.camera.set_target_colors([self.COLOR], tolerance=self.TOLERANCE)
 
