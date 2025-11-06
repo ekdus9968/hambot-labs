@@ -299,10 +299,10 @@ class BUG0:
             elif self.state == 'check_in_goal':
                 self.count += 1.0
                 print("-------CHECK IN GOAL---------")
-                if self.front_dist > 500:
+                if self.front_dist > 275:
                     self.change_state('go close')
                     self.state = 'go_close'
-                elif self.front_dist < 500:
+                elif self.front_dist < 225:
                     self.change_state('go far')
                     self.state = 'go_far'
                 else:
