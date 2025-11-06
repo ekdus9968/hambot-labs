@@ -42,7 +42,7 @@ class BUG0:
         self.prev_right_enc = right
 
         # CAMERA
-        self.COLOR = (255, 0, 200)
+        self.COLOR = (255, 20, 200)
         self.TOLERANCE = 120
         self.frame = None
         self.bot.camera.set_target_colors([self.COLOR], tolerance=self.TOLERANCE)
@@ -208,7 +208,7 @@ class BUG0:
 # -------------------------------
     # Detect landmarks with target color
     # -------------------------------
-    def detect_landmark(self, target_color=(255,0,200), tolerance=120):
+    def detect_landmark(self, target_color=(255,20,200), tolerance=120):
         """
         랜드마크를 찾고, 그 위치의 색상이 target_color 범위 내이면 True 반환.
         """
@@ -359,7 +359,7 @@ class BUG0:
 def main():
     try:
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
-        TARGET_COLOR = (255, 0, 200)
+        TARGET_COLOR = (255, 20, 200)
         TOLERANCE = 120
         bot.camera.set_target_colors([TARGET_COLOR], tolerance=TOLERANCE)
         
