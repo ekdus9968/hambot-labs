@@ -189,8 +189,8 @@ class BUG0:
 
             elif self.state == 'move_to_goal':
                 if self.front_dist > 600:
-                    self.bot.set_left_motor_speed(3)
-                    self.bot.set_right_motor_speed(3)
+                    self.bot.set_left_motor_speed(5)
+                    self.bot.set_right_motor_speed(5)
                     print("[DEBUG] Moving forward")
                 else:
                     self.stop_motors()
@@ -200,12 +200,12 @@ class BUG0:
                     self.change_state('end')
 
             elif self.state == 'wall_following':
-                if self.right_dist > 200:
-                    self.bot.set_left_motor_speed(0.5)
-                    self.bot.set_right_motor_speed(0.25)
-                else:
-                    self.bot.set_left_motor_speed(0.25)
-                    self.bot.set_right_motor_speed(0.5)
+                if self.front_dist_left < self.front_dist_right:
+                    self.bot.set_left_motor_speed(2.5)
+                    self.bot.set_right_motor_speed(2.25)
+                elif self.right_dist > self.left_dist:
+                    self.bot.set_left_motor_speed(2.25)
+                    self.bot.set_right_motor_speed(2.5)
 
                 if self.dist_to_goal < 50:
                     self.change_state('end')
