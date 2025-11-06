@@ -231,7 +231,9 @@ class BUG0:
 
             elif self.state == 'turn_to_goal':
                 
-                if self.turn_to_goal(self.goal_angle) or self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+                if self.turn_to_goal(self.goal_angle):
+                    self.change_state('move_to_goal')
+                elif self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
                     self.change_state('move_to_goal')
                 
 
