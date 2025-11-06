@@ -136,15 +136,14 @@ class BUG0:
         self.front_dist_left = np.nanmin(self.lidar[165:175])
         self.right_dist = np.nanmin(self.lidar[265:285])
         self.left_dist = np.nanmin(self.lidar[85:95])
-        self.left_dist_front = np.nanmin(self.lidar[75:85])
-        self.left_dist_back = np.nanmin(self.lidar[95:105])
+
         # Handle invalid readings
         for name in ["front_dist", "front_dist_right", "front_dist_left", "right_dist", "left_dist"]:
             val = getattr(self, name)
             if np.isinf(val) or np.isnan(val) or val < 0.05:
                 setattr(self, name, 666.666)
 
-        
+        self.max_front = max(self.front_dist, self.front_dist_left, self.front_dist_right)
         print(f"[DEBUG] LiDAR - Front: {self.front_dist:.1f}, Left: {self.left_dist:.1f}, Right: {self.right_dist:.1f}")
 
     # -------------------------------
@@ -259,23 +258,23 @@ class BUG0:
                         self.change_state('go_close')
                     else:
                         self.stop_motors()
-                        self.change_state('wall_following')
-                        
-#*************************************
-            elif self.state == 'wall_following':
-                self.bot.set_left_motor_speed(1.0)
-                self.bot.set_right_motor_speed(1.0)
-                if self.left_dist > 600:
-                    self.turn_to_goal()
-                elif self.left_dist_back < self.left_dist_front:
-                    self.bot.set_left_motor_speed(1.25)
-                    self.bot.set_right_motor_speed(1.5)
-                elif self.left_dist_back > self.left_dist_front:
-                    self.bot.set_left_motor_speed(1.5)
-                    self.bot.set_right_motor_speed(1.25)
-                elif self.left_dist >1000:
-                    self.change_state('turn_to_goal')
-                    
+                        #********self.change_state('wall_following')
+                        self.change_state('end')
+
+            # elif self.state == 'wall_following':
+            #     # self.bot.set_left_motor_speed(5.0)
+            #     # self.bot.set_right_motor_speed(5.0)
+            #     # if self.front_dist_left < self.front_dist_right:
+            #     #     self.bot.set_left_motor_speed(2.5)
+            #     #     self.bot.set_right_motor_speed(2.25)
+            #     # elif self.right_dist > self.left_dist:
+            #     #     self.bot.set_left_motor_speed(2.25)
+            #     #     self.bot.set_right_motor_speed(2.5)
+
+            #     # if self.dist_to_goal < 250:
+            #     #     self.change_state('end')
+            #     print("Wall Folling")
+            #     break
                 
             elif self.state == 'go_close':
                 print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
