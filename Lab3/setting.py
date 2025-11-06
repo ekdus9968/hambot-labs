@@ -279,7 +279,7 @@ class BUG0:
                 
 
             elif self.state == 'move_to_goal':
-                if self.front_dist > 400:
+                if self.front_dist > 500:
                     self.bot.set_left_motor_speed(5.0)
                     self.bot.set_right_motor_speed(5.0)
                     print("[DEBUG] Moving forward")
@@ -294,7 +294,7 @@ class BUG0:
             elif self.state == 'wall_following':
                 self.bot.set_left_motor_speed(4.0)
                 self.bot.set_right_motor_speed(4.0)
-                if self.left_dist > 400:
+                if self.left_dist > 500:
                     self.turn_to_wall(90)
                 elif self.left_dist_back < self.left_dist_front:
                     self.bot.set_left_motor_speed(3.0)
