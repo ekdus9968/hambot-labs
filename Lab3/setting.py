@@ -279,13 +279,10 @@ class BUG0:
                 
 
             elif self.state == 'move_to_goal':
-                if self.front_dist > 600:
-                    self.bot.set_left_motor_speed(5.0)
-                    self.bot.set_right_motor_speed(5.0)
-                    print("[DEBUG] Moving forward")
-                elif self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+                self.bot.set_left_motor_speed(5.0)
+                self.bot.set_right_motor_speed(5.0)
+                if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
                     self.change_state('go_close')
-                    
                 elif self.front_dist < 400:
                         self.stop_motors()
                         self.change_state('wall_following')
@@ -300,8 +297,8 @@ class BUG0:
                     self.bot.set_left_motor_speed(3.0)
                     self.bot.set_right_motor_speed(3.5)
                 elif self.left_dist_back > self.left_dist_front:
-                    self.bot.set_left_motor_speed(3.0)
-                    self.bot.set_right_motor_speed(3.5)
+                    self.bot.set_left_motor_speed(3.7)
+                    self.bot.set_right_motor_speed(3.0)
                 elif self.left_dist >1000:
                     self.turn_to_goal(10)
                     self.change_state('turn_to_goal')
