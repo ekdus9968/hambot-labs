@@ -242,9 +242,11 @@ class BUG0:
 
             if within_tolerance:
                 print(f"[DEBUG] Landmark with target color found at ({x},{y}) RGB: {pixel_color}")
+                print("FIND FIND FIND FINF FIND")
                 return True
             else:
                 print(f"[DEBUG] Landmark found but color does not match at ({x},{y}) RGB: {pixel_color}")
+                print("NOOOOOOOOOOOOOOOO")
                 return False
 
         except Exception as e:
