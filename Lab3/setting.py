@@ -198,7 +198,7 @@ class BUG0:
             self.bot.set_right_motor_speed(0.0)
             print("[DEBUG] Reached Wall heading, motors stopped")
             return True
-        elif self.left_dist > 450:
+        elif self.left_dist < 450:
             self.bot.set_left_motor_speed(0.0)
             self.bot.set_right_motor_speed(0.0)
             print("[DEBUG] Reached Wall heading, motors stopped")
