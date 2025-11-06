@@ -247,24 +247,63 @@ class BUG0:
                         self.change_state('go_close')
                     else:
                         self.stop_motors()
-                        self.change_state('wall_following')
+                        #********self.change_state('wall_following')
+                        self.change_state('end')
 
-            elif self.state == 'wall_following':
-                # self.bot.set_left_motor_speed(5)
-                # self.bot.set_right_motor_speed(5)
-                # if self.front_dist_left < self.front_dist_right:
-                #     self.bot.set_left_motor_speed(2.5)
-                #     self.bot.set_right_motor_speed(2.25)
-                # elif self.right_dist > self.left_dist:
-                #     self.bot.set_left_motor_speed(2.25)
-                #     self.bot.set_right_motor_speed(2.5)
+            # elif self.state == 'wall_following':
+            #     # self.bot.set_left_motor_speed(5)
+            #     # self.bot.set_right_motor_speed(5)
+            #     # if self.front_dist_left < self.front_dist_right:
+            #     #     self.bot.set_left_motor_speed(2.5)
+            #     #     self.bot.set_right_motor_speed(2.25)
+            #     # elif self.right_dist > self.left_dist:
+            #     #     self.bot.set_left_motor_speed(2.25)
+            #     #     self.bot.set_right_motor_speed(2.5)
 
-                # if self.dist_to_goal < 250:
-                #     self.change_state('end')
-                print("Wall Folling")
+            #     # if self.dist_to_goal < 250:
+            #     #     self.change_state('end')
+            #     print("Wall Folling")
+            #     break
+                
             elif self.state == 'go_close':
-                print("Go CLOSE")
-
+                print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
+                if self.front_dist> 250:
+                    self.bot.set_left_motor_velocity(2)
+                    self.bot.set_right_motor_velocity(2)
+                else:
+                    self.change_state('go close to check in goal')
+                    self.state = 'check_in_goal'
+                
+            elif self.state == 'go_far':
+                print("~~~~~~~~~GO FAR~~~~~~~~~~")
+                if self.front_dist  < 250:
+                    self.bot.set_left_motor_velocity(-2)
+                    self.bot.set_right_motor_velocity(-2)
+                else:
+                    self.change_state('go far to check in goal')
+                    self.state = 'check_in_goal'
+                
+            elif self.state == 'check_in_goal':
+                print("-------CHECK IN GOAL---------")
+                if self.front_dist > 500:
+                    self.change_state('go close')
+                    self.state = 'go_close'
+                elif self.front_dist < 500:
+                    self.change_state('go far')
+                    self.state = 'go_far'
+                else:
+                    self.change_state('end')
+                    self.state = 'end'
+                    
+                
+                
+            elif self.state == 'end':
+                self.get_current_position()
+                print("----------END---------")
+                self.bot.set_left_motor_velocity(0)
+                self.bot.set_right_motor_velocity(0)
+                self.stop_motors()
+                break
             
 
         self.stop_motors()
