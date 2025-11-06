@@ -11,8 +11,8 @@ class BUG0:
         self.bot.camera.set_target_colors([self.COLOR], tolerance=self.TOLERANCE)
 
     # -------------------------------
-# Detect landmarks with target color
-# -------------------------------
+    # Detect landmarks with target color
+    # -------------------------------
     def detect_landmark(self, target_color=(255,0,200), tolerance=80):
         """
         랜드마크를 찾고, 그 위치의 색상이 target_color 범위 내이면 True 반환.

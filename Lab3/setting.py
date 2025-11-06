@@ -164,6 +164,52 @@ class BUG0:
             self.bot.set_right_motor_speed(fixed_speed)   # 오른쪽 모터 앞으로
             return False
 
+# -------------------------------
+    # Detect landmarks with target color
+    # -------------------------------
+    def detect_landmark(self, target_color=(255,0,200), tolerance=80):
+        """
+        랜드마크를 찾고, 그 위치의 색상이 target_color 범위 내이면 True 반환.
+        """
+        try:
+            # find_landmarks()는 Landmark 객체 리스트를 반환
+            landmarks = self.bot.camera.find_landmarks()
+            if not landmarks:
+                print("[DEBUG] No landmarks found")
+                return False
+
+            # 첫 번째 Landmark 객체 사용
+            landmark = landmarks[0]
+            x, y = landmark.x, landmark.y  # Landmark 속성 사용
+
+            # 카메라 프레임 가져오기
+            frame = self.bot.camera.get_frame()
+            if frame is None:
+                print("[DEBUG] Camera frame not available")
+                return False
+
+            H, W = frame.shape[:2]
+            x = min(max(0, int(x)), W-1)
+            y = min(max(0, int(y)), H-1)
+
+            pixel_color = frame[y, x]  # (R,G,B)
+            r_diff = abs(int(pixel_color[0]) - target_color[0])
+            g_diff = abs(int(pixel_color[1]) - target_color[1])
+            b_diff = abs(int(pixel_color[2]) - target_color[2])
+
+            within_tolerance = r_diff <= tolerance and g_diff <= tolerance and b_diff <= tolerance
+
+            if within_tolerance:
+                print(f"[DEBUG] Landmark with target color found at ({x},{y}) RGB: {pixel_color}")
+                return True
+            else:
+                print(f"[DEBUG] Landmark found but color does not match at ({x},{y}) RGB: {pixel_color}")
+                return False
+
+        except Exception as e:
+            print(f"[DEBUG] Error in detect_landmark_color: {e}")
+            return False
+
     # -------------------------------
     # Main state machine
     # -------------------------------
@@ -184,8 +230,10 @@ class BUG0:
                 self.change_state('turn_to_goal')
 
             elif self.state == 'turn_to_goal':
-                if self.turn_to_goal(self.goal_angle):
+                
+                if self.turn_to_goal(self.goal_angle) or self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
                     self.change_state('move_to_goal')
+                
 
             elif self.state == 'move_to_goal':
                 if self.front_dist > 600:
@@ -221,8 +269,10 @@ class BUG0:
 def main():
     try:
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
-        bot.camera.set_target_colors([(255, 0, 200)], tolerance=80)
-
+        TARGET_COLOR = (255, 0, 200)
+        TOLERANCE = 80
+        bot.camera.set_target_colors([TARGET_COLOR], tolerance=TOLERANCE)
+        
         follower = BUG0(bot)
         follower.run_state()
 
