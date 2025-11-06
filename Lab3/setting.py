@@ -148,7 +148,7 @@ class BUG0:
         print(f"[DEBUG] LiDAR - Front: {self.front_dist:.1f}, Left: {self.left_dist:.1f}, Right: {self.right_dist:.1f}")
 
     # -------------------------------
-    # Turn to goal - 왼쪽(반시계) 고정 속도 회전
+    # Turn to goal LEFT ONLY
     # -------------------------------
     def turn_to_goal(self, target_angle):
         current_heading = self.bot.get_heading()
@@ -174,6 +174,35 @@ class BUG0:
             fixed_speed = 4.0
             self.bot.set_left_motor_speed(-fixed_speed)   # 왼쪽 모터 뒤
             self.bot.set_right_motor_speed(fixed_speed)   # 오른쪽 모터 앞으로
+            return False
+        
+    # -------------------------------
+    # Turn to Wall
+    # -------------------------------
+    def turn_to_wall(self, target_angle):
+        current_heading = self.bot.get_heading()
+        
+        if current_heading is None:
+            print("[DEBUG] Warning: current_heading is None, skipping turn")
+            return False
+
+        # 
+        error = abs((current_heading - target_angle + 360) -180 )
+        # if error > 180:
+        #     error = 360 - error  # 항상 최소 각도
+
+        print(f"[DEBUG] Turning left only - Current: {current_heading:.2f}, Target: {target_angle:.2f}, Error: {error:.2f}")
+
+        if error < 3:  # ±3° 안이면 멈춤
+            self.bot.set_left_motor_speed(0.0)
+            self.bot.set_right_motor_speed(0.0)
+            print("[DEBUG] Reached target heading, motors stopped")
+            return True
+        else:
+            # HamBot 모터 범위 내 고정 속도
+            fixed_speed = 4.0
+            self.bot.set_left_motor_speed(fixed_speed)   # 왼쪽 모터 뒤
+            self.bot.set_right_motor_speed(-fixed_speed)   # 오른쪽 모터 앞으로
             return False
 
 # -------------------------------
@@ -266,7 +295,7 @@ class BUG0:
                 self.bot.set_left_motor_speed(1.0)
                 self.bot.set_right_motor_speed(1.0)
                 if self.left_dist > 600:
-                    self.turn_to_goal(90)
+                    self.turn_to_wall(90)
                 elif self.left_dist_back < self.left_dist_front:
                     self.bot.set_left_motor_speed(1.25)
                     self.bot.set_right_motor_speed(1.5)
