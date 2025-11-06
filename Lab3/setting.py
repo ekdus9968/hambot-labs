@@ -63,70 +63,27 @@ class BUG0:
                 else:
                     print("[DEBUG] Keep searching...")
             
-
-
-    
-    # -------------------------------
-    # Main state machine
-    # -------------------------------
-    def run_state(self):
-        
-        self.change_state('start')
-
-        # goal angle 한 번만 계산
-        self.goal_angle = self.calculate_goal_angle()
-
-        while self.state != 'end':
             
-            self.read_lidar()
 
-            print(f"[DEBUG] Current state: {self.state}")
-
-            if self.state == 'start':
-                self.update_position_and_distance()
-                self.change_state('turn_to_goal')
-
-            elif self.state == 'turn_to_goal':
-                if self.turn_to_goal(self.goal_angle):
-                    self.change_state('move_to_goal')
-#********************************그리고 애초에 계속 찾아가야함+ 찾으러 가면서도 오왼오왼 맞추기 
-            elif self.state == 'move_to_goal':
-                self.update_position_and_distance()
-                if self.front_dist > 600 :
-                    self.bot.set_left_motor_speed(3)
-                    self.bot.set_right_motor_speed(3)
-                    print("[DEBUG] Moving forward")
-                else:
-                    self.stop_motors()
-                    self.change_state('wall_following')
-
-                if self.dist_to_goal < 50:
-                    self.change_state('end')
-
-
-            time.sleep(0.05)
-
-        self.stop_motors()
-        print("[DEBUG] Reached goal, stopping.")
-
-# -------------------------------
-# Main
-# -------------------------------
 def main():
+    """Main entry point"""
     try:
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
-        bot.camera.set_target_colors([(255, 0, 200)], tolerance=80)
-
+        print("HamBot initialized and ready for wall following.")
+        # Create wall follower
         follower = BUG0(bot)
+        
+        # Follow wall for 20 seconds
         follower.run_state()
         
-
+        # Cleanup
+        follower.stop()
+        
     except Exception as e:
-        print(f"[DEBUG] Error: {e}")
+        print(f"Error: {e}")
         import traceback
         traceback.print_exc()
 
 
 if __name__ == "__main__":
     main()
-#back up
