@@ -258,7 +258,7 @@ class BUG0:
     # -------------------------------
     def run_state(self):
         self.update_position_and_distance()
-        self.change_state('start')
+        self.change_state('move_to_goal')
 
         # goal angle 한 번만 계산
         self.goal_angle = self.calculate_goal_angle()
@@ -287,7 +287,7 @@ class BUG0:
                     self.change_state('go_close')
                 elif self.front_dist < 400:
                         self.stop_motors()
-                        self.change_state('wall_following')
+                        self.change_state('end')
                         
 #*************************************
             elif self.state == 'wall_following':
@@ -364,7 +364,7 @@ def main():
         bot.camera.set_target_colors([TARGET_COLOR], tolerance=TOLERANCE)
         
         follower = BUG0(bot)
-        follower.detect_landmark()
+        follower.run_state()
 
     except Exception as e:
         print(f"[DEBUG] Error: {e}")
