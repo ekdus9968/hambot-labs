@@ -22,11 +22,11 @@ class BUG0:
         self.wheel_d = 92.0    # mm
         
         # DISTANCE
-        self.front_dist = 6.66666
-        self.front_dist_right = 6.66666
-        self.front_dist_left = 6.66666
-        self.right_dist = 6.66666
-        self.left_dist = 6.66666
+        self.front_dist = 666.0
+        self.front_dist_right = 666.0
+        self.front_dist_left = 666.0
+        self.right_dist = 666.0
+        self.left_dist = 666.0
         self.max_front = 0.0
 
         # ROBOT POSITION
@@ -44,8 +44,6 @@ class BUG0:
         self.TOLERANCE = 80
         self.frame = None
         self.bot.camera.set_target_colors([self.COLOR], tolerance=self.TOLERANCE)
-        self.landmarks = None
-        self.bot.camera.find_landmarks()
 
         # IMU initial heading
         self.initial_heading = self.bot.get_heading()
@@ -165,56 +163,7 @@ class BUG0:
             self.bot.set_left_motor_speed(-fixed_speed)   # 왼쪽 모터 뒤
             self.bot.set_right_motor_speed(fixed_speed)   # 오른쪽 모터 앞으로
             return False
-        
-    # -------------------------------
-    # FIND the Obj
-    # -------------------------------
-    # -------------------------------
-    # Detect landmarks
-    # -------------------------------
-    def detect_landmark(bot, target_color=(255,0,200), tolerance=80):
-        """
-        랜드마크를 찾고, 그 위치의 색상이 target_color 범위 내이면 True 반환.
-        """
-        try:
-            landmarks = bot.camera.find_landmarks()
-            if not landmarks:
-                print("[DEBUG] No landmarks found")
-                return False
 
-            # 첫 번째 랜드마크 위치 사용 (x, y 픽셀 좌표)
-            x, y = landmarks[0][:2]  # find_landmarks()가 (x, y, ...) 반환한다고 가정
-
-            frame = bot.camera.get_frame()
-            if frame is None:
-                print("[DEBUG] Camera frame not available")
-                return False
-
-            H, W = frame.shape[:2]
-            x = min(max(0, int(x)), W-1)
-            y = min(max(0, int(y)), H-1)
-
-            pixel_color = frame[y, x]  # (R,G,B)
-            r_diff = abs(int(pixel_color[0]) - target_color[0])
-            g_diff = abs(int(pixel_color[1]) - target_color[1])
-            b_diff = abs(int(pixel_color[2]) - target_color[2])
-
-            within_tolerance = r_diff <= tolerance and g_diff <= tolerance and b_diff <= tolerance
-
-            if within_tolerance:
-                print(f"[DEBUG] Landmark with target color found at ({x},{y}) RGB: {pixel_color}")
-                return True
-            else:
-                print(f"[DEBUG] Landmark found but color does not match at ({x},{y}) RGB: {pixel_color}")
-                return False
-
-        except Exception as e:
-            print(f"[DEBUG] Error in detect_landmark_color: {e}")
-            return False
-
-
-    
-    
     # -------------------------------
     # Main state machine
     # -------------------------------
@@ -238,7 +187,7 @@ class BUG0:
             elif self.state == 'turn_to_goal':
                 if self.turn_to_goal(self.goal_angle):
                     self.change_state('move_to_goal')
-#********************************그리고 애초에 계속 찾아가야함+ 찾으러 가면서도 오왼오왼 맞추기 
+
             elif self.state == 'move_to_goal':
                 self.update_position_and_distance()
                 if self.front_dist > 600 :
@@ -252,6 +201,18 @@ class BUG0:
                 if self.dist_to_goal < 50:
                     self.change_state('end')
 
+            elif self.state == 'wall_following':
+                self.update_position_and_distance()
+                if self.right_dist > 200:
+                    self.bot.set_left_motor_speed(0.5)
+                    self.bot.set_right_motor_speed(0.25)
+                else:
+                    self.bot.set_left_motor_speed(0.25)
+                    self.bot.set_right_motor_speed(0.5)
+
+                if self.dist_to_goal < 50:
+                    self.update_position_and_distance()
+                    self.change_state('end')
 
             time.sleep(0.05)
 
@@ -267,8 +228,7 @@ def main():
         bot.camera.set_target_colors([(255, 0, 200)], tolerance=80)
 
         follower = BUG0(bot)
-        #follower.run_state()
-        follower.detect_landmark
+        follower.run_state()
 
     except Exception as e:
         print(f"[DEBUG] Error: {e}")
