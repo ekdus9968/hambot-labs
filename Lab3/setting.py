@@ -196,8 +196,14 @@ class BUG0:
         if error < 3:  # ±3° 안이면 멈춤
             self.bot.set_left_motor_speed(0.0)
             self.bot.set_right_motor_speed(0.0)
-            print("[DEBUG] Reached target heading, motors stopped")
+            print("[DEBUG] Reached Wall heading, motors stopped")
             return True
+        elif self.left_dist > 450:
+            self.bot.set_left_motor_speed(0.0)
+            self.bot.set_right_motor_speed(0.0)
+            print("[DEBUG] Reached Wall heading, motors stopped")
+            return True
+            
         else:
             # HamBot 모터 범위 내 고정 속도
             fixed_speed = 4.0
@@ -286,6 +292,7 @@ class BUG0:
                 if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
                     self.change_state('go_close')
                 elif self.front_dist < 400:
+                        self.turn_to_wall(90)
                         self.stop_motors()
                         self.change_state('wall_following')
                         
@@ -293,9 +300,10 @@ class BUG0:
             elif self.state == 'wall_following':
                 self.bot.set_left_motor_speed(4.0)
                 self.bot.set_right_motor_speed(4.0)
-                if self.left_dist > 450:
-                    self.turn_to_goal(90)
-                elif self.left_dist_back < self.left_dist_front:
+                
+                self.turn_to_wall(90)
+                
+                if self.left_dist_back < self.left_dist_front:
                     self.bot.set_left_motor_speed(3.5)
                     self.bot.set_right_motor_speed(3.0)
                 elif self.left_dist_back > self.left_dist_front:
