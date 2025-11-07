@@ -198,7 +198,7 @@ class BUG0:
             return False
 
         # 
-        error = (target_angle - current_heading + 540) % 360 - 180
+        error = abs((target_angle - current_heading + 540) % 360 - 180)
         # if error > 180:
         #     error = 360 - error  # 항상 최소 각도
 
