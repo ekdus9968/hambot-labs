@@ -309,7 +309,7 @@ class BUG0:
             elif self.state == 'turn_to_wall':
                 self.bot.set_left_motor_speed(4.0)
                 self.bot.set_right_motor_speed(-4.0)
-                if self.turn_to_wall(90):
+                if self.turn_to_wall(45):
                     self.stop_motors()
                     self.change_state('wall_following')
                             
