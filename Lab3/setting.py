@@ -304,8 +304,7 @@ class BUG0:
                     print("FIIIIIIIIIIIIIIIIIND so go close")
                     self.change_state('go_close')
                 elif self.front_dist < 400:
-                        self.turn_to_wall(90)
-                        if self.turn_to_wall() == True:
+                        if self.turn_to_wall(90) == True:
                             self.stop_motors()
                             self.change_state('wall_following')
                         
