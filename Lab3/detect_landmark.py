@@ -276,7 +276,7 @@ class BUG0:
     # -------------------------------
     def run_state(self):
         self.update_position_and_distance()
-        self.change_state('turn_to_wall')
+        self.change_state('start')
 
         # goal angle 한 번만 계산
         self.goal_angle = self.calculate_goal_angle()
@@ -304,18 +304,18 @@ class BUG0:
                 
 
             elif self.state == 'move_to_goal':
-                self.bot.set_left_motor_speed(8.0)
-                self.bot.set_right_motor_speed(8.0)
+                self.bot.set_left_motor_speed(4.0)
+                self.bot.set_right_motor_speed(4.0)
                 if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
                     self.change_state('go_close')
-                elif self.front_dist < 400:
+                elif self.front_dist < 500:
                     self.stop_motors()
                     self.change_state('turn_to_wall')
         
             elif self.state == 'turn_to_wall':
                 self.bot.set_left_motor_speed(4.0)
                 self.bot.set_right_motor_speed(-4.0)
-                if self.turn_to_wall(55):
+                if self.turn_to_wall(45):
                     self.stop_motors()
                     self.change_state('wall_following')
                             
