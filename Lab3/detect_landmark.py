@@ -51,6 +51,7 @@ class BUG0:
         self.initial_heading = self.bot.get_heading()
         print(f"[DEBUG] Initial heading: {self.initial_heading:.2f}°")
         
+        self.prev_state = ''
         self.count = 1.0
 
     # -------------------------------
@@ -291,10 +292,15 @@ class BUG0:
 
             elif self.state == 'turn_to_goal':
                 self.detect_landmark()
-                if self.turn_to_goal(self.goal_angle):
-                    self.change_state('move_to_goal')
-                elif self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
-                    self.change_state('move_to_goal')
+                if self.prev_state == 'wall_following':
+                    if self.turn_to_goal(50):
+                        self.change_state('move_to_goal')
+                    
+                else:
+                    if self.turn_to_goal(self.goal_angle):
+                        self.change_state('move_to_goal')
+                    elif self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+                        self.change_state('move_to_goal')
                 
 
             elif self.state == 'move_to_goal':
@@ -315,6 +321,7 @@ class BUG0:
                             
 #*************************************
             elif self.state == 'wall_following':
+                self.prev_state = 'wall_following'
                 self.bot.set_left_motor_speed(4.0)
                 self.bot.set_right_motor_speed(4.0)
                 
