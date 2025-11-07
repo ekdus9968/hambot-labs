@@ -312,7 +312,7 @@ class BUG0:
             elif self.state == 'turn_to_wall':
                 self.bot.set_left_motor_speed(4.0)
                 self.bot.set_right_motor_speed(-4.0)
-                if self.turn_to_wall(45):
+                if self.turn_to_wall(90):
                     self.stop_motors()
                     self.change_state('wall_following')
                             
@@ -324,7 +324,7 @@ class BUG0:
                 
                 if self.left_dist >600:
                     #EDIT 그냥 turn to goal 없애고 가도 되지 않은가
-                    #self.turn_to_goal(355)
+                    self.turn_to_goal(355)
                     self.change_state('turn_to_goal')
                     
                 
