@@ -321,8 +321,8 @@ class BUG0:
                 
                 
                 if self.left_dist >600:
-                    self.turn_to_goal(300)
-                    self.change_state('turn_to_goal')
+                    if self.turn_to_goal(300):
+                        self.change_state('move_to_goal')
                     
                 
                 if self.left_dist_back < self.left_dist_front:
