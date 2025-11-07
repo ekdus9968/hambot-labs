@@ -293,7 +293,7 @@ class BUG0:
             elif self.state == 'turn_to_goal':
                 self.detect_landmark()
                 if self.prev_state == 'wall_following':
-                    if self.turn_to_goal(self.goal_angle - 100):
+                    if self.turn_to_goal(self.goal_angle - 50):
                         self.change_state('move_to_goal')
                     
                 else:
@@ -304,8 +304,8 @@ class BUG0:
                 
 
             elif self.state == 'move_to_goal':
-                self.bot.set_left_motor_speed(5.0)
-                self.bot.set_right_motor_speed(5.0)
+                self.bot.set_left_motor_speed(8.0)
+                self.bot.set_right_motor_speed(8.0)
                 if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
                     self.change_state('go_close')
                 elif self.front_dist < 400:
