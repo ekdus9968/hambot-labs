@@ -1,3 +1,4 @@
+#3
 import time
 import numpy as np
 import math
@@ -43,7 +44,7 @@ class BUG0:
 
         # CAMERA
         self.COLOR = (255, 20, 200)
-        self.TOLERANCE = 120
+        self.TOLERANCE = 80
         self.frame = None
         self.bot.camera.set_target_colors([self.COLOR], tolerance=self.TOLERANCE)
 
@@ -151,6 +152,9 @@ class BUG0:
     # Turn to goal LEFT ONLY
     # -------------------------------
     def turn_to_goal(self, target_angle):
+        print("~~~~~~TURNING TO COAL~~~~~~~~~")
+        print("~~~~~~TURNING TO COAL~~~~~~~~~")
+        print("~~~~~~TURNING TO COAL~~~~~~~~~")
         current_heading = self.bot.get_heading()
         
         if current_heading is None:
@@ -169,6 +173,11 @@ class BUG0:
             self.bot.set_right_motor_speed(0.0)
             print("[DEBUG] Reached target heading, motors stopped")
             return True
+        elif self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+            self.bot.set_left_motor_speed(0.0)
+            self.bot.set_right_motor_speed(0.0)
+            print("[DEBUG] Reached target heading, motors stopped")
+            return True
         else:
             # HamBot 모터 범위 내 고정 속도
             fixed_speed = 4.0
@@ -180,6 +189,9 @@ class BUG0:
     # Turn to Wall
     # -------------------------------
     def turn_to_wall(self, target_angle):
+        print("~~~~~~TURNING TO WALL~~~~~~~~~")
+        print("~~~~~~TURNING TO WALL~~~~~~~~~")
+        print("~~~~~~TURNING TO WALL~~~~~~~~~")
         current_heading = self.bot.get_heading()
         
         if current_heading is None:
@@ -187,7 +199,7 @@ class BUG0:
             return False
 
         # 
-        error = abs((current_heading - target_angle + 360) -180 )
+        error = abs((target_angle - current_heading + 540) % 360 - 180)
         # if error > 180:
         #     error = 360 - error  # 항상 최소 각도
 
@@ -196,8 +208,14 @@ class BUG0:
         if error < 3:  # ±3° 안이면 멈춤
             self.bot.set_left_motor_speed(0.0)
             self.bot.set_right_motor_speed(0.0)
-            print("[DEBUG] Reached target heading, motors stopped")
+            print("[DEBUG] Reached Wall heading, motors stopped")
             return True
+        elif self.left_dist < 500:
+            self.bot.set_left_motor_speed(0.0)
+            self.bot.set_right_motor_speed(0.0)
+            print("[DEBUG] Reached Wall heading, motors stopped")
+            return True
+            
         else:
             # HamBot 모터 범위 내 고정 속도
             fixed_speed = 4.0
@@ -208,7 +226,7 @@ class BUG0:
 # -------------------------------
     # Detect landmarks with target color
     # -------------------------------
-    def detect_landmark(self, target_color=(255,20,200), tolerance=120):
+    def detect_landmark(self, target_color=(255,20,200), tolerance=80):
         """
         랜드마크를 찾고, 그 위치의 색상이 target_color 범위 내이면 True 반환.
         """
@@ -258,7 +276,7 @@ class BUG0:
     # -------------------------------
     def run_state(self):
         self.update_position_and_distance()
-        self.change_state('move_to_goal')
+        self.change_state('wall_following')
 
         # goal angle 한 번만 계산
         self.goal_angle = self.calculate_goal_angle()
@@ -286,25 +304,34 @@ class BUG0:
                 if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
                     self.change_state('go_close')
                 elif self.front_dist < 400:
-                        self.stop_motors()
-                        self.change_state('end')
-                        
+                    self.stop_motors()
+                    self.change_state('turn_to_wall')
+        
+            elif self.state == 'turn_to_wall':
+                self.bot.set_left_motor_speed(4.0)
+                self.bot.set_right_motor_speed(-4.0)
+                if self.turn_to_wall(45):
+                    self.stop_motors()
+                    self.change_state('wall_following')
+                            
 #*************************************
             elif self.state == 'wall_following':
                 self.bot.set_left_motor_speed(4.0)
                 self.bot.set_right_motor_speed(4.0)
-                if self.left_dist > 450:
-                    self.turn_to_wall(90)
-                elif self.left_dist_back < self.left_dist_front:
+                
+                
+                if self.left_dist >600:
+                    self.turn_to_goal(300)
+                    self.change_state('end')
+                    
+                
+                if self.left_dist_back < self.left_dist_front:
                     self.bot.set_left_motor_speed(3.5)
                     self.bot.set_right_motor_speed(3.0)
                 elif self.left_dist_back > self.left_dist_front:
                     self.bot.set_left_motor_speed(3.0)
                     self.bot.set_right_motor_speed(3.7)
-                elif self.left_dist >1000:
-                    self.turn_to_goal(355)
-                    self.change_state('turn_to_goal')
-                    
+                
                 
             elif self.state == 'go_close':
                 print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
@@ -360,7 +387,7 @@ def main():
     try:
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
         TARGET_COLOR = (255, 20, 200)
-        TOLERANCE = 120
+        TOLERANCE = 80
         bot.camera.set_target_colors([TARGET_COLOR], tolerance=TOLERANCE)
         
         follower = BUG0(bot)
