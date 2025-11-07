@@ -275,12 +275,12 @@ class BUG0:
     # -------------------------------
     def run_state(self):
         self.update_position_and_distance()
-        self.change_state('turn_to_wall')
+        self.change_state('wall_following')
 
         # goal angle 한 번만 계산
         self.goal_angle = self.calculate_goal_angle()
 
-        while self.state != 'wall_following':
+        while self.state != 'end':
             self.get_current_position()
             self.read_lidar()
 
