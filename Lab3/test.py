@@ -1,3 +1,5 @@
+#2.5 : 완료됨 
+#EDIT 한 거 
 import time
 import numpy as np
 import math
@@ -222,6 +224,7 @@ class BUG0:
             self.bot.set_right_motor_speed(-fixed_speed)   # 오른쪽 모터 앞으로
             return False
 
+
 # -------------------------------
     # Detect landmarks with target color
     # -------------------------------
@@ -275,7 +278,7 @@ class BUG0:
     # -------------------------------
     def run_state(self):
         self.update_position_and_distance()
-        self.change_state('wall_following')
+        self.change_state('start')
 
         # goal angle 한 번만 계산
         self.goal_angle = self.calculate_goal_angle()
@@ -315,17 +318,23 @@ class BUG0:
                             
 #*************************************
             elif self.state == 'wall_following':
-                
                 self.bot.set_left_motor_speed(4.0)
                 self.bot.set_right_motor_speed(4.0)
+                
+                
                 if self.left_dist >600:
-                    if self.turn_to_goal(180):
-                        self.change_state('move_to_goal')
-                    else:
-                        self.bot.set_left_motor_speed(-4.0)
-                        self.bot.set_right_motor_speed(4.0)
-                        if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
-                            self.change_state('move_to_goal')
+                    #EDIT 그냥 turn to goal 없애고 가도 되지 않은가
+                    #self.turn_to_goal(355)
+                    self.change_state('turn_to_goal')
+                    
+                
+                if self.left_dist_back < self.left_dist_front:
+                    self.bot.set_left_motor_speed(3.5)
+                    self.bot.set_right_motor_speed(3.0)
+                elif self.left_dist_back > self.left_dist_front:
+                    self.bot.set_left_motor_speed(3.0)
+                    self.bot.set_right_motor_speed(3.7)
+                
                 
             elif self.state == 'go_close':
                 print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
