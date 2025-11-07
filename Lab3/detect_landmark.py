@@ -294,7 +294,7 @@ class BUG0:
                 self.detect_landmark()
                 if self.prev_state == 'wall_following':
                     print("PLEASEEEEEEEEEEEEEEEEEEEE")
-                    if self.turn_to_goal(self.goal_angle + 13):
+                    if self.turn_to_goal(self.goal_angle + 10):
                         self.change_state('move_to_goal')
                     
                 else:
