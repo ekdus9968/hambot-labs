@@ -322,13 +322,13 @@ class BUG0:
                             
 #*************************************
             elif self.state == 'wall_following':
-                self.prev_state = 'wall_following'
                 self.bot.set_left_motor_speed(4.0)
                 self.bot.set_right_motor_speed(4.0)
                 
                 if self.left_dist >600:
                     #Edit
                     #self.turn_to_goal(45)
+                    self.prev_state = 'wall_following'
                     self.change_state('turn_to_goal')
                     
                 if self.left_dist_back < self.left_dist_front:
