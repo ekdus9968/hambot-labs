@@ -318,12 +318,11 @@ class BUG0:
                 self.bot.set_left_motor_speed(4.0)
                 self.bot.set_right_motor_speed(4.0)
                 
-                
                 if self.left_dist >600:
-                    self.turn_to_goal(90)
+                    #Edit
+                    #self.turn_to_goal(90)
                     self.change_state('turn_to_goal')
                     
-                
                 if self.left_dist_back < self.left_dist_front:
                     self.bot.set_left_motor_speed(3.5)
                     self.bot.set_right_motor_speed(3.0)
