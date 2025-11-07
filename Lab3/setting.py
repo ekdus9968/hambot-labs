@@ -305,7 +305,7 @@ class BUG0:
                     self.change_state('go_close')
                 elif self.front_dist < 400:
                         self.turn_to_wall(90)
-                        if self.turn_to_wall():
+                        if self.turn_to_wall() == True:
                             self.stop_motors()
                             self.change_state('wall_following')
                         
