@@ -198,7 +198,7 @@ class BUG0:
             return False
 
         # 
-        error = (target_angle - current_heading + 540) % 360 - 180
+        error = abs((target_angle - current_heading + 540) % 360 - 180)
         # if error > 180:
         #     error = 360 - error  # 항상 최소 각도
 
@@ -221,6 +221,7 @@ class BUG0:
             self.bot.set_left_motor_speed(fixed_speed)   # 왼쪽 모터 뒤
             self.bot.set_right_motor_speed(-fixed_speed)   # 오른쪽 모터 앞으로
             return False
+
 
 # -------------------------------
     # Detect landmarks with target color
@@ -307,7 +308,9 @@ class BUG0:
                     self.change_state('turn_to_wall')
         
             elif self.state == 'turn_to_wall':
-                if self.turn_to_wall(90):
+                self.bot.set_left_motor_speed(4.0)
+                self.bot.set_right_motor_speed(-4.0)
+                if self.turn_to_wall(45):
                     self.stop_motors()
                     self.change_state('wall_following')
                             
