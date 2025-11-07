@@ -319,8 +319,13 @@ class BUG0:
                 self.bot.set_left_motor_speed(4.0)
                 self.bot.set_right_motor_speed(4.0)
                 if self.left_dist >600:
-                    self.goal_angle = 90
-                    self.change_state('turn_to_goal')
+                    if self.turn_to_goal(180):
+                        self.change_state('move_to_goal')
+                    else:
+                        self.bot.set_left_motor_speed(-4.0)
+                        self.bot.set_right_motor_speed(4.0)
+                        if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+                            self.change_state('move_to_goal')
                         
                     
                 
