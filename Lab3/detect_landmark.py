@@ -276,7 +276,7 @@ class BUG0:
     # -------------------------------
     def run_state(self):
         self.update_position_and_distance()
-        self.change_state('wall_following')
+        self.change_state('start')
 
         # goal angle 한 번만 계산
         self.goal_angle = self.calculate_goal_angle()
@@ -294,7 +294,7 @@ class BUG0:
                 self.detect_landmark()
                 if self.prev_state == 'wall_following':
                     print("PLEASEEEEEEEEEEEEEEEEEEEE")
-                    if self.turn_to_goal(self.goal_angle - 120):
+                    if self.turn_to_goal(self.goal_angle - 110):
                         self.change_state('move_to_goal')
                     
                 else:
