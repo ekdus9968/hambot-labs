@@ -52,7 +52,6 @@ class BUG0:
         print(f"[DEBUG] Initial heading: {self.initial_heading:.2f}°")
         
         self.count = 1.0
-        self.prev_state = ''
 
     # -------------------------------
     # Motor control
@@ -291,29 +290,30 @@ class BUG0:
                 self.change_state('turn_to_goal')
 
             elif self.state == 'turn_to_goal':
-                self.turn_to_goal(self.goal_angle)
-                self.change_state('move_to_goal')
-                if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
-                    self.prev_state = 'turn_to_goal'
+                self.detect_landmark()
+                if self.turn_to_goal(self.goal_angle):
+                    self.change_state('move_to_goal')
+                elif self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
                     self.change_state('move_to_goal')
                 
+
             elif self.state == 'move_to_goal':
                 self.bot.set_left_motor_speed(5.0)
                 self.bot.set_right_motor_speed(5.0)
-                if self.prev_state == 'turn_to_goal' :
-                    if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
-                        print("FIIIIIIIIIIIIIIIIIND so go close go close")
-                        self.change_state('go_close')
+                if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+                    print("FIIIIIIIIIIIIIIIIIND so go close")
+                    self.change_state('go_close')
                 elif self.front_dist < 400:
                         self.turn_to_wall(90)
                         self.stop_motors()
-                        
                         self.change_state('wall_following')
                         
 #*************************************
             elif self.state == 'wall_following':
                 self.bot.set_left_motor_speed(4.0)
                 self.bot.set_right_motor_speed(4.0)
+                
+                self.turn_to_wall(90)
                 
                 if self.left_dist_back < self.left_dist_front:
                     self.bot.set_left_motor_speed(3.5)
