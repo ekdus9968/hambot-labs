@@ -280,7 +280,7 @@ class BUG0:
         # goal angle 한 번만 계산
         self.goal_angle = self.calculate_goal_angle()
 
-        while self.state != 'end':
+        while self.state != 'wall_following':
             self.get_current_position()
             self.read_lidar()
 
@@ -320,7 +320,7 @@ class BUG0:
                 
                 
                 if self.left_dist >600:
-                    self.turn_to_goal(355)
+                    self.turn_to_goal(300)
                     self.change_state('end')
                     
                 
