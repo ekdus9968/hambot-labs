@@ -315,22 +315,17 @@ class BUG0:
                             
 #*************************************
             elif self.state == 'wall_following':
+                
                 self.bot.set_left_motor_speed(4.0)
                 self.bot.set_right_motor_speed(4.0)
-                
-                
                 if self.left_dist >600:
-                    self.turn_to_goal(300)
-                    self.change_state('end')
-                    
-                
-                if self.left_dist_back < self.left_dist_front:
-                    self.bot.set_left_motor_speed(3.5)
-                    self.bot.set_right_motor_speed(3.0)
-                elif self.left_dist_back > self.left_dist_front:
-                    self.bot.set_left_motor_speed(3.0)
-                    self.bot.set_right_motor_speed(3.7)
-                
+                    if self.turn_to_goal(180):
+                        self.change_state('move_to_goal')
+                    else:
+                        self.bot.set_left_motor_speed(-4.0)
+                        self.bot.set_right_motor_speed(4.0)
+                        if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+                            self.change_state('move_to_goal')
                 
             elif self.state == 'go_close':
                 print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
