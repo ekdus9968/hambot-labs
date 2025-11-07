@@ -303,7 +303,7 @@ class BUG0:
                 if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
                     self.change_state('go_close')
                 elif self.front_dist < 400: 
-                    if self.turn_to_wall(90):
+                    if self.turn_to_wall(45) == True:
                         self.stop_motors()
                         self.change_state('wall_following')
                             
