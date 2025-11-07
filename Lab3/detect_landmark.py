@@ -210,7 +210,7 @@ class BUG0:
             self.bot.set_right_motor_speed(0.0)
             print("[DEBUG] Reached Wall heading, motors stopped")
             return True
-        elif self.left_dist < 500:
+        elif self.left_dist < 550:
             self.bot.set_left_motor_speed(0.0)
             self.bot.set_right_motor_speed(0.0)
             print("[DEBUG] Reached Wall heading, motors stopped")
@@ -315,7 +315,7 @@ class BUG0:
             elif self.state == 'turn_to_wall':
                 self.bot.set_left_motor_speed(4.0)
                 self.bot.set_right_motor_speed(-4.0)
-                if self.turn_to_wall(45):
+                if self.turn_to_wall(55):
                     self.stop_motors()
                     self.change_state('wall_following')
                             
