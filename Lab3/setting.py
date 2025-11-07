@@ -52,6 +52,7 @@ class BUG0:
         print(f"[DEBUG] Initial heading: {self.initial_heading:.2f}°")
         
         self.count = 1.0
+        self.prev_state = ''
 
     # -------------------------------
     # Motor control
@@ -151,6 +152,9 @@ class BUG0:
     # Turn to goal LEFT ONLY
     # -------------------------------
     def turn_to_goal(self, target_angle):
+        print("~~~~~~TURNING TO COAL~~~~~~~~~")
+        print("~~~~~~TURNING TO COAL~~~~~~~~~")
+        print("~~~~~~TURNING TO COAL~~~~~~~~~")
         current_heading = self.bot.get_heading()
         
         if current_heading is None:
@@ -169,6 +173,11 @@ class BUG0:
             self.bot.set_right_motor_speed(0.0)
             print("[DEBUG] Reached target heading, motors stopped")
             return True
+        elif self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+            self.bot.set_left_motor_speed(0.0)
+            self.bot.set_right_motor_speed(0.0)
+            print("[DEBUG] Reached target heading, motors stopped")
+            return True
         else:
             # HamBot 모터 범위 내 고정 속도
             fixed_speed = 4.0
@@ -180,6 +189,9 @@ class BUG0:
     # Turn to Wall
     # -------------------------------
     def turn_to_wall(self, target_angle):
+        print("~~~~~~TURNING TO WALL~~~~~~~~~")
+        print("~~~~~~TURNING TO WALL~~~~~~~~~")
+        print("~~~~~~TURNING TO WALL~~~~~~~~~")
         current_heading = self.bot.get_heading()
         
         if current_heading is None:
@@ -279,29 +291,29 @@ class BUG0:
                 self.change_state('turn_to_goal')
 
             elif self.state == 'turn_to_goal':
-                self.detect_landmark()
-                if self.turn_to_goal(self.goal_angle):
-                    self.change_state('move_to_goal')
-                elif self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+                self.turn_to_goal(self.goal_angle)
+                self.change_state('move_to_goal')
+                if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+                    self.prev_state = 'turn_to_goal'
                     self.change_state('move_to_goal')
                 
-
             elif self.state == 'move_to_goal':
                 self.bot.set_left_motor_speed(5.0)
                 self.bot.set_right_motor_speed(5.0)
-                if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
-                    self.change_state('go_close')
+                if self.prev_state == 'turn_to_goal' :
+                    if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+                        print("FIIIIIIIIIIIIIIIIIND so go close go close")
+                        self.change_state('go_close')
                 elif self.front_dist < 400:
                         self.turn_to_wall(90)
                         self.stop_motors()
+                        
                         self.change_state('wall_following')
                         
 #*************************************
             elif self.state == 'wall_following':
                 self.bot.set_left_motor_speed(4.0)
                 self.bot.set_right_motor_speed(4.0)
-                
-                self.turn_to_wall(90)
                 
                 if self.left_dist_back < self.left_dist_front:
                     self.bot.set_left_motor_speed(3.5)
