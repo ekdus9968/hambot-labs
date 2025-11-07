@@ -276,7 +276,7 @@ class BUG0:
     # -------------------------------
     def run_state(self):
         self.update_position_and_distance()
-        self.change_state('start')
+        self.change_state('turn_to_wall')
 
         # goal angle 한 번만 계산
         self.goal_angle = self.calculate_goal_angle()
