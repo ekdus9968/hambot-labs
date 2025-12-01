@@ -62,7 +62,7 @@ TARGET_COLORS = {
     "pink": (204, 0, 152)
 }
 TOLERANCE = 50
-FIXED_SPEED = 1.0  # 제자리 회전 속도
+FIXED_SPEED = 0.0  # 제자리 회전 속도
 SLEEP_TIME = 0.05  # 루프 딜레이
 
 def get_forward_distance(bot):
