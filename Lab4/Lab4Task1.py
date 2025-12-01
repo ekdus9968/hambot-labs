@@ -167,6 +167,7 @@ def main():
             print(f"[TRILATERATION] Estimated robot position: x={x:.2f}, y={y:.2f}")
         else:
             # 2개 이하 감지 시 기본 위치 사용
+            # **************
             x, y = -300, -300
             print("[TRILATERATION] Not enough landmarks detected (<=2). Using default position: x=-300, y=-300")
 
