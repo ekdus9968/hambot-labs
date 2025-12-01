@@ -11,7 +11,7 @@ TARGET_COLORS = {
     "pink": (255, 220, 0)
 }
 TOLERANCE = 50
-FIXED_SPEED = 4.0  # 회전 속도
+FIXED_SPEED = 1.0  # 회전 속도
 SLEEP_TIME = 0.05   # 루프 딜레이
 
 def detect_color_in_frame(frame, target_color, tolerance):
