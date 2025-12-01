@@ -12,15 +12,11 @@ import numpy as np
 import math
 from robot_systems.robot import HamBot
 
-YELLOW = (255, 220, 0)   # attempting to make yellow
-color_tolerance  = 45  
-
 class BUG0:
     def __init__(self, bot: HamBot):
         self.bot = bot
         self.state = 'start'
         self.visited_points = []
-        self.step_back_counter = 0
 
         # GOAL and START POINT (mm)
         self.goal_x = 2400
@@ -28,330 +24,395 @@ class BUG0:
         self.start_x = -750
         self.start_y = -750
         self.dist_to_goal = 0.0
+        self.goal_angle = 0.0
 
-        # ROBOT PARAMETER
-        self.wheel_r = 0.045
-        self.wheel_d = 0.092
-
+        # ROBOT PARAMETERS
+        self.wheel_r = 45.0    # mm
+        self.wheel_d = 92.0    # mm
+        self.bot.set_left_motor_speed(0.0)
+        self.bot.set_right_motor_speed(0.0)
+        
         # DISTANCE
-        self.front_dist = 0.0
-        self.front_dist_right = 0.0
-        self.front_dist_left = 0.0
-        self.right_dist = 0.0
-        self.left_dist = 0.0
+        self.front_dist = 666.0
+        self.front_dist_right = 666.0
+        self.front_dist_left = 666.0
+        self.right_dist = 666.0
+        self.left_dist = 666.0
         self.max_front = 0.0
 
-        # ROBOT POS
+        # ROBOT POSITION
         self.x = 0.0
         self.y = 0.0
         self.theta = 0.0  # degree
-        self.error_theta = 0.0
 
         # ENCODER
         left, right = self.bot.get_encoder_readings()
         self.prev_left_enc = left
         self.prev_right_enc = right
-        
-        # CAMERA
-        self.bot.camera.enable(32)  # 32 ms timestep
-        self.bot.camera.set_target_colors([(255, 255, 0)], tolerance=45) #color
-        self.cam = self.bot.camera.get_image()
-        self.frame_height = 0.0
-        self.frame_width = 0.0
 
+        # CAMERA
+        self.COLOR = (255, 20, 200)
+        self.TOLERANCE = 80
+        self.frame = None
+        self.bot.camera.set_target_colors([self.COLOR], tolerance=self.TOLERANCE)
+
+        # IMU initial heading
+        self.initial_heading = self.bot.get_heading()
+        print(f"[DEBUG] Initial heading: {self.initial_heading:.2f}°")
+        
+        self.prev_state = ''
+        self.count = 1.0
+
+    # -------------------------------
+    # Motor control
+    # -------------------------------
     def stop_motors(self):
-        self.bot.set_left_motor_velocity(0)
-        self.bot.set_right_motor_velocity(0)
+        try:
+            self.bot.set_left_motor_speed(0.0)
+            self.bot.set_right_motor_speed(0.0)
+            print("[DEBUG] Motors stopped")
+        except AttributeError:
+            print("[DEBUG] Motor stop failed")
+
     # -------------------------------
-    # GPS : get curr pos
+    # Encoder + IMU based dead reckoning
     # -------------------------------
-    # No need, hambot has lidar 
-    # 로봇 위치 구하기 self.x self.y self. theta
-    #if state = 'turn: theta 만 구하기
-    # else : 간 거리 구하기 
     def get_current_position(self):
-        if self.state == 'turn_to_goal':
-            return 
         left_enc, right_enc = self.bot.get_encoder_readings()
         delta_left = left_enc - self.prev_left_enc
         delta_right = right_enc - self.prev_right_enc
-        
-        # 거리 이동 계산 (mm)
+
+        # distance traveled in mm
         d = (delta_left + delta_right) / 2 * self.wheel_r
 
-        # 현재 heading
+        # heading from IMU
+        if self.bot.get_heading() is None:
+            print("[DEBUG] Warning: current_heading is None, skipping turn")
+            return 
         theta = math.radians(self.bot.get_heading())
 
-        # 위치 업데이트
+        # update position
         self.x += d * math.cos(theta)
         self.y += d * math.sin(theta)
 
-        # 이전 엔코더 업데이트
         self.prev_left_enc = left_enc
         self.prev_right_enc = right_enc
-        
+
+        print(f"[DEBUG] Position updated: x={self.x:.1f}, y={self.y:.1f}, heading={self.bot.get_heading():.2f}°")
         return self.x, self.y
 
+    # -------------------------------
+    # Update distance to goal
+    # -------------------------------
     def update_position_and_distance(self):
-        print("update_position_and_distance()")
-        # HamBot에서 x, y 좌표 얻기 (예: dead-reckoning)
-        self.x, self.y = self.get_current_position()  # 사용자 정의 함수 필요
+        self.get_current_position()
         self.dist_to_goal = self.calculate_distance_to_goal()
-        
+        print(f"[DEBUG] Distance to goal: {self.dist_to_goal:.1f} mm")
+
+    # -------------------------------
+    # Change state
+    # -------------------------------
     def change_state(self, new_state):
-        print("change_state()")
-        # 상태 바뀔 때 현재 위치 기록
         self.update_position_and_distance()
         self.visited_points.append((new_state, self.x, self.y, self.dist_to_goal))
-        print(self.visited_points)
-    
+        self.state = new_state
+        print(f"[DEBUG] State changed to: {new_state}")
+
     # -------------------------------
-    # goal angle 
+    # Goal calculations
     # -------------------------------
     def calculate_goal_angle(self):
-        print("calculate_goal_angle()")
         dx = self.goal_x - self.x
         dy = self.goal_y - self.y
-        return math.degrees(math.atan2(dy, dx)) % 360
+        goal_angle = math.degrees(math.atan2(dy, dx)) % 360
+        print(f"[DEBUG] Goal angle: {goal_angle:.2f}°")
+        return goal_angle
 
-
-
-    # -------------------------------
-    # distance to goal
-    # -------------------------------
     def calculate_distance_to_goal(self):
-        print("calculate_distance_to_goal()")
         return math.sqrt((self.goal_x - self.x)**2 + (self.goal_y - self.y)**2)
 
-
     # -------------------------------
-    # lidar
+    # LIDAR
     # -------------------------------
     def read_lidar(self):
-        print("read_lidar()")
-        lidar = self.bot.get_lidar_range_image()
-
-        if lidar is None or len(lidar) < 360:
-            print("LiDAR data missing")
+        self.lidar = self.bot.get_range_image()
+        if self.lidar is None or len(self.lidar) < 360:
+            print("[DEBUG] No LiDAR data received")
             return
 
-        # distance from each anlge
-        self.front_dist = np.nanmin(lidar[175:185])  
-        self.front_dist_right = np.nanmin(lidar[185:195])
-        self.front_dist_left = np.nanmin(lidar[165:175])
-        self.right_dist = np.nanmin(lidar[265:285])
-        self.left_dist = np.nanmin(lidar[85:95])
-        self.left_dist_front = np.nanmin(lidar[95:105])
-        self.left_dist_back = np.nanmin(lidar[75:85])
-
-        # NaN
+        # Front and side distances
+        self.front_dist = np.nanmin(self.lidar[175:185])
+        self.front_dist_right = np.nanmin(self.lidar[185:195])
+        self.front_dist_left = np.nanmin(self.lidar[165:175])
+        self.right_dist = np.nanmin(self.lidar[265:285])
+        self.left_dist = np.nanmin(self.lidar[85:95])
+        self.left_dist_front = np.nanmin(self.lidar[75:85])
+        self.left_dist_back = np.nanmin(self.lidar[95:105])
+        # Handle invalid readings
         for name in ["front_dist", "front_dist_right", "front_dist_left", "right_dist", "left_dist"]:
             val = getattr(self, name)
             if np.isinf(val) or np.isnan(val) or val < 0.05:
                 setattr(self, name, 666.666)
-        self.max_front = max(self.front_dist, self.front_dist_left, self.front_dist_right)
 
-
+        
+        print(f"[DEBUG] LiDAR - Front: {self.front_dist:.1f}, Left: {self.left_dist:.1f}, Right: {self.right_dist:.1f}")
 
     # -------------------------------
-    # Turn to goal (LEFT)
+    # Turn to goal LEFT ONLY
     # -------------------------------
     def turn_to_goal(self, target_angle):
-        print("turn_to_goal()")
-        # based on IMU 
-        current_heading = self.bot.get_heading()  # 0~360° 북 기준
-        #target_angle = self.calculate_goal_angle()
+        print("~~~~~~TURNING TO COAL~~~~~~~~~")
+        print("~~~~~~TURNING TO COAL~~~~~~~~~")
+        print("~~~~~~TURNING TO COAL~~~~~~~~~")
+        current_heading = self.bot.get_heading()
         
-        error = (target_angle - current_heading + 540) % 360 - 180
+        if current_heading is None:
+            print("[DEBUG] Warning: current_heading is None, skipping turn")
+            return False
 
-        if abs(error) < 5 :
-            self.bot.stop()
+        # 왼쪽 회전 전용 error 계산 (0~180°)
+        error = abs((current_heading - target_angle + 360) % 360 - 180)
+        if error > 180:
+            error = 360 - error  # 항상 최소 각도
+
+        print(f"[DEBUG] Turning left only - Current: {current_heading:.2f}, Target: {target_angle:.2f}, Error: {error:.2f}")
+
+        if error < 3:  # ±3° 안이면 멈춤
+            self.bot.set_left_motor_speed(0.0)
+            self.bot.set_right_motor_speed(0.0)
+            print("[DEBUG] Reached target heading, motors stopped")
             return True
-        elif self.front_dist_left < 500 :
-            self.state = 'wall_following'
-            self.bot.stop()
+        elif self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+            self.bot.set_left_motor_speed(0.0)
+            self.bot.set_right_motor_speed(0.0)
+            print("[DEBUG] Reached target heading, motors stopped")
+            return True
+        else:
+            # HamBot 모터 범위 내 고정 속도
+            fixed_speed = 4.0
+            self.bot.set_left_motor_speed(-fixed_speed)   # 왼쪽 모터 뒤
+            self.bot.set_right_motor_speed(fixed_speed)   # 오른쪽 모터 앞으로
+            return False
+        
+    # -------------------------------
+    # Turn to Wall
+    # -------------------------------
+    def turn_to_wall(self, target_angle):
+        print("~~~~~~TURNING TO WALL~~~~~~~~~")
+        print("~~~~~~TURNING TO WALL~~~~~~~~~")
+        print("~~~~~~TURNING TO WALL~~~~~~~~~")
+        current_heading = self.bot.get_heading()
+        
+        if current_heading is None:
+            print("[DEBUG] Warning: current_heading is None, skipping turn")
+            return False
+
+        # 
+        error = abs((target_angle - current_heading + 540) % 360 - 180)
+        # if error > 180:
+        #     error = 360 - error  # 항상 최소 각도
+
+        print(f"[DEBUG] Turning left only - Current: {current_heading:.2f}, Target: {target_angle:.2f}, Error: {error:.2f}")
+
+        if error < 3:  # ±3° 안이면 멈춤
+            self.bot.set_left_motor_speed(0.0)
+            self.bot.set_right_motor_speed(0.0)
+            print("[DEBUG] Reached Wall heading, motors stopped")
+            return True
+        elif self.left_dist < 475:
+            self.bot.set_left_motor_speed(0.0)
+            self.bot.set_right_motor_speed(0.0)
+            print("[DEBUG] Reached Wall heading, motors stopped")
             return True
             
         else:
-            # 왼쪽으로만 회전
-            self.bot.set_left_motor_velocity(-1)
-            self.bot.set_right_motor_velocity(1)
+            # HamBot 모터 범위 내 고정 속도
+            fixed_speed = 4.0
+            self.bot.set_left_motor_speed(fixed_speed)   # 왼쪽 모터 뒤
+            self.bot.set_right_motor_speed(-fixed_speed)   # 오른쪽 모터 앞으로
             return False
-        
-    def turn_to_str(self, speed_left, speed_right):
-        while self.front_dist < self.front_dist_left and self.front_dist < self.front_dist_right:
-            self.bot.set_left_motor_velocity(speed_left)
-            self.bot.set_right_motor_velocity(speed_right)
-            break
-        return 
-        
-        
+
+# -------------------------------
+    # Detect landmarks with target color
     # -------------------------------
-    # Find the goal
+    def detect_landmark(self, target_color=(255,20,200), tolerance=80):
+        """
+        랜드마크를 찾고, 그 위치의 색상이 target_color 범위 내이면 True 반환.
+        """
+        try:
+            # find_landmarks()는 Landmark 객체 리스트를 반환
+            landmarks = self.bot.camera.find_landmarks()
+            if not landmarks:
+                print("[DEBUG] No landmarks found")
+                return False
+
+            # 첫 번째 Landmark 객체 사용
+            landmark = landmarks[0]
+            x, y = landmark.x, landmark.y  # Landmark 속성 사용
+
+            # 카메라 프레임 가져오기
+            frame = self.bot.camera.get_frame()
+            if frame is None:
+                print("[DEBUG] Camera frame not available")
+                return False
+
+            H, W = frame.shape[:2]
+            x = min(max(0, int(x)), W-1)
+            y = min(max(0, int(y)), H-1)
+
+            pixel_color = frame[y, x]  # (R,G,B)
+            r_diff = abs(int(pixel_color[0]) - target_color[0])
+            g_diff = abs(int(pixel_color[1]) - target_color[1])
+            b_diff = abs(int(pixel_color[2]) - target_color[2])
+
+            within_tolerance = r_diff <= tolerance and g_diff <= tolerance and b_diff <= tolerance
+
+            if within_tolerance:
+                print(f"[DEBUG] Landmark with target color found at ({x},{y}) RGB: {pixel_color}")
+                print("FIND FIND FIND FINF FIND")
+                return True
+            else:
+                print(f"[DEBUG] Landmark found but color does not match at ({x},{y}) RGB: {pixel_color}")
+                print("NOOOOOOOOOOOOOOOO")
+                return False
+
+        except Exception as e:
+            print(f"[DEBUG] Error in detect_landmark_color: {e}")
+            return False
+
     # -------------------------------
-    #if cqmera see yellow 
-    def detect_yellow_post(self):
-        print("detect_yellow_post()")
-        posts = self.bot.camera.find_landmarks(YELLOW, tolerance=color_tolerance)
-        return bool(posts)
-    
-    def check_in_goal(self):
-        print("check_in_goal()")
-        dist = self.front_dist 
-        if dist > 25:
-            self.change_state('check in goal to go close')
-            self.state = 'go_close'
-            return 
-        elif dist < 25 :
-            self.change_state('check in goal to go fat')
-            self.state = 'go_far'
-            return 
-        else :
-            self.change_state('check in goal to end')
-            self.state = 'end'
-            return
-        
+    # Main state machine
+    # -------------------------------
     def run_state(self):
-        print("run_state()")
-        self.get_current_position()
-        self.change_state('start0')
+        self.update_position_and_distance()
+        self.change_state('start')
+
+        # goal angle 한 번만 계산
+        self.goal_angle = self.calculate_goal_angle()
+
         while self.state != 'end':
-            print(":::::::::START STATE:::::::::")
-            
+            self.get_current_position()
+            self.read_lidar()
+
+            print(f"[DEBUG] Current state: {self.state}")
+
             if self.state == 'start':
-                self.read_lidar()
-                self.get_current_position()
-                print(":::::::::START STATE:::::::::")
-                print(":::::::::START STATE:::::::::")
-                print(":::::::::START STATE:::::::::")
-                print(":::::::::START STATE:::::::::")
-                print(":::::::::START STATE:::::::::")
-                self.dist_to_goal = self.calculate_distance_to_goal()
-                self.change_state('start to turn to goal')
-                self.state = 'turn_to_goal'
-                self.change_state('start to turn to goal')
-                
+                self.change_state('turn_to_goal')
+
             elif self.state == 'turn_to_goal':
-                self.read_lidar()
-                self.get_current_position()
-                print(":::::::::TURN TO GOAL:::::::::")
-                print(":::::::::TURN TO GOAL:::::::::")
-                print(":::::::::TURN TO GOAL:::::::::")
-                print(":::::::::TURN TO GOAL:::::::::")
-                print(":::::::::TURN TO GOAL:::::::::")
-                target_angle = self.calculate_goal_angle()
-                if self.turn_to_goal(target_angle):
-                    self.change_state('turn to move to goal')
-                    self.state = 'move_to_goal'
+                self.detect_landmark()
+                if self.prev_state == 'wall_following':
+                    print("PLEASEEEEEEEEEEEEEEEEEEEE")
+                    if self.turn_to_goal(self.goal_angle + 10):
+                        self.change_state('move_to_goal')
+                    
+                else:
+                    if self.turn_to_goal(self.goal_angle):
+                        self.change_state('move_to_goal')
+                    elif self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+                        self.change_state('move_to_goal')
                 
+
             elif self.state == 'move_to_goal':
-                self.read_lidar()
-                self.get_current_position()
-                print(":::::::::MOVE TO GOAL:::::::::")
-                print(":::::::::MOVE TO GOAL:::::::::")
-                print(":::::::::MOVE TO GOAL:::::::::")
-                print(":::::::::MOVE TO GOAL:::::::::")
-                print(":::::::::MOVE TO GOAL:::::::::")
-                if self.max_front > 600 :
-                    self.bot.set_left_motor_velocity(4)
-                    self.bot.set_right_motor_velocity(4)
-                else: 
-                    post = self.detect_yellow_post()
-                    if post:
-                        self.change_state('move to goal to go close')
-                        self.state = 'go_close'
-                    else :
-                        self.turn_to_goal(90)
-                        self.change_state('move to goal to wall following')
-                        self.state = 'wall_following'
-                
+                self.bot.set_left_motor_speed(4.0)
+                self.bot.set_right_motor_speed(4.0)
+                if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+                    self.change_state('go_close')
+                elif self.front_dist < 500:
+                    self.stop_motors()
+                    self.change_state('turn_to_wall')
+        
+            elif self.state == 'turn_to_wall':
+                self.bot.set_left_motor_speed(4.0)
+                self.bot.set_right_motor_speed(-4.0)
+                if self.turn_to_wall(45):
+                    self.stop_motors()
+                    self.change_state('wall_following')
+                            
+#*************************************
             elif self.state == 'wall_following':
-                self.read_lidar()
-                self.get_current_position()
-                print("/////////WALL FOLLOWING/////////")
-                print("/////////WALL FOLLOWING/////////")
-                print("/////////WALL FOLLOWING/////////")
-                print("/////////WALL FOLLOWING/////////")
-                print("/////////WALL FOLLOWING/////////")
-                if self.left_dist < 600:
-                    self.bot.set_left_motor_velocity(4)
-                    self.bot.set_right_motor_velocity(4)
-                    if self.front_dist_left < self.front_dist_right:
-                        self.stop_motors()
-                        self.turn_to_str(1, -1)
-                    elif self.front_dist_left < self.front_dist_right:
-                        self.stop_motors()
-                        self.turn_to_str(-1, 1)
-                        
-                else :
-                    self.change_state('wall following to turn to goal')
-                    self.state = 'turn_to_goal'
+                self.bot.set_left_motor_speed(4.0)
+                self.bot.set_right_motor_speed(4.0)
+                
+                if self.left_dist >600:
+                    #Edit
+                    #self.turn_to_goal(45)
+                    self.prev_state = 'wall_following'
+                    self.change_state('turn_to_goal')
+                
+                if self.detect_landmark(target_color=self.COLOR, tolerance=self.TOLERANCE):
+                    self.change_state('check_in_goal')
+                    
+                if self.left_dist_back < self.left_dist_front:
+                    self.bot.set_left_motor_speed(3.5)
+                    self.bot.set_right_motor_speed(3.0)
+                elif self.left_dist_back > self.left_dist_front:
+                    self.bot.set_left_motor_speed(3.0)
+                    self.bot.set_right_motor_speed(3.7)
+                
                 
             elif self.state == 'go_close':
-                self.get_current_position()
-                self.read_lidar()
-                print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
-                print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
-                print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
-                print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
                 print("~~~~~~~~~GO CLOSER~~~~~~~~~~")
                 if self.front_dist> 250:
-                    self.bot.set_left_motor_velocity(2)
-                    self.bot.set_right_motor_velocity(2)
+                    speed = 3.0 / self.count
+                    self.bot.set_left_motor_speed(speed) 
+                    self.bot.set_right_motor_speed(speed) 
                 else:
                     self.change_state('go close to check in goal')
                     self.state = 'check_in_goal'
                 
             elif self.state == 'go_far':
-                self.get_current_position()
-                self.read_lidar()
-                print("~~~~~~~~~GO FAR~~~~~~~~~~")
-                print("~~~~~~~~~GO FAR~~~~~~~~~~")
-                print("~~~~~~~~~GO FAR~~~~~~~~~~")
-                print("~~~~~~~~~GO FAR~~~~~~~~~~")
                 print("~~~~~~~~~GO FAR~~~~~~~~~~")
                 if self.front_dist  < 250:
-                    self.bot.set_left_motor_velocity(-2)
-                    self.bot.set_right_motor_velocity(-2)
+                    speed = 3.0 / self.count
+                    self.bot.set_left_motor_speed(-speed) 
+                    self.bot.set_right_motor_speed(-speed)
                 else:
                     self.change_state('go far to check in goal')
                     self.state = 'check_in_goal'
                 
             elif self.state == 'check_in_goal':
-                self.get_current_position()
-                self.read_lidar()
+                self.count += 1.0
                 print("-------CHECK IN GOAL---------")
-                print("-------CHECK IN GOAL---------")
-                print("-------CHECK IN GOAL---------")
-                print("-------CHECK IN GOAL---------")
-                print("-------CHECK IN GOAL---------")
-                self.check_in_goal()
+                if self.front_dist > 275:
+                    self.change_state('go close')
+                    self.state = 'go_close'
+                elif self.front_dist < 225:
+                    self.change_state('go far')
+                    self.state = 'go_far'
+                else:
+                    self.change_state('end')
+                    self.state = 'end'
+                    
+                
                 
             elif self.state == 'end':
                 self.get_current_position()
                 print("----------END---------")
-                self.bot.set_left_motor_velocity(0)
-                self.bot.set_right_motor_velocity(0)
+                self.bot.set_left_motor_speed(0)
+                self.bot.set_right_motor_speed(0)
                 self.stop_motors()
                 break
-                
+            
 
+        self.stop_motors()
+        print("[DEBUG] Reached goal, stopping.")
+
+# -------------------------------
+# Main
+# -------------------------------
 def main():
-    """Main entry point"""
     try:
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
-        print("HamBot initialized and ready for wall following.")
-        # Create wall follower
+        TARGET_COLOR = (255, 20, 200)
+        TOLERANCE = 80
+        bot.camera.set_target_colors([TARGET_COLOR], tolerance=TOLERANCE)
+        
         follower = BUG0(bot)
-        
-        # Follow wall for 20 seconds
         follower.run_state()
-        
-        # Cleanup
-        follower.stop()
-        
+
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"[DEBUG] Error: {e}")
         import traceback
         traceback.print_exc()
 
