@@ -53,10 +53,12 @@ import time
 import numpy as np
 from robot_systems.robot import HamBot
 
-# 감지할 색상
+# -------------------------------
+# 감지할 색상 설정
+# -------------------------------
 COLOR_LIST = ["orange", "green", "blue", "pink"]
 TARGET_COLORS = {
-    "orange": (255, 150, 30), #check
+    "orange": (255, 150, 30),
     "green": (50, 200, 130),
     "blue": (50, 80, 80),
     "pink": (150, 30, 30)
@@ -65,24 +67,29 @@ TOLERANCE = 50
 FIXED_SPEED = 3.0  # 제자리 회전 속도
 SLEEP_TIME = 0.05  # 루프 딜레이
 
+# -------------------------------
+# 전방 최소 거리 계산
+# -------------------------------
 def get_forward_distance(bot):
-    """전방 최소 거리 계산"""
     scan = bot.get_range_image()
     if scan is not None and len(scan) > 0:
         forward_distance = np.min(scan[175:185])
         if np.isnan(forward_distance) or np.isinf(forward_distance) or forward_distance < 0:
             forward_distance = 9999.9999
-        return forward_distance 
+        return forward_distance / 600
     return 9999.9999
 
+# -------------------------------
+# 360° 회전하며 색상 감지
+# -------------------------------
 def turn_360_detect(bot):
     start_heading = bot.get_heading()
     if start_heading is None:
         print("[DEBUG] Warning: start heading is None")
         return
 
-    detected_flags = [False]*4
-    detected_list = [None]*4
+    detected_flags = [False] * 4
+    detected_list = [None] * 4
 
     print("Starting 360° color detection...")
 
@@ -91,12 +98,11 @@ def turn_360_detect(bot):
         if current_heading is None:
             continue
 
+        # delta angle 계산
         delta_angle_total = (current_heading - start_heading + 360) % 360
-        if delta_angle_total > 180:
-            delta_angle_total = 360 - delta_angle_total
 
-        # 360° 회전 완료 여부
-        if abs(delta_angle_total - 360) < 3:
+        # 360° 완료 여부 (±3° 허용)
+        if delta_angle_total >= 357:
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
             print("360° rotation completed.")
@@ -106,13 +112,13 @@ def turn_360_detect(bot):
         bot.set_left_motor_speed(-FIXED_SPEED)
         bot.set_right_motor_speed(FIXED_SPEED)
 
-        # 카메라 프레임 확인
+        # 카메라 프레임 가져오기
         frame = bot.camera.get_frame()
         if frame is None:
             continue
 
         H, W = frame.shape[:2]
-        center_pixel = frame[H//2, W//2]  # 중앙 픽셀 기준
+        center_pixel = frame[H // 2, W // 2]  # 중앙 픽셀
         r, g, b = center_pixel
 
         forward_distance = get_forward_distance(bot)
@@ -120,26 +126,32 @@ def turn_360_detect(bot):
         # 4개 색상 확인
         for idx, color_name in enumerate(COLOR_LIST):
             if detected_flags[idx]:
+                # 이미 감지된 색상
+                print(f"[DEBUG] {color_name} already detected | Pixel RGB: R:{r} G:{g} B:{b} | Forward:{forward_distance:.3f}")
                 continue
+
             target_color = TARGET_COLORS[color_name]
             r_diff = abs(r - target_color[0])
             g_diff = abs(g - target_color[1])
             b_diff = abs(b - target_color[2])
             within_tolerance = r_diff <= TOLERANCE and g_diff <= TOLERANCE and b_diff <= TOLERANCE
 
-            # 디버그 출력
+            # 실시간 디버그 출력
             print(f"[DEBUG] {color_name} | Pixel RGB: R:{r} G:{g} B:{b} | R_diff:{r_diff} G_diff:{g_diff} B_diff:{b_diff} | Forward:{forward_distance:.3f} | Delta:{delta_angle_total:.2f}")
 
             if within_tolerance:
                 detected_flags[idx] = True
                 detected_list[idx] = [forward_distance, delta_angle_total]
-                print(f"[DETECTED] {color_name}{color_name}{color_name}{color_name}{color_name} | Forward:{forward_distance:.3f}, Delta angle:{delta_angle_total:.2f}")
+                print(f"[DETECTED] {color_name} | Forward:{forward_distance:.3f}, Delta angle:{delta_angle_total:.2f}")
 
         time.sleep(SLEEP_TIME)
 
     print("Final detected list:", detected_list)
     return detected_list
 
+# -------------------------------
+# 메인 실행
+# -------------------------------
 def main():
     try:
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
