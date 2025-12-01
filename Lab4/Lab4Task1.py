@@ -1,154 +1,164 @@
 import time
 import numpy as np
 from robot_systems.robot import HamBot
+from scipy.optimize import least_squares
 
-# =========================================================
-# LANDMARKS POSITIONS (mm)
-# =========================================================
-LANDMARKS = np.array([
-    [-2400,  2400],   # Pink
-    [ 2400,  2400],   # Baby Blue
-    [-2400, -2400],   # Orange
-    [ 2400, -2400],   # Green
-])
+# -------------------------------
+# 감지할 색상 설정
+# -------------------------------
+COLOR_LIST = ["orange", "green", "blue", "pink"]
+TARGET_COLORS = {
+    "orange": (255, 150, 30),
+    "green": (50, 200, 130),
+    "blue": (50, 80, 80),
+    "pink": (150, 30, 30)
+}
+TOLERANCE = 50
+FIXED_SPEED = 4.0  # 제자리 회전 속도
+SLEEP_TIME = 0.05  # 루프 딜레이
 
-# =========================================================
-# COLOR RANGES
-# =========================================================
-PINK       = (255, 20, 200)
-BABY_BLUE  = (100, 180, 255)
-ORANGE     = (255, 140, 50)
-GREEN      = (50, 200, 50)
-TOL = 80
+# -------------------------------
+# 랜드마크 절대 좌표 (mm)
+# -------------------------------
+landmark_positions = {
+    "orange": (-350, 350),
+    "green": (-350, -350),
+    "blue": (350, -350),
+    "pink": (350, 350)
+}
 
-# =========================================================
-# CAMERA / LIDAR UTILITIES
-# =========================================================
-CAMERA_FOV_DEG = 60.0
+# -------------------------------
+# 전방 최소 거리 계산
+# -------------------------------
+def get_forward_distance(bot):
+    scan = bot.get_range_image()
+    if scan is not None and len(scan) > 0:
+        forward_distance = np.min(scan[175:185])
+        if np.isnan(forward_distance) or np.isinf(forward_distance) or forward_distance < 0:
+            forward_distance = 9999.9999
+        return forward_distance
+    return 9999.9999
 
-def get_landmark_bbox(bot, idx):
-    boxes = bot.camera.find_landmarks(index=idx)
-    if len(boxes) == 0:
-        return None
-    return max(boxes, key=lambda b: (b[2]-b[0])*(b[3]-b[1]))
+# -------------------------------
+# 360° 회전하며 색상 감지
+# -------------------------------
+def turn_360_detect(bot):
+    start_heading = bot.get_heading()
+    if start_heading is None:
+        print("[DEBUG] Warning: start heading is None")
+        return
 
-def bbox_center_x(bbox):
-    x1, y1, x2, y2 = bbox
-    return (x1 + x2) / 2.0
+    detected_flags = [False] * 4
+    detected_list = [None] * 4
 
-def pixel_to_angle(px, frame_width):
-    center = frame_width / 2.0
-    norm = (px - center) / center
-    return norm * (CAMERA_FOV_DEG / 2.0)
+    print("Starting 360° color detection...")
 
-def get_distance_for_angle(bot, angle_deg):
-    lidar = bot.lidar.get_scan()   # 360-array
-    idx = int(angle_deg % 360)
-    return lidar[idx]
+    while True:
+        current_heading = bot.get_heading()
+        if current_heading is None:
+            continue
 
-# =========================================================
-# TRILATERATION LEAST-SQUARES
-# =========================================================
-def trilaterate(landmarks, distances):
-    x1, y1 = landmarks[0]
-    d1 = distances[0]
-    A = []
-    b = []
-    for i in range(1, len(landmarks)):
-        xi, yi = landmarks[i]
-        di = distances[i]
-        A.append([2*(xi-x1), 2*(yi-y1)])
-        b.append(d1**2 - di**2 - x1**2 + xi**2 - y1**2 + yi**2)
-    A = np.array(A)
-    b = np.array(b)
-    p, *_ = np.linalg.lstsq(A, b, rcond=None)
-    return p[0], p[1]
+        # delta angle 계산
+        delta_angle_total = (current_heading - start_heading + 360) % 360
 
-# =========================================================
-# POINT → GRID CELL
-# =========================================================
-CELL_SIZE = 600
-GRID_MIN = -2400
-GRID_MAX =  2400
-GRID_SIZE = 5
-
-def point_to_cell(x, y):
-    col = int((x - GRID_MIN) // CELL_SIZE)
-    row = int((GRID_MAX - y) // CELL_SIZE)
-    col = max(0, min(GRID_SIZE-1, col))
-    row = max(0, min(GRID_SIZE-1, row))
-    return row * GRID_SIZE + col + 1
-
-# =========================================================
-# FULL 360 ROTATION TRILATERATION
-# =========================================================
-def run_trilateration_full_rotation(bot, rotation_step_deg=30, step_time=0.5):
-    """
-    Rotate robot 360 degrees in steps, detect landmarks, then perform trilateration.
-    """
-    bot.camera.set_target_colors([PINK, BABY_BLUE, ORANGE, GREEN], tolerance=TOL)
-    all_distances = [None]*4
-    detected = [False]*4
-
-    steps = int(360 / rotation_step_deg)
-    for _ in range(steps):
-        frame = bot.camera.raw_frame()
-        h, w, _ = frame.shape
-
-        # 각 랜드마크 검사
-        for idx in range(4):
-            if detected[idx]:
-                continue
-            bbox = get_landmark_bbox(bot, idx)
-            if bbox is None:
-                continue
-            px = bbox_center_x(bbox)
-            angle = pixel_to_angle(px, w)
-            dist = get_distance_for_angle(bot, angle)
-            all_distances[idx] = dist
-            detected[idx] = True
-            print(f"[INFO] Landmark {idx} detected at distance {dist:.1f} mm")
-
-        # 회전
-        fixed_speed = 4.0
-        bot.set_left_motor_speed(-fixed_speed)
-        bot.set_right_motor_speed(fixed_speed)
-        time.sleep(step_time)  # 회전 시간
-        bot.set_left_motor_speed(0.0)
-        bot.set_right_motor_speed(0.0)
-
-        if all(detected):
+        # 360° 완료 여부 (±3° 허용)
+        if delta_angle_total >= 357:
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+            print("360° rotation completed.")
             break
 
-    # 감지되지 않은 랜드마크는 큰 값으로 설정
-    for i in range(4):
-        if all_distances[i] is None:
-            all_distances[i] = 9999
-            print(f"[WARN] Landmark {i} not detected, setting distance to 9999")
+        # 제자리 회전
+        bot.set_left_motor_speed(-FIXED_SPEED)
+        bot.set_right_motor_speed(FIXED_SPEED)
 
-    # Trilateration
-    x, y = trilaterate(LANDMARKS, all_distances)
-    cell = point_to_cell(x, y)
+        # 카메라 프레임 가져오기
+        frame = bot.camera.get_frame()
+        if frame is None:
+            continue
 
-    print("\n=== Trilateration Result After Full Rotation ===")
-    print(f"Distances: {all_distances}")
-    print(f"Estimated Position: ({x:.1f}, {y:.1f}) mm")
-    print(f"Grid Cell Index: {cell}")
-    print("==============================================\n")
+        H, W = frame.shape[:2]
+        center_pixel = frame[H // 2, W // 2]  # 중앙 픽셀
+        r, g, b = center_pixel
 
-    return x, y, cell
+        forward_distance = get_forward_distance(bot)
 
-# =========================================================
-# MAIN ENTRY
-# =========================================================
+        # 4개 색상 확인
+        for idx, color_name in enumerate(COLOR_LIST):
+            if detected_flags[idx]:
+                # 이미 감지된 색상
+                print(f"[DEBUG] {color_name} already detected | Pixel RGB: R:{r} G:{g} B:{b} | Forward:{forward_distance:.3f}")
+                continue
+
+            target_color = TARGET_COLORS[color_name]
+            r_diff = abs(r - target_color[0])
+            g_diff = abs(g - target_color[1])
+            b_diff = abs(b - target_color[2])
+            within_tolerance = r_diff <= TOLERANCE and g_diff <= TOLERANCE and b_diff <= TOLERANCE
+
+            # 실시간 디버그 출력
+            print(f"[DEBUG] {color_name} | Pixel RGB: R:{r} G:{g} B:{b} | R_diff:{r_diff} G_diff:{g_diff} B_diff:{b_diff} | Forward:{forward_distance:.3f} | Delta:{delta_angle_total:.2f}")
+
+            if within_tolerance:
+                detected_flags[idx] = True
+                detected_list[idx] = [forward_distance, delta_angle_total]
+                print(f"[DETECTED] {color_name} | Forward:{forward_distance:.3f}, Delta angle:{delta_angle_total:.2f}")
+
+        time.sleep(SLEEP_TIME)
+
+    print("Final detected list:", detected_list)
+    return detected_list
+
+# -------------------------------
+# Trilateration으로 로봇 위치 추정
+# -------------------------------
+def trilateration(detected_list):
+    points = []
+    distances = []
+    for idx, item in enumerate(detected_list):
+        if item is not None:
+            distance, _ = item
+            color_name = COLOR_LIST[idx]
+            points.append(landmark_positions[color_name])
+            distances.append(distance)
+
+    points = np.array(points)
+    distances = np.array(distances)
+
+    if len(points) < 2:
+        print("[TRILATERATION ERROR] 최소 2개 이상의 landmark 필요")
+        return None
+
+    def fun(x):
+        return np.sqrt((x[0]-points[:,0])**2 + (x[1]-points[:,1])**2) - distances
+
+    x0 = np.mean(points, axis=0)
+    res = least_squares(fun, x0)
+    x_est, y_est = res.x
+    print(f"[TRILATERATION] Estimated robot position: x={x_est:.3f}, y={y_est:.3f}")
+    return x_est, y_est
+
+# -------------------------------
+# 메인 실행
+# -------------------------------
 def main():
     try:
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
-        x, y, cell = run_trilateration_full_rotation(bot)
-    except Exception as e:
-        print("[DEBUG] Error:", e)
-        import traceback
-        traceback.print_exc()
+        time.sleep(1)  # 카메라 초기화 대기
+
+        # 360° 색상 감지
+        detected_list = turn_360_detect(bot)
+
+        # Trilateration으로 위치 추정
+        trilateration(detected_list)
+
+    except KeyboardInterrupt:
+        print("Detection stopped by user.")
+    finally:
+        bot.set_left_motor_speed(0)
+        bot.set_right_motor_speed(0)
+        bot.camera.stop()
+        print("Camera disabled.")
 
 if __name__ == "__main__":
     main()
