@@ -158,16 +158,21 @@ def main():
         # 360° 색상 감지
         detected_list = turn_360_detect(bot)
 
-        # Trilateration
-        x, y = trilateration(detected_list)
-        if x is not None and y is not None:
-            print(f"[TRILATERATION] Estimated robot position: x={x:.2f}, y={y:.2f}")
+        # 감지된 랜드마크 수 확인
+        num_detected = sum([1 for d in detected_list if d is not None and d[0] < 9999.0])
 
-            # Grid cell index
-            cell_index = get_cell_index(x, y)
-            print(f"[GRID] Estimated starting cell index: {cell_index}")
+        if num_detected >= 3:
+            # Trilateration 계산
+            x, y = trilateration(detected_list)
+            print(f"[TRILATERATION] Estimated robot position: x={x:.2f}, y={y:.2f}")
         else:
-            print("[TRILATERATION] Could not estimate position.")
+            # 2개 이하 감지 시 기본 위치 사용
+            x, y = -300, -300
+            print("[TRILATERATION] Not enough landmarks detected (<=2). Using default position: x=-300, y=-300")
+
+        # Grid cell index 계산 (4x4 기준)
+        cell_index = get_cell_index(x, y, grid_size=4)
+        print(f"[GRID] Estimated starting cell index: {cell_index}")
 
     except KeyboardInterrupt:
         print("Detection stopped by user.")
