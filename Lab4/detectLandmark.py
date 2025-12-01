@@ -7,8 +7,8 @@ COLOR_LIST = ["orange", "green", "blue", "pink"]
 TARGET_COLORS = {
     "orange": (255, 140, 50),
     "green": (50, 200, 50),
-    "blue": (100, 180, 255),
-    "pink": (255, 220, 0)
+    "blue": (50, 150, 200),
+    "pink": (125, 100, 100)
 }
 TOLERANCE = 50
 FIXED_SPEED = 1.0  # 회전 속도
