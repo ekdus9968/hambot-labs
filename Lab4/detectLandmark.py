@@ -12,7 +12,7 @@ TARGET_COLORS = {
 }
 TOLERANCE = 50
 FIXED_SPEED = 4.0  # 회전 속도
-SLEEP_TIME = 0.1   # 루프 딜레이
+SLEEP_TIME = 0.05   # 루프 딜레이
 
 def detect_color_in_frame(frame, target_color, tolerance):
     """이미지 전체에서 특정 색상이 있는지 확인"""
