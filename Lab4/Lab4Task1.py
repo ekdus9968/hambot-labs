@@ -20,10 +20,10 @@ SLEEP_TIME = 0.05  # 루프 딜레이
 # Landmark positions (x, y) mm
 # -------------------------------
 landmark_positions = {
-    "orange": (-350, 350),
-    "green": (-350,-350),
-    "blue": (350,-350),
-    "pink": (350,350)
+    "orange": (-2400, 2400),
+    "green": (-2400,-2400),
+    "blue": (2400,-2400),
+    "pink": (2400,2400)
 }
 
 # -------------------------------
@@ -139,7 +139,7 @@ def trilateration(detected_list):
 # -------------------------------
 # Grid Cell Index 매핑
 # -------------------------------
-def get_cell_index(x, y, grid_size=4, world_min=-400, world_max=400):
+def get_cell_index(x, y, grid_size=4, world_min=-2400, world_max=2400):
     cell_width = (world_max - world_min) / grid_size  # 각 셀 크기
     col = int((x - world_min) // cell_width)
     row = int((world_max - y) // cell_width)  # y는 위쪽이 최대
