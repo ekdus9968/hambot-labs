@@ -81,7 +81,7 @@ def detect_landmark_color(bot, target_color, tolerance):
     """
     landmarks = bot.camera.find_landmarks()
     if not landmarks:
-        return False
+        return False, None  # landmarks 없으면 False, 픽셀값 None 반환
 
     # 첫 번째 Landmark 사용
     landmark = landmarks[0]
@@ -89,7 +89,7 @@ def detect_landmark_color(bot, target_color, tolerance):
 
     frame = bot.camera.get_frame()
     if frame is None:
-        return False
+        return False, None
 
     H, W = frame.shape[:2]
     x = min(max(0, int(x)), W-1)
