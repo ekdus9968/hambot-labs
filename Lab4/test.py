@@ -57,9 +57,9 @@ from robot_systems.robot import HamBot
 COLOR_LIST = ["orange", "green", "blue", "pink"]
 TARGET_COLORS = {
     "orange": (255, 150, 30), #check
-    "green": (0, 255, 0),
-    "blue": (153, 255, 255),
-    "pink": (204, 0, 152)
+    "green": (50, 200, 130),
+    "blue": (50, 80, 80),
+    "pink": (150, 30, 30)
 }
 TOLERANCE = 50
 FIXED_SPEED = 0.0  # 제자리 회전 속도
