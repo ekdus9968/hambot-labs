@@ -48,7 +48,8 @@ def turn_to_detect():
                     conitue
             return False 
 
-"""import time
+"""
+import time
 import numpy as np
 from robot_systems.robot import HamBot
 
