@@ -1,7 +1,6 @@
 import time
 import numpy as np
 from robot_systems.robot import HamBot
-from scipy.optimize import least_squares
 
 # -------------------------------
 # 감지할 색상 설정
@@ -58,10 +57,9 @@ def turn_360_detect(bot):
         if current_heading is None:
             continue
 
-        # delta angle 계산
         delta_angle_total = (current_heading - start_heading + 360) % 360
 
-        # 360° 완료 여부 (±3° 허용)
+        # 360° 완료 여부
         if delta_angle_total >= 357:
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
@@ -72,21 +70,17 @@ def turn_360_detect(bot):
         bot.set_left_motor_speed(-FIXED_SPEED)
         bot.set_right_motor_speed(FIXED_SPEED)
 
-        # 카메라 프레임 가져오기
         frame = bot.camera.get_frame()
         if frame is None:
             continue
 
         H, W = frame.shape[:2]
-        center_pixel = frame[H // 2, W // 2]  # 중앙 픽셀
-        r, g, b = center_pixel
+        r, g, b = frame[H // 2, W // 2]  # 중앙 픽셀
 
         forward_distance = get_forward_distance(bot)
 
-        # 4개 색상 확인
         for idx, color_name in enumerate(COLOR_LIST):
             if detected_flags[idx]:
-                # 이미 감지된 색상
                 print(f"[DEBUG] {color_name} already detected | Pixel RGB: R:{r} G:{g} B:{b} | Forward:{forward_distance:.3f}")
                 continue
 
@@ -96,7 +90,6 @@ def turn_360_detect(bot):
             b_diff = abs(b - target_color[2])
             within_tolerance = r_diff <= TOLERANCE and g_diff <= TOLERANCE and b_diff <= TOLERANCE
 
-            # 실시간 디버그 출력
             print(f"[DEBUG] {color_name} | Pixel RGB: R:{r} G:{g} B:{b} | R_diff:{r_diff} G_diff:{g_diff} B_diff:{b_diff} | Forward:{forward_distance:.3f} | Delta:{delta_angle_total:.2f}")
 
             if within_tolerance:
@@ -110,7 +103,7 @@ def turn_360_detect(bot):
     return detected_list
 
 # -------------------------------
-# Trilateration으로 로봇 위치 추정
+# 단순 Trilateration (NumPy만 사용)
 # -------------------------------
 def trilateration(detected_list):
     points = []
@@ -129,12 +122,35 @@ def trilateration(detected_list):
         print("[TRILATERATION ERROR] 최소 2개 이상의 landmark 필요")
         return None
 
-    def fun(x):
-        return np.sqrt((x[0]-points[:,0])**2 + (x[1]-points[:,1])**2) - distances
+    # 단순 평균 기반 추정: 모든 랜드마크에서의 원과 중심점 추정
+    xs = []
+    ys = []
+    for i in range(len(points)):
+        for j in range(i+1, len(points)):
+            x1, y1 = points[i]
+            x2, y2 = points[j]
+            r1 = distances[i]
+            r2 = distances[j]
 
-    x0 = np.mean(points, axis=0)
-    res = least_squares(fun, x0)
-    x_est, y_est = res.x
+            # 두 원의 교차점 근사 계산 (x-axis 기준)
+            dx = x2 - x1
+            dy = y2 - y1
+            d = np.hypot(dx, dy)
+            if d > (r1 + r2):
+                continue  # 교차하지 않음
+            # 단순히 두 점 중간에 가까운 위치로 대략 계산
+            t = (r1**2 - r2**2 + d**2) / (2*d**2)
+            x_mid = x1 + t*dx
+            y_mid = y1 + t*dy
+            xs.append(x_mid)
+            ys.append(y_mid)
+
+    if len(xs) == 0:
+        print("[TRILATERATION ERROR] 유효한 교차점 없음")
+        return None
+
+    x_est = np.mean(xs)
+    y_est = np.mean(ys)
     print(f"[TRILATERATION] Estimated robot position: x={x_est:.3f}, y={y_est:.3f}")
     return x_est, y_est
 
@@ -144,12 +160,9 @@ def trilateration(detected_list):
 def main():
     try:
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
-        time.sleep(1)  # 카메라 초기화 대기
+        time.sleep(1)
 
-        # 360° 색상 감지
         detected_list = turn_360_detect(bot)
-
-        # Trilateration으로 위치 추정
         trilateration(detected_list)
 
     except KeyboardInterrupt:
