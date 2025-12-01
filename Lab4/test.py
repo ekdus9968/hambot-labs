@@ -76,7 +76,7 @@ def get_forward_distance(bot):
         forward_distance = np.min(scan[175:185])
         if np.isnan(forward_distance) or np.isinf(forward_distance) or forward_distance < 0:
             forward_distance = 9999.9999
-        return forward_distance / 600
+        return forward_distance 
     return 9999.9999
 
 # -------------------------------
