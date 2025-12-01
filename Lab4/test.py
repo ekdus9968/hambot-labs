@@ -179,7 +179,7 @@ TARGET_COLORS = {
     "pink": (125, 100, 100)
 }
 TOLERANCE = 30  # RGB 허용 오차
-FIXED_SPEED = 1.0  # 제자리 회전 속도
+FIXED_SPEED = 0.0  # 제자리 회전 속도
 SLEEP_TIME = 0.05   # 루프 딜레이
 
 ROI_SIZE = 20  # 중앙 영역 크기 (20x20 픽셀)
