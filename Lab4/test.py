@@ -56,13 +56,13 @@ from robot_systems.robot import HamBot
 # 감지할 색상
 COLOR_LIST = ["orange", "green", "blue", "pink"]
 TARGET_COLORS = {
-    "orange": (255, 150, 30),
+    "orange": (255, 150, 30), #check
     "green": (0, 255, 0),
     "blue": (153, 255, 255),
     "pink": (204, 0, 152)
 }
 TOLERANCE = 50
-FIXED_SPEED = 1.0  # 제자리 회전 속도
+FIXED_SPEED = 0.0  # 제자리 회전 속도
 SLEEP_TIME = 0.05  # 루프 딜레이
 
 def get_forward_distance(bot):
