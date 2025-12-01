@@ -139,13 +139,13 @@ def trilateration(detected_list):
 # -------------------------------
 # Grid Cell Index 매핑
 # -------------------------------
-def get_cell_index(x, y, grid_size=5, world_min=-400, world_max=400):
-    cell_width = (world_max - world_min) / grid_size
+def get_cell_index(x, y, grid_size=4, world_min=-400, world_max=400):
+    cell_width = (world_max - world_min) / grid_size  # 각 셀 크기
     col = int((x - world_min) // cell_width)
     row = int((world_max - y) // cell_width)  # y는 위쪽이 최대
     col = max(0, min(grid_size-1, col))
     row = max(0, min(grid_size-1, row))
-    return row * grid_size + col + 1
+    return row * grid_size + col + 1  # 1~16
 
 # -------------------------------
 # 메인 실행
