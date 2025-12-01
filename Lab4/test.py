@@ -133,7 +133,7 @@ def turn_360_detect(bot):
             if within_tolerance:
                 detected_flags[idx] = True
                 detected_list[idx] = [forward_distance, delta_angle_total]
-                print(f"[DETECTED] {color_name} | Forward:{forward_distance:.3f}, Delta angle:{delta_angle_total:.2f}")
+                print(f"[DETECTED] {color_name}{color_name}{color_name}{color_name}{color_name} | Forward:{forward_distance:.3f}, Delta angle:{delta_angle_total:.2f}")
 
         time.sleep(SLEEP_TIME)
 
