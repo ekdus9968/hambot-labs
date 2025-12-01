@@ -1,70 +1,115 @@
-# -----------------------------------------------
-#  Detect 4 color landmarks separately
-# -----------------------------------------------
-def detect_all_landmarks(bot):
-    """
-    4개 랜드마크(PINK, BLUE, ORANGE, GREEN)를 각각 탐지하고
-    각 랜드마크의 bbox 중심 (cx, cy)를 반환한다.
+import time
+import numpy as np
+from robot_systems.robot import HamBot
 
-    return:
-        positions = [
-            (found, cx, cy),   # Pink
-            (found, cx, cy),   # Blue
-            (found, cx, cy),   # Orange
-            (found, cx, cy)    # Green
-        ]
-    """
-    results = []
+# 감지할 색상
+COLOR_LIST = ["orange", "green", "blue", "pink"]
+TARGET_COLORS = {
+    "orange": (255, 140, 50),
+    "green": (50, 200, 50),
+    "blue": (100, 180, 255),
+    "pink": (255, 220, 0)
+}
+TOLERANCE = 50
+FIXED_SPEED = 4.0  # 회전 속도
+SLEEP_TIME = 0.1   # 루프 딜레이
 
-    for idx in range(4):
-        boxes = bot.camera.find_landmarks(index=idx)
+def detect_color_in_frame(frame, target_color, tolerance):
+    """이미지 전체에서 특정 색상이 있는지 확인"""
+    diff = np.abs(frame.astype(int) - np.array(target_color))
+    mask = np.all(diff <= tolerance, axis=2)
+    return np.any(mask)
 
-        if not boxes:
-            results.append((False, None, None))
-            print(f"[DEBUG] Landmark {idx} NOT FOUND")
+def get_forward_distance(bot):
+    """전방 최소 거리 계산"""
+    scan = bot.get_range_image()
+    if scan is not None and len(scan) > 0:
+        # 전방 10도 영역에서 최소값
+        forward_distance = np.min(scan[175:185])
+        if np.isnan(forward_distance) or np.isinf(forward_distance):
+            forward_distance = 9999.9999
+        return forward_distance / 600  # 기존 코드처럼 스케일 조정
+    return None
+
+def turn_to_detect(bot):
+    """제자리 회전하면서 색상 감지"""
+    start_heading = bot.get_heading()
+    if start_heading is None:
+        print("[DEBUG] Warning: start heading is None")
+        return
+
+    detected_list = [None] * 4  # 4개 색상, 각 [distance, delta_angle]
+    detected_flags = [False] * 4
+
+    print("Starting 360° color detection...")
+
+    while True:
+        current_heading = bot.get_heading()
+        if current_heading is None:
             continue
 
-        # 가장 큰 landmark bbox 선택
-        bbox = max(boxes, key=lambda b: (b[2] - b[0]) * (b[3] - b[1]))
+        # 360° 완료 여부
+        delta_angle = (current_heading - start_heading + 360) % 360
+        if delta_angle > 180:
+            delta_angle = 360 - delta_angle  # 항상 최소 각도
 
-        x1, y1, x2, y2 = bbox
-        cx = int((x1 + x2) / 2)
-        cy = int((y1 + y2) / 2)
+        if abs(delta_angle - 360) < 3:
+            # 회전 완료
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+            print("360° rotation completed.")
+            break
 
-        print(f"[DEBUG] Landmark {idx} FOUND at center ({cx},{cy}) bbox={bbox}")
-        results.append((True, cx, cy))
+        # 제자리 회전
+        bot.set_left_motor_speed(-FIXED_SPEED)
+        bot.set_right_motor_speed(FIXED_SPEED)
 
-    return results
+        # 프레임 색상 확인
+        frame = bot.camera.get_frame()
+        if frame is None:
+            continue
+
+        forward_distance = get_forward_distance(bot)
+        if forward_distance is None:
+            forward_distance = 9999.9999
+
+        for idx, color_name in enumerate(COLOR_LIST):
+            if detected_flags[idx]:
+                continue  # 이미 감지했으면 패스
+
+            found = detect_color_in_frame(frame, TARGET_COLORS[color_name], TOLERANCE)
+            H, W = frame.shape[:2]
+            center_pixel = frame[H//2, W//2]  # (R,G,B)
+
+            print(f"[DEBUG] {color_name} | Found: {found} | Center pixel RGB: {center_pixel} | Forward distance: {forward_distance:.3f}")
+            
+            if found:
+                detected_flags[idx] = True
+                detected_list[idx] = [forward_distance, delta_angle]
+                print(f"[DETECTED] {color_name} | Distance: {forward_distance:.3f} m, Delta angle: {delta_angle:.2f}°")
+
+        # 디버그 출력 (감지 안 된 색상도 표시)
+        for idx, color_name in enumerate(COLOR_LIST):
+            if not detected_flags[idx]:
+                print(f"[CHECKING] {color_name} | Forward: {forward_distance:.3f} m")
+
+        time.sleep(SLEEP_TIME)
+
+    print("Final detected list:", detected_list)
+    return detected_list
+
 def main():
     try:
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
-
-        # 4개 색 등록 (index=0,1,2,3 순서가 중요)
-        COLORS = [
-            (255, 20, 200),   # Pink
-            (100, 180, 255),  # Baby Blue
-            (255, 140, 50),   # Orange
-            (50, 200, 50)     # Green
-        ]
-        TOL = 80
-        bot.camera.set_target_colors(COLORS, tolerance=TOL)
-
-        # --- 4개 랜드마크 탐지 테스트 ---
-        print("=== Detecting All Landmarks ===")
-        results = detect_all_landmarks(bot)
-
-        # 확인 출력
-        for i, (found, cx, cy) in enumerate(results):
-            if found:
-                print(f"Landmark {i} detected at ({cx},{cy})")
-            else:
-                print(f"Landmark {i} not detected")
-
-    except Exception as e:
-        print(f"[DEBUG] Error: {e}")
-        import traceback
-        traceback.print_exc()
-
+        time.sleep(1)  # 카메라 초기화 대기
+        detected_list = turn_to_detect(bot)
+    except KeyboardInterrupt:
+        print("Detection stopped by user.")
+    finally:
+        bot.set_left_motor_speed(0)
+        bot.set_right_motor_speed(0)
+        bot.camera.stop()
+        print("Camera disabled.")
 
 if __name__ == "__main__":
     main()
