@@ -17,13 +17,13 @@ FIXED_SPEED = 4.0  # 제자리 회전 속도
 SLEEP_TIME = 0.05  # 루프 딜레이
 
 # -------------------------------
-# 랜드마크 절대 좌표 (mm)
+# Landmark positions (x, y) mm
 # -------------------------------
 landmark_positions = {
     "orange": (-350, 350),
-    "green": (-350, -350),
-    "blue": (350, -350),
-    "pink": (350, 350)
+    "green": (-350,-350),
+    "blue": (350,-350),
+    "pink": (350,350)
 }
 
 # -------------------------------
@@ -57,9 +57,10 @@ def turn_360_detect(bot):
         if current_heading is None:
             continue
 
+        # delta angle 계산
         delta_angle_total = (current_heading - start_heading + 360) % 360
 
-        # 360° 완료 여부
+        # 360° 완료 여부 (±3° 허용)
         if delta_angle_total >= 357:
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
@@ -70,17 +71,21 @@ def turn_360_detect(bot):
         bot.set_left_motor_speed(-FIXED_SPEED)
         bot.set_right_motor_speed(FIXED_SPEED)
 
+        # 카메라 프레임 가져오기
         frame = bot.camera.get_frame()
         if frame is None:
             continue
 
         H, W = frame.shape[:2]
-        r, g, b = frame[H // 2, W // 2]  # 중앙 픽셀
+        center_pixel = frame[H // 2, W // 2]  # 중앙 픽셀
+        r, g, b = center_pixel
 
         forward_distance = get_forward_distance(bot)
 
+        # 4개 색상 확인
         for idx, color_name in enumerate(COLOR_LIST):
             if detected_flags[idx]:
+                # 이미 감지된 색상
                 print(f"[DEBUG] {color_name} already detected | Pixel RGB: R:{r} G:{g} B:{b} | Forward:{forward_distance:.3f}")
                 continue
 
@@ -90,6 +95,7 @@ def turn_360_detect(bot):
             b_diff = abs(b - target_color[2])
             within_tolerance = r_diff <= TOLERANCE and g_diff <= TOLERANCE and b_diff <= TOLERANCE
 
+            # 실시간 디버그 출력
             print(f"[DEBUG] {color_name} | Pixel RGB: R:{r} G:{g} B:{b} | R_diff:{r_diff} G_diff:{g_diff} B_diff:{b_diff} | Forward:{forward_distance:.3f} | Delta:{delta_angle_total:.2f}")
 
             if within_tolerance:
@@ -103,56 +109,43 @@ def turn_360_detect(bot):
     return detected_list
 
 # -------------------------------
-# 단순 Trilateration (NumPy만 사용)
+# Trilateration (2D)
 # -------------------------------
 def trilateration(detected_list):
+    # 최소 3개 유효 landmark 필요
     points = []
     distances = []
     for idx, item in enumerate(detected_list):
         if item is not None:
             distance, _ = item
+            if distance >= 9999.0:
+                continue  # 유효하지 않은 거리 제외
             color_name = COLOR_LIST[idx]
             points.append(landmark_positions[color_name])
             distances.append(distance)
 
-    points = np.array(points)
-    distances = np.array(distances)
+    if len(points) < 3:
+        print("[TRILATERATION] Not enough landmarks detected for trilateration.")
+        return None, None
 
-    if len(points) < 2:
-        print("[TRILATERATION ERROR] 최소 2개 이상의 landmark 필요")
-        return None
+    # 단순 평균법으로 근사
+    xs, ys = zip(*points)
+    # 비율로 보정: landmark 중심과 거리 비율
+    estimated_x = np.mean([x - distances[i] for i, x in enumerate(xs)])
+    estimated_y = np.mean([y - distances[i] for i, y in enumerate(ys)])
 
-    # 단순 평균 기반 추정: 모든 랜드마크에서의 원과 중심점 추정
-    xs = []
-    ys = []
-    for i in range(len(points)):
-        for j in range(i+1, len(points)):
-            x1, y1 = points[i]
-            x2, y2 = points[j]
-            r1 = distances[i]
-            r2 = distances[j]
+    return estimated_x, estimated_y
 
-            # 두 원의 교차점 근사 계산 (x-axis 기준)
-            dx = x2 - x1
-            dy = y2 - y1
-            d = np.hypot(dx, dy)
-            if d > (r1 + r2):
-                continue  # 교차하지 않음
-            # 단순히 두 점 중간에 가까운 위치로 대략 계산
-            t = (r1**2 - r2**2 + d**2) / (2*d**2)
-            x_mid = x1 + t*dx
-            y_mid = y1 + t*dy
-            xs.append(x_mid)
-            ys.append(y_mid)
-
-    if len(xs) == 0:
-        print("[TRILATERATION ERROR] 유효한 교차점 없음")
-        return None
-
-    x_est = np.mean(xs)
-    y_est = np.mean(ys)
-    print(f"[TRILATERATION] Estimated robot position: x={x_est:.3f}, y={y_est:.3f}")
-    return x_est, y_est
+# -------------------------------
+# Grid Cell Index 매핑
+# -------------------------------
+def get_cell_index(x, y, grid_size=5, world_min=-400, world_max=400):
+    cell_width = (world_max - world_min) / grid_size
+    col = int((x - world_min) // cell_width)
+    row = int((world_max - y) // cell_width)  # y는 위쪽이 최대
+    col = max(0, min(grid_size-1, col))
+    row = max(0, min(grid_size-1, row))
+    return row * grid_size + col + 1
 
 # -------------------------------
 # 메인 실행
@@ -160,10 +153,21 @@ def trilateration(detected_list):
 def main():
     try:
         bot = HamBot(lidar_enabled=True, camera_enabled=True)
-        time.sleep(1)
+        time.sleep(1)  # 카메라 초기화 대기
 
+        # 360° 색상 감지
         detected_list = turn_360_detect(bot)
-        trilateration(detected_list)
+
+        # Trilateration
+        x, y = trilateration(detected_list)
+        if x is not None and y is not None:
+            print(f"[TRILATERATION] Estimated robot position: x={x:.2f}, y={y:.2f}")
+
+            # Grid cell index
+            cell_index = get_cell_index(x, y)
+            print(f"[GRID] Estimated starting cell index: {cell_index}")
+        else:
+            print("[TRILATERATION] Could not estimate position.")
 
     except KeyboardInterrupt:
         print("Detection stopped by user.")
