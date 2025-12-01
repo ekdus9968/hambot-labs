@@ -48,8 +48,7 @@ def turn_to_detect():
                     conitue
             return False 
 
-"""
-import time
+"""import time
 import numpy as np
 from robot_systems.robot import HamBot
 
@@ -72,7 +71,7 @@ def get_forward_distance(bot):
         forward_distance = np.min(scan[175:185])
         if np.isnan(forward_distance) or np.isinf(forward_distance) or forward_distance < 0:
             forward_distance = 9999.9999
-        return forward_distance / 600
+        return forward_distance 
     return 9999.9999
 
 def detect_landmark_color(bot, target_color, tolerance):
@@ -81,9 +80,8 @@ def detect_landmark_color(bot, target_color, tolerance):
     """
     landmarks = bot.camera.find_landmarks()
     if not landmarks:
-        return False, None  # landmarks 없으면 False, 픽셀값 None 반환
+        return False, None
 
-    # 첫 번째 Landmark 사용
     landmark = landmarks[0]
     x, y = landmark.x, landmark.y
 
@@ -112,7 +110,7 @@ def turn_to_detect(bot):
         print("[DEBUG] Warning: start heading is None")
         return
 
-    detected_list = [None] * 4  # 색상별 [distance, delta_angle]
+    detected_list = [None] * 4  # 색상별 [forward distance, delta angle]
     detected_flags = [False] * 4
 
     print("Starting 360° color detection...")
@@ -144,12 +142,15 @@ def turn_to_detect(bot):
                 continue
 
             found, pixel_rgb = detect_landmark_color(bot, TARGET_COLORS[color_name], TOLERANCE)
+
+            if pixel_rgb is not None:
+                r, g, b = pixel_rgb
+                print(f"[DEBUG] {color_name} | Pixel RGB: R:{r} G:{g} B:{b} | Forward distance: {forward_distance:.3f} m")
+
             if found:
                 detected_flags[idx] = True
                 detected_list[idx] = [forward_distance, delta_angle]
-                print(f"[DETECTED] {color_name} | Pixel RGB: {pixel_rgb} | Distance: {forward_distance:.3f} m, Delta angle: {delta_angle:.2f}°")
-            else:
-                print(f"[DEBUG] {color_name} | Pixel RGB: {pixel_rgb} | Forward distance: {forward_distance:.3f}")
+                print(f"[DETECTED] {color_name} | Forward distance: {forward_distance:.3f} m, Delta angle: {delta_angle:.2f}°")
 
         time.sleep(SLEEP_TIME)
 
