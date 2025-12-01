@@ -5,12 +5,12 @@ from robot_systems.robot import HamBot
 # 감지할 색상
 COLOR_LIST = ["orange", "green", "blue", "pink"]
 TARGET_COLORS = {
-    "orange": (255, 140, 50),
-    "green": (50, 200, 50),
-    "blue": (50, 150, 200),
-    "pink": (125, 100, 100)
+    "orange": (255, 153, 51),
+    "green": (0, 255, 0),
+    "blue": (153, 255, 255),
+    "pink": (204, 0, 152)
 }
-TOLERANCE = 50
+TOLERANCE = 50  # RGB 허용 오차
 FIXED_SPEED = 1.0  # 회전 속도
 SLEEP_TIME = 0.05   # 루프 딜레이
 
