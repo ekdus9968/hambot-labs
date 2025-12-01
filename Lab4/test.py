@@ -65,80 +65,17 @@ TOLERANCE = 50
 FIXED_SPEED = 1.0  # 제자리 회전 속도
 SLEEP_TIME = 0.05  # 루프 딜레이
 
-class LandmarkDetector:
-    def __init__(self, bot):
-        self.bot = bot
-
-    def detect_landmarks_all_colors(self, detected_flags, detected_list, start_heading, tolerance=TOLERANCE):
-        """
-        4가지 target 색상을 확인하고, 발견하면 detected_list에 기록.
-        detected_flags: 이미 감지한 색상 True/False 리스트
-        detected_list: 각 색상별 [forward_distance, delta_angle] 저장
-        """
-        try:
-            landmarks = self.bot.camera.find_landmarks()
-            if not landmarks:
-                print("[DEBUG] No landmarks found")
-                return
-
-            # 첫 번째 Landmark 객체 사용
-            landmark = landmarks[0]
-            x, y = landmark.x, landmark.y
-
-            frame = self.bot.camera.get_frame()
-            if frame is None:
-                print("[DEBUG] Camera frame not available")
-                return
-
-            H, W = frame.shape[:2]
-            x = min(max(0, int(x)), W-1)
-            y = min(max(0, int(y)), H-1)
-
-            pixel_color = frame[y, x]  # (R,G,B)
-
-            # forward distance 계산
-            scan = self.bot.get_range_image()
-            if scan is not None and len(scan) > 0:
-                forward_distance = np.min(scan[175:185])
-                if np.isnan(forward_distance) or np.isinf(forward_distance) or forward_distance < 0:
-                    forward_distance = 9999.9999
-                forward_distance /= 600
-            else:
-                forward_distance = 9999.9999
-
-            # delta angle 계산
-            current_heading = self.bot.get_heading()
-            if current_heading is None:
-                delta_angle = 0
-            else:
-                delta_angle = (current_heading - start_heading + 360) % 360
-
-            # 4개 색상 확인
-            for idx, color_name in enumerate(COLOR_LIST):
-                if detected_flags[idx]:
-                    # 이미 감지한 색상
-                    print(f"[DEBUG] {color_name} already detected | Pixel RGB: {pixel_color} | Forward: {forward_distance:.3f}")
-                    continue
-
-                target_color = TARGET_COLORS[color_name]
-                r_diff = abs(int(pixel_color[0]) - target_color[0])
-                g_diff = abs(int(pixel_color[1]) - target_color[1])
-                b_diff = abs(int(pixel_color[2]) - target_color[2])
-                within_tolerance = r_diff <= tolerance and g_diff <= tolerance and b_diff <= tolerance
-
-                # 디버그 출력
-                print(f"[DEBUG] {color_name} | Pixel RGB: {pixel_color} | R_diff:{r_diff} G_diff:{g_diff} B_diff:{b_diff} | Forward:{forward_distance:.3f} | Delta:{delta_angle:.2f}")
-
-                if within_tolerance:
-                    detected_flags[idx] = True
-                    detected_list[idx] = [forward_distance, delta_angle]
-                    print(f"[DETECTED] {color_name} | Forward: {forward_distance:.3f}, Delta angle: {delta_angle:.2f}")
-
-        except Exception as e:
-            print(f"[DEBUG] Error in detect_landmarks_all_colors: {e}")
+def get_forward_distance(bot):
+    """전방 최소 거리 계산"""
+    scan = bot.get_range_image()
+    if scan is not None and len(scan) > 0:
+        forward_distance = np.min(scan[175:185])
+        if np.isnan(forward_distance) or np.isinf(forward_distance) or forward_distance < 0:
+            forward_distance = 9999.9999
+        return forward_distance 
+    return 9999.9999
 
 def turn_360_detect(bot):
-    detector = LandmarkDetector(bot)
     start_heading = bot.get_heading()
     if start_heading is None:
         print("[DEBUG] Warning: start heading is None")
@@ -158,7 +95,7 @@ def turn_360_detect(bot):
         if delta_angle_total > 180:
             delta_angle_total = 360 - delta_angle_total
 
-        # 회전 완료 여부
+        # 360° 회전 완료 여부
         if abs(delta_angle_total - 360) < 3:
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
@@ -169,8 +106,34 @@ def turn_360_detect(bot):
         bot.set_left_motor_speed(-FIXED_SPEED)
         bot.set_right_motor_speed(FIXED_SPEED)
 
-        # 4개 색상 확인 및 기록
-        detector.detect_landmarks_all_colors(detected_flags, detected_list, start_heading)
+        # 카메라 프레임 확인
+        frame = bot.camera.get_frame()
+        if frame is None:
+            continue
+
+        H, W = frame.shape[:2]
+        center_pixel = frame[H//2, W//2]  # 중앙 픽셀 기준
+        r, g, b = center_pixel
+
+        forward_distance = get_forward_distance(bot)
+
+        # 4개 색상 확인
+        for idx, color_name in enumerate(COLOR_LIST):
+            if detected_flags[idx]:
+                continue
+            target_color = TARGET_COLORS[color_name]
+            r_diff = abs(r - target_color[0])
+            g_diff = abs(g - target_color[1])
+            b_diff = abs(b - target_color[2])
+            within_tolerance = r_diff <= TOLERANCE and g_diff <= TOLERANCE and b_diff <= TOLERANCE
+
+            # 디버그 출력
+            print(f"[DEBUG] {color_name} | Pixel RGB: R:{r} G:{g} B:{b} | R_diff:{r_diff} G_diff:{g_diff} B_diff:{b_diff} | Forward:{forward_distance:.3f} | Delta:{delta_angle_total:.2f}")
+
+            if within_tolerance:
+                detected_flags[idx] = True
+                detected_list[idx] = [forward_distance, delta_angle_total]
+                print(f"[DETECTED] {color_name} | Forward:{forward_distance:.3f}, Delta angle:{delta_angle_total:.2f}")
 
         time.sleep(SLEEP_TIME)
 
