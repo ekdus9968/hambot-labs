@@ -2,6 +2,65 @@ import time
 import numpy as np
 from robot_systems.robot import HamBot
 
+import math
+
+def trilateration_two_points(detected_list):
+    """
+    detected_list에서 2개만 존재할 때,
+    두 landmark와 거리로 두 개의 교차점을 계산.
+    """
+
+    # 감지된 두 개 추출
+    valid_items = [(COLOR_LIST[i], detected_list[i]) for i in range(4) if detected_list[i] is not None]
+    if len(valid_items) != 2:
+        print("[ERROR] trilateration_two_points called but detected_list does not contain exactly 2 entries.")
+        return None, None
+
+    # Landmark positions & distances
+    (color1, (d1, _)), (color2, (d2, _)) = valid_items
+    (x1, y1) = landmark_positions[color1]
+    (x2, y2) = landmark_positions[color2]
+
+    # Landmark 간 거리
+    dx = x2 - x1
+    dy = y2 - y1
+    D = math.sqrt(dx*dx + dy*dy)
+
+    print(f"[DEBUG-2PT] Using landmarks {color1} and {color2}")
+    print(f"[DEBUG-2PT] Landmark1=({x1},{y1}), d1={d1}")
+    print(f"[DEBUG-2PT] Landmark2=({x2},{y2}), d2={d2}")
+    print(f"[DEBUG-2PT] Landmark distance D={D}")
+
+    # 원이 서로 닿지 않거나 한 원이 다른 원을 포함하는 경우
+    if D > d1 + d2 or D < abs(d1 - d2):
+        print("[WARNING] Circles do not intersect. No valid solution.")
+        return None, None
+
+    # 두 원 교차점 공식
+    a = (d1*d1 - d2*d2 + D*D) / (2*D)
+    h = math.sqrt(max(d1*d1 - a*a, 0))
+
+    xm = x1 + a * dx / D
+    ym = y1 + a * dy / D
+
+    # 교차점 2개
+    rx = -dy * (h / D)
+    ry = dx * (h / D)
+
+    p1 = (xm + rx, ym + ry)
+    p2 = (xm - rx, ym - ry)
+
+    print(f"[2-POINT SOLUTIONS] Intersection point 1: x={p1[0]:.2f}, y={p1[1]:.2f}")
+    print(f"[2-POINT SOLUTIONS] Intersection point 2: x={p2[0]:.2f}, y={p2[1]:.2f}")
+
+    # ⚠️ Return both in case user wants to choose
+    # For now, pick the midpoint (or one of them)
+    px = (p1[0] + p2[0]) / 2
+    py = (p1[1] + p2[1]) / 2
+
+    return px, py
+
+
 # -------------------------------
 # 감지할 색상 설정
 # -------------------------------
@@ -13,7 +72,7 @@ TARGET_COLORS = {
     "pink": (150, 30, 30)
 }
 TOLERANCE = 50
-FIXED_SPEED = 4.0  # 제자리 회전 속도
+FIXED_SPEED = 0.0  # 제자리 회전 속도
 SLEEP_TIME = 0.05  # 루프 딜레이
 
 # -------------------------------
@@ -165,6 +224,11 @@ def main():
             # Trilateration 계산
             x, y = trilateration(detected_list)
             print(f"[TRILATERATION] Estimated robot position: x={x:.2f}, y={y:.2f}")
+        elif num_detected ==2:
+            x, y = trilateration_two_points(detected_list)
+            print(f"[TRILATERATION-2] Final chosen estimate: x={x:.2f}, y={y:.2f}")
+
+            
         else:
             # 2개 이하 감지 시 기본 위치 사용
             # **************
