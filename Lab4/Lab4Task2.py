@@ -237,7 +237,7 @@ def turn_left(bot, deg):
         if error > 180:
             error = 360 - error
 
-        print(f"[DEBUG] Turning left - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
+        #print(f"[DEBUG] Turning left - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
 
         if error < 3:
             bot.set_left_motor_speed(0)
@@ -273,7 +273,7 @@ def turn_right(bot, deg):
         if error > 180:
             error = 360 - error
 
-        print(f"[DEBUG] Turning right - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
+        #print(f"[DEBUG] Turning right - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
 
         if error < 3:
             bot.set_left_motor_speed(0)
@@ -292,7 +292,7 @@ def main():
     bot = HamBot()
     
     
-    motions = ["left_turn", "forward", "left_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "left_turn"]
+    motions = [ "forward", "left_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "left_turn"]
 
     for step, command in enumerate(motions):
         print(f"\n=== STEP {step+1}: {command} ===")
