@@ -179,20 +179,12 @@ def turn_right(bot, deg):
 def main():
     bot = HamBot()
     
-    motions = ["forward", "left_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "left_turn"]
+    
+    motions = []
 
     for step, command in enumerate(motions):
         print(f"\n=== STEP {step+1}: {command} ===")
         
-        # --- ROBOT ACTION ---
-        if command == "forward":
-            drive_forward(bot, STEP_DISTANCE)
-        elif command == "left_turn":
-            turn_left(bot, 90)
-        elif command == "right_turn":
-            turn_right(bot, 90)
-
-        time.sleep(0.3)
 
         # --- PARTICLE PREDICTION ---
         for p in particles:
@@ -208,11 +200,22 @@ def main():
         particles[:] = resample_particles(particles)
 
         # --- DEBUG ---
+        print("Debug particle")
         debug_particles(particles)
-
+        print("debug estimation")
         # --- ESTIMATION ---
         cell, count = estimate_position(particles)
         print(f"Estimated cell = {cell}, count = {count}/{N_PARTICLES}")
+        
+        # --- ROBOT ACTION ---
+        if command == "forward":
+            drive_forward(bot, STEP_DISTANCE)
+        elif command == "left_turn":
+            turn_left(bot, 90)
+        elif command == "right_turn":
+            turn_right(bot, 90)
+
+        time.sleep(0.3)
 
         if count / N_PARTICLES >= SUCCESS_RATIO:
             print("Localization success! >80% particles converged.")
