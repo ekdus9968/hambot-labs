@@ -3,6 +3,8 @@ import numpy as np
 import random
 from collections import defaultdict
 from robot_systems.robot import HamBot
+
+
 def turn_left(bot, deg):
     """
     Turn left by `deg` degrees using heading only.
