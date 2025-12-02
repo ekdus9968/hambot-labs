@@ -104,15 +104,44 @@ def estimate_position(particles):
 # ============================================
 # PARTICLE DEBUG
 # ============================================
+# def debug_particles(particles):
+#     counts = [0]*GRID_SIZE
+#     for p in particles:
+#         counts[p.cell] += 1
+#     print("Particles per cell:")
+#     for i in range(0, GRID_SIZE, 4):
+#         print(counts[i:i+4])
+#     weights = [round(p.weight,3) for p in particles[:10]]
+#     print("Sample weights:", weights, "...")
 def debug_particles(particles):
+    """
+    Print detailed debug info for particles.
+    - Count per cell
+    - Fraction per cell
+    - Cumulative fraction
+    - Max cell fraction (localization confidence)
+    """
     counts = [0]*GRID_SIZE
     for p in particles:
         counts[p.cell] += 1
-    print("Particles per cell:")
-    for i in range(0, GRID_SIZE, 4):
-        print(counts[i:i+4])
-    weights = [round(p.weight,3) for p in particles[:10]]
-    print("Sample weights:", weights, "...")
+
+    total_particles = len(particles)
+    fractions = [c/total_particles for c in counts]
+    cumulative = np.cumsum(fractions)
+    max_frac = max(fractions)
+    max_cell = counts.index(max(counts))
+
+    print("\n--- Particle Distribution ---")
+    for row in range(4):
+        row_counts = counts[row*4:(row+1)*4]
+        row_fracs = [round(fractions[i+row*4],3) for i in range(4)]
+        print(f"Row {row}: Counts {row_counts}, Fractions {row_fracs}")
+    print(f"Cumulative fractions: {[round(c,3) for c in cumulative]}")
+    print(f"Max cell: {max_cell}, Localization confidence: {round(max_frac*100,1)}%")
+
+    # sample weights for first 10 particles
+    sample_weights = [round(p.weight,3) for p in particles[:10]]
+    print(f"Sample particle weights: {sample_weights} ...\n")
 
 # ============================================
 # SENSOR FROM ROBOT
