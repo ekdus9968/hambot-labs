@@ -67,12 +67,12 @@ def trilateration_two_points(detected_list):
 COLOR_LIST = ["orange", "green", "blue", "pink"]
 TARGET_COLORS = {
     "orange": (255, 150, 30),
-    "green": (50, 200, 130),
-    "blue": (50, 80, 80),
+    "green": (50, 225, 130),
+    "blue": (120, 220, 225),
     "pink": (225, 30, 165)
 }
 TOLERANCE = 50
-FIXED_SPEED = 0.0  # 제자리 회전 속도
+FIXED_SPEED = 2.0  # 제자리 회전 속도
 SLEEP_TIME = 0.05  # 루프 딜레이
 
 # -------------------------------
