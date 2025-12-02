@@ -11,7 +11,7 @@ N_PARTICLES = 160
 ORIENTATIONS = ["N", "E", "S", "W"]  # 북, 동, 남, 서
 GRID_SIZE = 16  # 4x4 grid
 SUCCESS_RATIO = 0.80
-STEP_DISTANCE = 300  # mm
+STEP_DISTANCE = 100  # m
 
 # ============================================
 # MAZE WALL INFO (N,E,S,W)
@@ -184,7 +184,7 @@ def get_observation(bot):
 # ROBOT CONTROL
 # ============================================
 def drive_forward(bot, D, speed=5):
-    wheel_radius = 0.090
+    wheel_radius = 90
     bot.reset_encoders()
     bot.set_left_motor_speed(speed)
     bot.set_right_motor_speed(speed)
