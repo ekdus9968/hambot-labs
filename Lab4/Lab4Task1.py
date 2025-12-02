@@ -53,7 +53,7 @@ def trilateration_two_points(detected_list):
     print(f"[2-POINT SOLUTIONS] Intersection point 1: x={p1[0]:.2f}, y={p1[1]:.2f}")
     print(f"[2-POINT SOLUTIONS] Intersection point 2: x={p2[0]:.2f}, y={p2[1]:.2f}")
 
-    # ⚠️ Return both in case user wants to choose
+    # Return both in case user wants to choose
     # For now, pick the midpoint (or one of them)
     px = (p1[0] + p2[0]) / 2
     py = (p1[1] + p2[1]) / 2
@@ -136,8 +136,21 @@ def turn_360_detect(bot):
             continue
 
         H, W = frame.shape[:2]
-        center_pixel = frame[H // 2, W // 2]  # 중앙 픽셀
-        r, g, b = center_pixel
+        roi = frame[H//2 - 20:H//2 + 20, W//2 - 20:W//2 + 20]  # 40x40 중앙 ROI
+
+        for idx, color_name in enumerate(COLOR_LIST):
+            if detected_flags[idx]:
+                continue
+            target_color = TARGET_COLORS[color_name]
+            found = check_color_in_roi(roi, target_color, TOLERANCE)
+
+            print(f"[DEBUG] {color_name} | ROI check: {found} | Target RGB:{target_color}")
+            if found:
+                detected_flags[idx] = True
+                detected_list[idx] = [forward_distance, delta_angle_total]
+                print(f"[DETECTED] {color_name} | Forward:{forward_distance:.3f}, Delta angle:{delta_angle_total:.2f}")
+
+
 
         forward_distance = get_forward_distance(bot)
 
@@ -205,6 +218,13 @@ def get_cell_index(x, y, grid_size=4, world_min=-2400, world_max=2400):
     col = max(0, min(grid_size-1, col))
     row = max(0, min(grid_size-1, row))
     return row * grid_size + col + 1  # 1~16
+
+def check_color_in_roi(roi, target_color, tolerance):
+    # roi: HxWx3
+    # target_color: (R,G,B)
+    diff = np.abs(roi.astype(int) - np.array(target_color))
+    mask = np.all(diff <= tolerance, axis=2)
+    return np.any(mask)  # 하나라도 존재하면 True
 
 # -------------------------------
 # 메인 실행
