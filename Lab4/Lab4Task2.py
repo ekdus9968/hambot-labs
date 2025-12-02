@@ -117,8 +117,34 @@ def debug_particles(particles):
 # ============================================
 # SENSOR FROM ROBOT
 # ============================================
+def read_lidar(bot):
+    lidar = bot.get_range_image()
+    if lidar is None or len(lidar) < 360:
+        print("[DEBUG] No LiDAR data received")
+        return
+
+    # Front and side distances
+    front_dist = np.nanmin(lidar[175:185])
+    right_dist = np.nanmin(lidar[265:275])
+    left_dist = np.nanmin(lidar[85:95])
+    back_dist = np.nanmin(lidar[355:360] + lidar[0:5])
+    
+    # Handle invalid readings
+    for i, val in enumerate([front_dist, right_dist, back_dist, left_dist]):
+        if np.isinf(val) or np.isnan(val) or val < 0.05:
+            if i == 0: front_dist = 666.666
+            elif i == 1: right_dist = 666.666
+            elif i == 2: back_dist = 666.666
+            elif i == 3: left_dist = 666.666
+
+    
+    print(f"[DEBUG] LiDAR - Front: {front_dist:.1f}, Left: {left_dist:.1f}, Right: {right_dist:.1f}, Back:  {back_dist:.1f}")
+    return front_dist, left_dist, back_dist, right_dist
+
 def get_observation(bot):
-    dN, dE, dS, dW = bot.get_front_distance(), bot.get_right_distance(), bot.get_back_distance(), bot.get_left_distance()
+    dN, dE, dS, dW = read_lidar(bot)
+    if dN is None: 
+        return 0,0,0,0
     TH = 400
     return (1 if dN < TH else 0,
             1 if dE < TH else 0,
