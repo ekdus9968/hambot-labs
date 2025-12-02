@@ -11,7 +11,7 @@ N_PARTICLES = 160
 ORIENTATIONS = ["N", "E", "S", "W"]  # 북, 동, 남, 서
 GRID_SIZE = 16  # 4x4 grid
 SUCCESS_RATIO = 0.80
-STEP_DISTANCE = 600  # mm
+STEP_DISTANCE = 300  # mm
 
 # ============================================
 # MAZE WALL INFO (N,E,S,W)
@@ -236,10 +236,17 @@ def main():
         # --- ROBOT ACTION ---
         if command == "forward":
             drive_forward(bot, STEP_DISTANCE)
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+            
         elif command == "left_turn":
             turn_left(bot, 90)
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
         elif command == "right_turn":
             turn_right(bot, 90)
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
 
         time.sleep(0.3)
 
