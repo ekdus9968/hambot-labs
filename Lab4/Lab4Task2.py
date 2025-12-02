@@ -179,7 +179,7 @@ def turn_right(bot, deg):
 def main():
     bot = HamBot()
     
-    motions = ["left_turn", "forward", "left_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "left_turn"]
+    motions = ["forward", "left_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "left_turn"]
 
     for step, command in enumerate(motions):
         print(f"\n=== STEP {step+1}: {command} ===")
