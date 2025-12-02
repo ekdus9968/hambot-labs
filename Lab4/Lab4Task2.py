@@ -11,7 +11,7 @@ N_PARTICLES = 160
 ORIENTATIONS = ["N", "E", "S", "W"]  # 북, 동, 남, 서
 GRID_SIZE = 16  # 4x4 grid
 SUCCESS_RATIO = 0.80
-STEP_DISTANCE = 100  # m
+STEP_DISTANCE = 600  # m
 
 # ============================================
 # MAZE WALL INFO (N,E,S,W)
@@ -211,7 +211,6 @@ def drive_forward(bot, D, speed=5):
             break
 
         time.sleep(0.01)
-
 
 
 def turn_left(bot, deg):
