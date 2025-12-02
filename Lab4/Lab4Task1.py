@@ -72,7 +72,7 @@ TARGET_COLORS = {
     "pink": (225, 30, 165)
 }
 TOLERANCE = 50
-FIXED_SPEED = 2.0  # 제자리 회전 속도
+FIXED_SPEED = 0.0  # 제자리 회전 속도
 SLEEP_TIME = 0.05  # 루프 딜레이
 
 # -------------------------------
