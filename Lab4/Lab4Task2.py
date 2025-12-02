@@ -178,7 +178,7 @@ def turn_left(bot, deg):
     goal = (start - deg) % 360
     while True:
         h = bot.get_heading()
-        error = (h - goal + 360) % 360
+        error = ((h - goal + 360) % 360 )-270
         if error < 3:
             break
         bot.set_left_motor_speed(-4)
@@ -188,7 +188,7 @@ def turn_left(bot, deg):
 
 def turn_right(bot, deg):
     start = bot.get_heading()
-    goal = (start + deg) % 360
+    goal = ((start + deg) % 360) - 270
     while True:
         h = bot.get_heading()
         error = (goal - h + 360) % 360
@@ -206,7 +206,7 @@ def main():
     bot = HamBot()
     
     
-    motions = ["forward"]
+    motions = ["left_turn", "forward", "left_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "left_turn"]
 
     for step, command in enumerate(motions):
         print(f"\n=== STEP {step+1}: {command} ===")
