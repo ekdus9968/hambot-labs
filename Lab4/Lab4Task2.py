@@ -180,7 +180,7 @@ def main():
     bot = HamBot()
     
     
-    motions = []
+    motions = ["forward"]
 
     for step, command in enumerate(motions):
         print(f"\n=== STEP {step+1}: {command} ===")
