@@ -178,7 +178,7 @@ def turn_left(bot, deg):
     goal = (start - deg) % 360
     while True:
         h = bot.get_heading()
-        error = ((h - goal + 360) % 360 )-270
+        error = abs((goal-h + 540) % 360 -180 )
         if error < 3:
             break
         bot.set_left_motor_speed(-4)
@@ -188,7 +188,7 @@ def turn_left(bot, deg):
 
 def turn_right(bot, deg):
     start = bot.get_heading()
-    goal = ((start + deg) % 360) - 270
+    goal = ((start + deg) % 360) 
     while True:
         h = bot.get_heading()
         error = (goal - h + 360) % 360
