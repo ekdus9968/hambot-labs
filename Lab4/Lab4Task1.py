@@ -68,7 +68,7 @@ COLOR_LIST = ["orange", "green", "blue", "pink"]
 TARGET_COLORS = {
     "orange": (255, 150, 30),
     "green": (50, 225, 130),
-    "blue": (120, 220, 225),
+    "blue": (110, 220, 225),
     "pink": (225, 30, 165)
 }
 TOLERANCE = 50
