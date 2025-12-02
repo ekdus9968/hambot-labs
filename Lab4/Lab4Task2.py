@@ -228,4 +228,4 @@ if __name__ == "__main__":
 
 
     #motions = ["forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "left_turn", "left_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "right_turn", "forward", "forward"]
-    motions = ["left_turn", "forward", "left_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "left_turn"]
+    #motions = ["left_turn", "forward", "left_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "left_turn"]
