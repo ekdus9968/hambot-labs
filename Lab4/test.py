@@ -3,47 +3,76 @@ import numpy as np
 import random
 from collections import defaultdict
 from robot_systems.robot import HamBot
-
 def turn_left(bot, deg):
+    """
+    Turn left by `deg` degrees using heading only.
+    Stops when error < 3°.
+    """
     start = bot.get_heading()
-    goal = (start - deg) % 360  # 왼쪽 회전 목표
+    if start is None:
+        print("[DEBUG] No heading, skipping turn")
+        return
+
+    goal = (start - deg) % 360
+    fixed_speed = 4.0
+
     while True:
-        h = bot.get_heading()
-        # -180 ~ +180 범위 error
-        error = (goal - h + 180) % 360 - 180
-        if abs(error) < 2:  # 2도 오차 허용
+        current = bot.get_heading()
+        if current is None:
+            print("[DEBUG] No heading during turn")
             break
-        # 왼쪽 회전이면 error < 0
-        if error < 0:
-            bot.set_left_motor_speed(4)
-            bot.set_right_motor_speed(-4)
+        # 왼쪽 회전 기준 최소 각도 error
+        error = abs((current - goal + 360) % 360 - 180)
+        if error > 180:
+            error = 360 - error
+
+        print(f"[DEBUG] Turning left - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
+
+        if error < 3:
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+            print("[DEBUG] Left turn complete")
+            break
         else:
-            bot.set_left_motor_speed(-4)
-            bot.set_right_motor_speed(4)
+            bot.set_left_motor_speed(-fixed_speed)
+            bot.set_right_motor_speed(fixed_speed)
         time.sleep(0.01)
-    bot.set_left_motor_speed(0)
-    bot.set_right_motor_speed(0)
 
 
 def turn_right(bot, deg):
+    """
+    Turn right by `deg` degrees using heading only.
+    Stops when error < 3°.
+    """
     start = bot.get_heading()
-    goal = (start + deg) % 360  # 오른쪽 회전 목표
-    while True:
-        h = bot.get_heading()
-        error = (goal - h + 180) % 360 - 180
-        if abs(error) < 2:
-            break
-        # 오른쪽 회전이면 error > 0
-        if error > 0:
-            bot.set_left_motor_speed(4)
-            bot.set_right_motor_speed(-4)
-        else:
-            bot.set_left_motor_speed(-4)
-            bot.set_right_motor_speed(4)
-        time.sleep(0.01)
-    bot.set_left_motor_speed(0)
-    bot.set_right_motor_speed(0)
+    if start is None:
+        print("[DEBUG] No heading, skipping turn")
+        return
 
+    goal = (start + deg) % 360
+    fixed_speed = 4.0
+
+    while True:
+        current = bot.get_heading()
+        if current is None:
+            print("[DEBUG] No heading during turn")
+            break
+        # 오른쪽 회전 기준 최소 각도 error
+        error = abs((goal - current + 360) % 360 - 180)
+        if error > 180:
+            error = 360 - error
+
+        print(f"[DEBUG] Turning right - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
+
+        if error < 3:
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+            print("[DEBUG] Right turn complete")
+            break
+        else:
+            bot.set_left_motor_speed(fixed_speed)
+            bot.set_right_motor_speed(-fixed_speed)
+        time.sleep(0.01)
 
 def main():
     bot = HamBot()
