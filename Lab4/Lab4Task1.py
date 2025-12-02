@@ -100,7 +100,10 @@ def get_forward_distance(bot):
 # -------------------------------
 # 360° 회전하며 색상 감지
 # -------------------------------
-def turn_360_detect(bot):
+# # -------------------------------
+# 360° 회전하며 색상 감지 (ROI 기준)
+# -------------------------------
+def turn_360_detect_roi(bot, roi_size=40):
     start_heading = bot.get_heading()
     if start_heading is None:
         print("[DEBUG] Warning: start heading is None")
@@ -109,7 +112,7 @@ def turn_360_detect(bot):
     detected_flags = [False] * 4
     detected_list = [None] * 4
 
-    print("Starting 360° color detection...")
+    print("Starting 360° color detection (ROI)...")
 
     while True:
         current_heading = bot.get_heading()
@@ -136,21 +139,15 @@ def turn_360_detect(bot):
             continue
 
         H, W = frame.shape[:2]
-        roi = frame[H//2 - 20:H//2 + 20, W//2 - 20:W//2 + 20]  # 40x40 중앙 ROI
+        cx, cy = W // 2, H // 2
 
-        for idx, color_name in enumerate(COLOR_LIST):
-            if detected_flags[idx]:
-                continue
-            target_color = TARGET_COLORS[color_name]
-            found = check_color_in_roi(roi, target_color, TOLERANCE)
+        # ROI 범위 설정
+        x_start = max(cx - roi_size//2, 0)
+        x_end = min(cx + roi_size//2, W)
+        y_start = max(cy - roi_size//2, 0)
+        y_end = min(cy + roi_size//2, H)
 
-            print(f"[DEBUG] {color_name} | ROI check: {found} | Target RGB:{target_color}")
-            if found:
-                detected_flags[idx] = True
-                detected_list[idx] = [forward_distance, delta_angle_total]
-                print(f"[DETECTED] {color_name} | Forward:{forward_distance:.3f}, Delta angle:{delta_angle_total:.2f}")
-
-
+        roi = frame[y_start:y_end, x_start:x_end]
 
         forward_distance = get_forward_distance(bot)
 
@@ -158,19 +155,19 @@ def turn_360_detect(bot):
         for idx, color_name in enumerate(COLOR_LIST):
             if detected_flags[idx]:
                 # 이미 감지된 색상
-                print(f"[DEBUG] {color_name} already detected | Pixel RGB: R:{r} G:{g} B:{b} | Forward:{forward_distance:.3f}")
+                print(f"[DEBUG] {color_name} already detected | Forward:{forward_distance:.3f} | Delta:{delta_angle_total:.2f}")
                 continue
 
-            target_color = TARGET_COLORS[color_name]
-            r_diff = abs(r - target_color[0])
-            g_diff = abs(g - target_color[1])
-            b_diff = abs(b - target_color[2])
-            within_tolerance = r_diff <= TOLERANCE and g_diff <= TOLERANCE and b_diff <= TOLERANCE
+            target_color = np.array(TARGET_COLORS[color_name])
+            diff = np.abs(roi.astype(int) - target_color)
+            mask = np.all(diff <= TOLERANCE, axis=2)
+            found = np.any(mask)  # ROI 안에 한 픽셀이라도 존재하면 True
 
-            # 실시간 디버그 출력
-            print(f"[DEBUG] {color_name} | Pixel RGB: R:{r} G:{g} B:{b} | R_diff:{r_diff} G_diff:{g_diff} B_diff:{b_diff} | Forward:{forward_distance:.3f} | Delta:{delta_angle_total:.2f}")
+            # 디버그용: ROI 평균 RGB (중앙 픽셀 대신 참고용)
+            roi_avg = roi.mean(axis=(0,1)).astype(int)
+            print(f"[DEBUG] {color_name} | ROI avg RGB: R:{roi_avg[0]} G:{roi_avg[1]} B:{roi_avg[2]} | Forward:{forward_distance:.3f} | Delta:{delta_angle_total:.2f} | Found: {found}")
 
-            if within_tolerance:
+            if found:
                 detected_flags[idx] = True
                 detected_list[idx] = [forward_distance, delta_angle_total]
                 print(f"[DETECTED] {color_name} | Forward:{forward_distance:.3f}, Delta angle:{delta_angle_total:.2f}")
@@ -219,12 +216,19 @@ def get_cell_index(x, y, grid_size=4, world_min=-2400, world_max=2400):
     row = max(0, min(grid_size-1, row))
     return row * grid_size + col + 1  # 1~16
 
-def check_color_in_roi(roi, target_color, tolerance):
+def get_mode_color(roi):
     # roi: HxWx3
-    # target_color: (R,G,B)
-    diff = np.abs(roi.astype(int) - np.array(target_color))
-    mask = np.all(diff <= tolerance, axis=2)
-    return np.any(mask)  # 하나라도 존재하면 True
+    # reshape into N x 3
+    pixels = roi.reshape(-1, 3)
+
+    # unique colors with counts
+    unique, counts = np.unique(pixels, axis=0, return_counts=True)
+
+    # pick the most frequent color
+    mode_color = unique[counts.argmax()]
+    r, g, b = int(mode_color[0]), int(mode_color[1]), int(mode_color[2])
+    return r, g, b
+
 
 # -------------------------------
 # 메인 실행
