@@ -239,7 +239,7 @@ def main():
         time.sleep(1)  # 카메라 초기화 대기
 
         # 360° 색상 감지
-        detected_list = turn_360_detect(bot)
+        detected_list = turn_360_detect_roi(bot)
 
         # 감지된 랜드마크 수 확인
         num_detected = sum([1 for d in detected_list if d is not None and d[0] < 9999.0])
