@@ -216,8 +216,8 @@ def read_lidar(bot):
 
     # Front and side distances
     front_dist = np.nanmin(lidar[175:185])
-    right_dist = np.nanmin(lidar[265:275])
-    left_dist = np.nanmin(lidar[85:95])
+    right_dist = np.nanmin(lidar[267:273])
+    left_dist = np.nanmin(lidar[87:93])
     back_dist = np.nanmin(lidar[355:360] + lidar[0:5])
     
     # Handle invalid readings
@@ -236,7 +236,7 @@ def get_observation(bot):
     dN, dE, dS, dW = read_lidar(bot)
     if dN is None: 
         return 0,0,0,0
-    TH = 300
+    TH = 400
     return (1 if dN < TH else 0,
             1 if dE < TH else 0,
             1 if dS < TH else 0,
