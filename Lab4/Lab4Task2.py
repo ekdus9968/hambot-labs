@@ -93,13 +93,67 @@ def resample_particles(particles):
 # ============================================
 # ESTIMATION
 # ============================================
-def estimate_position(particles):
-    counter = defaultdict(int)
+# def estimate_position(particles):
+#     counter = defaultdict(int)
+#     for p in particles:
+#         counter[p.cell] += 1
+#     mode_cell = max(counter, key=counter.get)
+#     count = counter[mode_cell]
+#     return mode_cell, count
+
+# ============================================
+# WEIGHT-BASED ESTIMATION
+# ============================================
+def estimate_position_weighted(particles):
+    """
+    Return the cell with the highest total particle weight
+    """
+    weight_sum = defaultdict(float)
     for p in particles:
-        counter[p.cell] += 1
-    mode_cell = max(counter, key=counter.get)
-    count = counter[mode_cell]
-    return mode_cell, count
+        weight_sum[p.cell] += p.weight
+
+    max_cell = max(weight_sum, key=weight_sum.get)
+    max_weight = weight_sum[max_cell]
+    return max_cell, max_weight
+
+
+# ============================================
+# DEBUG PARTICLES (Weight 기반)
+# ============================================
+def debug_particles_weighted(bot, particles):
+    """
+    Print detailed debug info for particles using weight fractions.
+    """
+    weight_sum_per_cell = [0.0]*GRID_SIZE
+    for p in particles:
+        weight_sum_per_cell[p.cell] += p.weight
+
+    total_weight = sum(weight_sum_per_cell)
+    fractions = [w / total_weight for w in weight_sum_per_cell]
+    cumulative = np.cumsum(fractions)
+    max_frac = max(fractions)
+    max_cell = fractions.index(max_frac)
+
+    print("\n--- Particle Weight Distribution ---")
+    for row in range(4):
+        row_weights = weight_sum_per_cell[row*4:(row+1)*4]
+        row_fracs = [round(fractions[i+row*4],3) for i in range(4)]
+        print(f"Row {row}: Weights {row_weights}, Fractions {row_fracs}")
+    print(f"Cumulative fractions: {[round(c,3) for c in cumulative]}")
+    print(f"Max weight cell: {max_cell}, Localization confidence: {round(max_frac*100,1)}%")
+
+    # sample weights for first 10 particles
+    sample_weights = [round(p.weight,3) for p in particles[:10]]
+    print(f"Sample particle weights: {sample_weights} ...\n")
+
+    if max_frac > 0.80:
+        bot.stop_motors()
+        bot.set_left_motor_speed(0)
+        bot.set_right_motor_speed(0)
+        print("Localization confidence > 80%, stopping robot")
+        return 1
+
+    return 0
 
 # ============================================
 # PARTICLE DEBUG
@@ -440,7 +494,8 @@ def main():
 
         # --- DEBUG ---
         print("Debug particle")
-        curr_ratio = debug_particles(bot, particles)
+        curr_ratio = debug_particles_weighted(bot, particles)
+
         if curr_ratio != 0:
             print("Localization success! >80% particles converged.")
             bot.set_left_motor_speed(0)
@@ -450,8 +505,8 @@ def main():
             
         print("debug estimation")
         # --- ESTIMATION ---
-        cell, count = estimate_position(particles)
-        print(f"Estimated cell = {cell}, count = {count}/{N_PARTICLES}")
+        # cell, count = estimate_position(particles)
+        # print(f"Estimated cell = {cell}, count = {count}/{N_PARTICLES}")
         
         # --- ROBOT ACTION ---
         if command == "forward":
