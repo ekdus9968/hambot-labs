@@ -384,7 +384,7 @@ def main():
     
     
     #motions = ["forward","right_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward"]
-    motions = ["forward", "forward", "right_turn", "right_turn", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "right_turn", "forward", "forward"]
+    motions = ["forward", "forward", "right_turn", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "right_turn", "forward", "forward"]
     for step, command in enumerate(motions):
         print(f"\n=== STEP {step+1}: {command} ===")
         
