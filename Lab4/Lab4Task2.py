@@ -183,7 +183,7 @@ def get_observation(bot):
 # ============================================
 # ROBOT CONTROL
 # ============================================
-def drive_forward(bot, D, speed=5):
+def drive_forward(bot, D, speed=8):
     wheel_radius = 90
     bot.reset_encoders()
     bot.set_left_motor_speed(speed)
@@ -272,7 +272,7 @@ def turn_right(bot, deg):
         if error > 180:
             error = 360 - error
 
-        #print(f"[DEBUG] Turning right - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
+        # print(f"[DEBUG] Turning right - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
 
         if error < 3:
             bot.set_left_motor_speed(0)
