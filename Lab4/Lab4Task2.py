@@ -18,9 +18,9 @@ STEP_DISTANCE = 1200  # m
 # ============================================
 maze_map = {
     0: (1,0,0,1), 1:(1,0,0,0), 2:(1,0,0,0), 3:(1,1,0,0),
-    4: (0,0,0,1), 5:(1,0,1,1), 6:(1,0,1,0), 7:(0,1,1,0),
+    4: (0,1,0,1), 5:(1,0,1,1), 6:(1,0,1,0), 7:(0,1,1,0),
     8: (0,0,0,1), 9:(1,0,1,0),10:(1,1,1,0),11:(1,1,0,1),
-    12:(0,0,1,1),13:(1,0,1,0),14:(1,0,1,0),15:(0,1,1,0)
+    12:(0,0,1,1),13:(1,0,1,0),14:(1,0,1,0),15:(0,0,1,1)
 }
 
 # ============================================
@@ -128,7 +128,7 @@ def debug_particles(bot, particles):
     total_particles = len(particles)
     fractions = [c/total_particles for c in counts]
     cumulative = np.cumsum(fractions)
-    max_frac = max(fractions) + 0.05
+    max_frac = max(fractions) 
     max_cell = counts.index(max(counts))
 
     print("\n--- Particle Distribution ---")
