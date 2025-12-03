@@ -10,7 +10,7 @@ from robot_systems.robot import HamBot
 N_PARTICLES = 160
 ORIENTATIONS = ["N", "E", "S", "W"]  # 북, 동, 남, 서
 GRID_SIZE = 16  # 4x4 grid
-SUCCESS_RATIO = 0.80
+SUCCESS_RATIO = 80
 STEP_DISTANCE = 1200  # m
 
 # ============================================
