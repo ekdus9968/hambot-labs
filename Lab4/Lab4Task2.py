@@ -142,6 +142,7 @@ def debug_particles(particles):
     # sample weights for first 10 particles
     sample_weights = [round(p.weight,3) for p in particles[:10]]
     print(f"Sample particle weights: {sample_weights} ...\n")
+    return max_frac
 
 # ============================================
 # SENSOR FROM ROBOT
@@ -396,7 +397,7 @@ def main():
 
         # --- DEBUG ---
         print("Debug particle")
-        debug_particles(particles)
+        curr_ratio = debug_particles(particles)
         print("debug estimation")
         # --- ESTIMATION ---
         cell, count = estimate_position(particles)
@@ -413,13 +414,13 @@ def main():
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
         elif command == "right_turn":
-            turn_right(bot, 87)
+            turn_right(bot, 85)
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
 
         time.sleep(0.3)
 
-        if count / N_PARTICLES >= SUCCESS_RATIO:
+        if curr_ratio >= SUCCESS_RATIO:
             print("Localization success! >80% particles converged.")
             break
 
