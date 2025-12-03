@@ -114,7 +114,7 @@ def main():
     bot = HamBot()
     print("turn right")
     turn_right(bot, 90)
-    turn_left(bot, 90)
+    #turn_left(bot, 90)
 
     print("Finished.")
 
