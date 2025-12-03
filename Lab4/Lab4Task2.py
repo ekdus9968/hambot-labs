@@ -170,9 +170,9 @@ def read_lidar(bot):
     for i, val in enumerate([front_dist, right_dist, back_dist, left_dist]):
         if np.isinf(val) or np.isnan(val) or val < 0.05:
             if i == 0: front_dist = 666.666
-            elif i == 1: right_dist = 666.666
-            elif i == 2: back_dist = 666.666
-            elif i == 3: left_dist = 666.666
+            elif i == 1: right_dist = 222.222
+            elif i == 2: back_dist = 222.222
+            elif i == 3: left_dist = 222.222
 
     
     print(f"[DEBUG] LiDAR - Front: {front_dist:.1f}, Left: {left_dist:.1f}, Right: {right_dist:.1f}, Back:  {back_dist:.1f}")
@@ -257,6 +257,18 @@ def turn_left(bot, deg):
             bot.set_left_motor_speed(-fixed_speed)
             bot.set_right_motor_speed(fixed_speed)
         time.sleep(0.01)
+        
+    for p in particles:
+        idx = ORIENTATIONS.index(p.orientation)
+        p.orientation = ORIENTATIONS[(idx - deg // 90) % 4]
+
+    # --- 로봇 heading 동기화 (Particle 초기화) ---
+    heading = bot.get_heading()
+    if heading is not None:
+        current_ori = heading_to_orientation(heading)
+        for p in particles:
+            p.orientation = current_ori
+
 
 
 def turn_right(bot, deg):
@@ -293,8 +305,32 @@ def turn_right(bot, deg):
             bot.set_left_motor_speed(fixed_speed)
             bot.set_right_motor_speed(-fixed_speed)
         time.sleep(0.01)
+        
+        
+    for p in particles:
+        idx = ORIENTATIONS.index(p.orientation)
+        p.orientation = ORIENTATIONS[(idx + deg // 90) % 4]
+
+    # --- 로봇 heading 동기화 (Particle 초기화) ---
+    heading = bot.get_heading()
+    if heading is not None:
+        current_ori = heading_to_orientation(heading)
+        for p in particles:
+            p.orientation = current_ori
 
 
+def heading_to_orientation(heading):
+    """
+    0°~360° heading을 N/E/S/W orientation으로 변환
+    """
+    if 45 <= heading < 135:
+        return "E"
+    elif 135 <= heading < 225:
+        return "S"
+    elif 225 <= heading < 315:
+        return "W"
+    else:
+        return "N"
 
 # ============================================
 # TURN USING ENCODERS
