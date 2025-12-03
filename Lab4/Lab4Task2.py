@@ -128,7 +128,7 @@ def debug_particles(particles):
     total_particles = len(particles)
     fractions = [c/total_particles for c in counts]
     cumulative = np.cumsum(fractions)
-    max_frac = max(fractions)
+    max_frac = max(fractions) + 5
     max_cell = counts.index(max(counts))
 
     print("\n--- Particle Distribution ---")
