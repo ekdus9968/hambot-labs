@@ -443,11 +443,11 @@ def heading_to_orientation(heading):
     if 45 <= heading < 135:
         return "W"
     elif 135 <= heading < 225:
-        return "S"
+        return "N"
     elif 225 <= heading < 315:
         return "E"
     else:
-        return "N"
+        return "S"
 
 # ============================================
 # TURN USING ENCODERS
