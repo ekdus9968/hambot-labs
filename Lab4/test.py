@@ -112,7 +112,7 @@ def turn_right(bot, deg, speed=8):
 
 def main():
     bot = HamBot()
-    drive_forward(bot,600)
+    drive_forward(bot,1200)
 
     print("Finished.")
 
