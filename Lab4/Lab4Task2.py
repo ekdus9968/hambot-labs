@@ -215,7 +215,7 @@ def read_lidar(bot):
         return
 
     # Front and side distances
-    front_dist = np.nanmin(lidar[175:185])
+    front_dist = np.nanmin(lidar[178:182])
     right_dist = np.nanmin(lidar[267:273])
     left_dist = np.nanmin(lidar[87:93])
     back_dist = np.nanmin(lidar[355:360] + lidar[0:5])
