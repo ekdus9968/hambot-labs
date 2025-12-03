@@ -35,7 +35,9 @@ class Particle:
 # ============================================
 # PARTICLE FILTER INITIALIZATION
 # ============================================
-particles = [Particle(cell=11, orientation=ORIENTATIONS["S"]) for _ in range(N_PARTICLES)]
+# 로봇 시작 방향 S (South)
+particles = [Particle(cell=11, orientation="S") for _ in range(N_PARTICLES)]
+
 
 # ============================================
 # MOTION UPDATE
