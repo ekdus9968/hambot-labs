@@ -190,7 +190,7 @@ def get_cell_index(x, y, grid_size=4, world_min=-2400, world_max=2400):
     row = int((world_max - y) // cell_width)
     col = max(0, min(grid_size-1, col))
     row = max(0, min(grid_size-1, row))
-    return row * grid_size + col + 1
+    return row * grid_size + col  # 0~15
 
 # -------------------------------
 # Main
