@@ -10,7 +10,7 @@ from robot_systems.robot import HamBot
 N_PARTICLES = 160
 ORIENTATIONS = ["N", "E", "S", "W"]  # 북, 동, 남, 서
 GRID_SIZE = 16  # 4x4 grid
-SUCCESS_RATIO = 80
+SUCCESS_RATIO = 0.80
 STEP_DISTANCE = 1200  # m
 
 # ============================================
@@ -113,7 +113,7 @@ def estimate_position(particles):
 #         print(counts[i:i+4])
 #     weights = [round(p.weight,3) for p in particles[:10]]
 #     print("Sample weights:", weights, "...")
-def debug_particles(particles):
+def debug_particles(bot, particles):
     """
     Print detailed debug info for particles.
     - Count per cell
@@ -142,7 +142,14 @@ def debug_particles(particles):
     # sample weights for first 10 particles
     sample_weights = [round(p.weight,3) for p in particles[:10]]
     print(f"Sample particle weights: {sample_weights} ...\n")
-    return max_frac
+    if max_frac > 0.80:
+        bot.stop_motors()
+        bot.set_left_motor_speed(0)
+        bot.set_right_motor_speed(0)
+        print("REUTNE over 80% RATIO")
+        return 1
+        
+    return 0
 
 # ============================================
 # SENSOR FROM ROBOT
@@ -398,6 +405,13 @@ def main():
         # --- DEBUG ---
         print("Debug particle")
         curr_ratio = debug_particles(particles)
+        if curr_ratio != 0:
+            print("Localization success! >80% particles converged.")
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+            bot.stop_motors()
+            break
+            
         print("debug estimation")
         # --- ESTIMATION ---
         cell, count = estimate_position(particles)
@@ -414,18 +428,11 @@ def main():
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
         elif command == "right_turn":
-            turn_right(bot, 80)
+            turn_right(bot, 75)
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
 
         time.sleep(0.3)
-
-        if curr_ratio >= SUCCESS_RATIO:
-            print("Localization success! >80% particles converged.")
-            bot.set_left_motor_speed(0)
-            bot.set_right_motor_speed(0)
-            bot.stop_motors()
-            break
 
     print("Finished.")
 
