@@ -88,7 +88,7 @@ def resample_particles(particles):
 
     normalized = [w/total for w in weights]
     new_ps = random.choices(particles, weights=normalized, k=N_PARTICLES)
-    return [Particle(p.cell, random.choice(ORIENTATIONS)) for p in new_ps]
+    return [Particle(p.cell, p.orientation) for p in new_ps]
 
 # ============================================
 # ESTIMATION
