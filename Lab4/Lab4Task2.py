@@ -221,7 +221,7 @@ def drive_forward(bot, D, speed=8):
 #     start = bot.get_heading()
 #     if start is None:
 #         print("[DEBUG] No heading, skipping turn")
-#         return
+        
 
 #     goal = (start - deg) % 360
 #     fixed_speed = 4.0
@@ -257,7 +257,7 @@ def drive_forward(bot, D, speed=8):
 #     start = bot.get_heading()
 #     if start is None:
 #         print("[DEBUG] No heading, skipping turn")
-#         return
+    
 
 #     goal = (start + deg) % 360
 #     fixed_speed = 4.0
@@ -370,7 +370,7 @@ def main():
     bot = HamBot()
     
     
-    motions = ["forward","right_turn", "forward", "forward", "forward", "turn_right", "forward", "turn_right", "forward", "forward", "left_turn", "left_turn", "forward", "forward", "right_turn", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "right_turn", "forward", "forward"]
+    motions = ["forward","right_turn", "forward", "forward", "forward", "right_turn", "forward", "right_turn", "forward", "forward", "left_turn", "left_turn", "forward", "forward", "right_turn", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "right_turn", "forward", "forward"]
 
     for step, command in enumerate(motions):
         print(f"\n=== STEP {step+1}: {command} ===")
