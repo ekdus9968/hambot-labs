@@ -113,7 +113,7 @@ def estimate_position(particles):
 #         print(counts[i:i+4])
 #     weights = [round(p.weight,3) for p in particles[:10]]
 #     print("Sample weights:", weights, "...")
-def debug_particles(bot, particles):
+def debug_particles(particles):
     """
     Print detailed debug info for particles.
     - Count per cell
