@@ -11,7 +11,7 @@ N_PARTICLES = 160
 ORIENTATIONS = ["N", "E", "S", "W"]  # 북, 동, 남, 서
 GRID_SIZE = 16  # 4x4 grid
 SUCCESS_RATIO = 0.80
-STEP_DISTANCE = 800  # m
+STEP_DISTANCE = 700  # m
 
 # ============================================
 # MAZE WALL INFO (N,E,S,W)
@@ -291,7 +291,7 @@ def main():
     bot = HamBot()
     
     
-    motions = ["forward","right_turn", "forward", "forward", "left_turn", "left_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "right_turn", "forward", "forward"]
+    motions = ["forward","right_turn", "forward", "forward", "forward", "turn_right", "forward", "turn_right", "forward", "forward", "left_turn", "left_turn", "forward", "forward", "right_turn", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "right_turn", "forward", "forward"]
 
     for step, command in enumerate(motions):
         print(f"\n=== STEP {step+1}: {command} ===")
