@@ -424,11 +424,11 @@ def main():
             bot.set_right_motor_speed(0)
             
         elif command == "left_turn":
-            turn_left(bot, 87)
+            turn_left(bot, 90)
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
         elif command == "right_turn":
-            turn_right(bot, 75)
+            turn_right(bot, 90)
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
 
