@@ -324,13 +324,13 @@ def heading_to_orientation(heading):
     0°~360° heading을 N/E/S/W orientation으로 변환
     """
     if 45 <= heading < 135:
-        return "W"
-    elif 135 <= heading < 225:
-        return "S"
-    elif 225 <= heading < 315:
         return "E"
-    else:
+    elif 135 <= heading < 225:
         return "N"
+    elif 225 <= heading < 315:
+        return "W"
+    else:
+        return "S"
 
 # ============================================
 # TURN USING ENCODERS
