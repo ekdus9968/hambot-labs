@@ -113,7 +113,7 @@ def estimate_position(particles):
 #         print(counts[i:i+4])
 #     weights = [round(p.weight,3) for p in particles[:10]]
 #     print("Sample weights:", weights, "...")
-def debug_particles(particles):
+def debug_particles(bot, particles):
     """
     Print detailed debug info for particles.
     - Count per cell
@@ -404,7 +404,7 @@ def main():
 
         # --- DEBUG ---
         print("Debug particle")
-        curr_ratio = debug_particles(particles)
+        curr_ratio = debug_particles(bot, particles)
         if curr_ratio != 0:
             print("Localization success! >80% particles converged.")
             bot.set_left_motor_speed(0)
