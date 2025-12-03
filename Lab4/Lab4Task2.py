@@ -248,7 +248,7 @@ def turn_left(bot, deg):
 
         #print(f"[DEBUG] Turning left - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
 
-        if error < 3:
+        if error < 1:
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
             print("[DEBUG] Left turn complete")
@@ -284,7 +284,7 @@ def turn_right(bot, deg):
 
         # print(f"[DEBUG] Turning right - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
 
-        if error < 3:
+        if error < 1:
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
             print("[DEBUG] Right turn complete")
