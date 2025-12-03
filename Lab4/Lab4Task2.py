@@ -9,6 +9,7 @@ from robot_systems.robot import HamBot
 # ============================================
 N_PARTICLES = 160
 ORIENTATIONS = ["N", "E", "S", "W"]  # 북, 동, 남, 서
+DIR_INDEX = {o:i for i,o in enumerate(ORIENTATIONS)}
 GRID_SIZE = 16  # 4x4 grid
 SUCCESS_RATIO = 0.80
 STEP_DISTANCE = 1200  # m
@@ -232,15 +233,63 @@ def read_lidar(bot):
     print(f"[DEBUG] LiDAR - Front: {front_dist:.1f}, Left: {left_dist:.1f}, Right: {right_dist:.1f}, Back:  {back_dist:.1f}")
     return front_dist, left_dist, back_dist, right_dist
 
+# ============================
+# ADD: ROBOT→WORLD observation rotation
+# ============================
+
+
+def rotate_observation(robot_ori, obs_robot):
+    """
+    로봇 기준 (front, left, right, back)
+    → 월드 기준 (N, E, S, W) 변환
+    """
+    f, l, r, b = obs_robot
+    idx = DIR_INDEX[robot_ori]
+
+    world = [0,0,0,0]  # (N,E,S,W)
+
+    world[idx] = f                      # front → 현재 방향
+    world[(idx - 1) % 4] = l            # left
+    world[(idx + 1) % 4] = r            # right
+    world[(idx + 2) % 4] = b            # back
+
+    return tuple(world)
+
+
+
+# ============================
+# MODIFY get_observation()
+# ============================
 def get_observation(bot):
-    dN, dE, dS, dW = read_lidar(bot)
-    if dN is None: 
-        return 0,0,0,0
+    # LiDAR는 로봇 기준(front,left,back,right) 반환
+    dF, dL, dB, dR = read_lidar(bot)
+    if dF is None:
+        return (0,0,0,0)
+
     TH = 600
-    return (1 if dN < TH else 0,
-            1 if dE < TH else 0,
-            1 if dS < TH else 0,
-            1 if dW < TH else 0)
+    obs_robot = (
+        1 if dF < TH else 0,
+        1 if dL < TH else 0,
+        1 if dR < TH else 0,
+        1 if dB < TH else 0
+    )
+
+    # ------------------------------
+    # 추가: 로봇 heading 을 orientation 문자로 변환
+    # ------------------------------
+    heading = bot.get_heading()
+    if heading is None:
+        robot_ori = "N"
+    else:
+        robot_ori = heading_to_orientation(heading)
+
+    # ------------------------------
+    # 추가: 로봇 기준 → 월드 기준으로 변환
+    # ------------------------------
+    world_obs = rotate_observation(robot_ori, obs_robot)
+
+    return world_obs
+
 
 # ============================================
 # ROBOT CONTROL
@@ -473,7 +522,7 @@ def main():
     bot = HamBot()
     
     
-    motions = ["forward","right_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward"]
+    motions = ["forward","right_turn", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward"]
     #motions = ["forward", "forward", "right_turn", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "right_turn", "forward", "forward"]
     for step, command in enumerate(motions):
         print(f"\n=== STEP {step+1}: {command} ===")
@@ -530,6 +579,8 @@ def main():
 if __name__ == "__main__":
     main()
 
+    
+    #motions = ["forward","right_turn", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward"]
 
     #motions = ["forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "left_turn", "left_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "right_turn", "forward", "forward"]
     #motions = ["left_turn", "forward", "left_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "left_turn"]
