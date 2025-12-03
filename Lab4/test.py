@@ -108,6 +108,7 @@ def turn_right(bot, deg):
 
 def main():
     bot = HamBot()
+    print("turn right")
     turn_right(bot, 90)
 
     print("Finished.")
