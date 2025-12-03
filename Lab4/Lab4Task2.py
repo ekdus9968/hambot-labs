@@ -35,7 +35,7 @@ class Particle:
 # ============================================
 # PARTICLE FILTER INITIALIZATION
 # ============================================
-particles = [Particle(cell=11 % GRID_SIZE, orientation="S") for i in range(N_PARTICLES)]
+particles = [Particle(cell=i % GRID_SIZE, orientation="S") for i in range(N_PARTICLES)]
 
 # ============================================
 # MOTION UPDATE
