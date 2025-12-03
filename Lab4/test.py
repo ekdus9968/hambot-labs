@@ -33,77 +33,81 @@ def drive_forward(bot, D, speed=5):
             break
 
         time.sleep(0.01)
-
-
-def turn_left(bot, deg):
+def turn_left(bot, deg, speed=8):
     """
-    Turn left by `deg` degrees using heading only.
-    Stops when error < 3°.
+    Turn left by `deg` degrees using only wheel encoders.
     """
-    start = bot.get_heading()
-    if start is None:
-        print("[DEBUG] No heading, skipping turn")
-        return
+    wheel_radius=90
+    axel_length=184
+    # 목표 바퀴 이동 거리 계산
+    delta_theta_rad = np.deg2rad(deg)
+    l_dist = -delta_theta_rad * (axel_length / 2)
+    r_dist = delta_theta_rad * (axel_length / 2)
 
-    goal = (start - deg) % 360
-    fixed_speed = 4.0
+    # 초기 엔코더 값 저장
+    init_l = bot.get_left_encoder_reading()
+    init_r = bot.get_right_encoder_reading()
+
+    # 속도 비율 설정
+    max_dist = max(abs(l_dist), abs(r_dist))
+    v_l = speed * l_dist / max_dist
+    v_r = speed * r_dist / max_dist
+
+    # 모터 속도 설정
+    bot.set_left_motor_speed(v_l)
+    bot.set_right_motor_speed(v_r)
 
     while True:
-        current = bot.get_heading()
-        if current is None:
-            print("[DEBUG] No heading during turn")
-            break
-        # 왼쪽 회전 기준 최소 각도 error
-        error = abs((current - goal + 360) % 360 - 180)
-        if error > 180:
-            error = 360 - error
+        l_delta = bot.get_left_encoder_reading() - init_l
+        r_delta = bot.get_right_encoder_reading() - init_r
 
-        print(f"[DEBUG] Turning left - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
+        l_d = wheel_radius * l_delta
+        r_d = wheel_radius * r_delta
 
-        if error < 3:
+        if abs(l_d) >= abs(l_dist) or abs(r_d) >= abs(r_dist):
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
-            print("[DEBUG] Left turn complete")
+            bot.stop_motors()
             break
-        else:
-            bot.set_left_motor_speed(-fixed_speed)
-            bot.set_right_motor_speed(fixed_speed)
         time.sleep(0.01)
 
 
-def turn_right(bot, deg):
+def turn_right(bot, deg, speed=8):
     """
-    Turn right by `deg` degrees using heading only.
-    Stops when error < 3°.
+    Turn right by `deg` degrees using only wheel encoders.
     """
-    start = bot.get_heading()
-    if start is None:
-        print("[DEBUG] No heading, skipping turn")
-        return
+    wheel_radius=90
+    axel_length=184
+    # 목표 바퀴 이동 거리 계산
+    delta_theta_rad = np.deg2rad(deg)
+    l_dist = delta_theta_rad * (axel_length / 2)
+    r_dist = -delta_theta_rad * (axel_length / 2)
 
-    goal = (start + deg) % 360
-    fixed_speed = 4.0
+    # 초기 엔코더 값 저장
+    init_l = bot.get_left_encoder_reading()
+    init_r = bot.get_right_encoder_reading()
+
+    # 속도 비율 설정
+    max_dist = max(abs(l_dist), abs(r_dist))
+    v_l = speed * l_dist / max_dist
+    v_r = speed * r_dist / max_dist
+
+    # 모터 속도 설정
+    bot.set_left_motor_speed(v_l)
+    bot.set_right_motor_speed(v_r)
 
     while True:
-        current = bot.get_heading()
-        if current is None:
-            print("[DEBUG] No heading during turn")
-            break
-        # 오른쪽 회전 기준 최소 각도 error
-        error = abs((goal - current + 360) % 360 - 180)
-        if error > 180:
-            error = 360 - error
+        l_delta = bot.get_left_encoder_reading() - init_l
+        r_delta = bot.get_right_encoder_reading() - init_r
 
-        print(f"[DEBUG] Turning right - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
+        l_d = wheel_radius * l_delta
+        r_d = wheel_radius * r_delta
 
-        if error < 3:
+        if abs(l_d) >= abs(l_dist) or abs(r_d) >= abs(r_dist):
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
-            print("[DEBUG] Right turn complete")
+            bot.stop_motors()
             break
-        else:
-            bot.set_left_motor_speed(fixed_speed)
-            bot.set_right_motor_speed(-fixed_speed)
         time.sleep(0.01)
 
 def main():
