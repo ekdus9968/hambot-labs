@@ -231,9 +231,9 @@ def read_lidar(bot):
     # Handle invalid readings
     for i, val in enumerate([front_dist, right_dist, back_dist, left_dist]):
         if np.isinf(val) or np.isnan(val) or val < 0.05:
-            if i == 0: front_dist = 666.666
+            if i == 0: front_dist = 222.666
             elif i == 1: right_dist = 222.222
-            elif i == 2: back_dist = 222.222
+            elif i == 2: back_dist = 666.222
             elif i == 3: left_dist = 222.222
 
     
