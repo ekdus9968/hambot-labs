@@ -14,7 +14,7 @@ TARGET_COLORS = {
     "pink": (225, 30, 165)
 }
 TOLERANCE = 50
-FIXED_SPEED = 4.0  # 제자리 회전 속도
+FIXED_SPEED = 2.0  # 제자리 회전 속도
 SLEEP_TIME = 0.05  # 루프 딜레이
 
 # -------------------------------
@@ -40,7 +40,7 @@ def get_forward_distance(bot):
     return 9999.9999
 
 # -------------------------------
-# 360° 회전하며 색상 감지 (ROI)
+# 색상 감지 (ROI)
 # -------------------------------
 def turn_360_detect_roi(bot, roi_size=40):
     start_heading = bot.get_heading()
@@ -58,39 +58,31 @@ def turn_360_detect_roi(bot, roi_size=40):
         if current_heading is None:
             continue
 
-        # delta angle 계산
         delta_angle_total = (current_heading - start_heading + 360) % 360
 
-        # 360° 완료 여부 (±3° 허용)
         if delta_angle_total >= 357:
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
             print("360° rotation completed.")
             break
 
-        # 제자리 회전
         bot.set_left_motor_speed(-FIXED_SPEED)
         bot.set_right_motor_speed(FIXED_SPEED)
 
-        # 카메라 프레임 가져오기
         frame = bot.camera.get_frame()
         if frame is None:
             continue
 
         H, W = frame.shape[:2]
-        cx, cy = W // 2, H // 6  # 중앙 상단 영역
-
-        # ROI 범위 설정
+        cx, cy = W // 2, H // 6  # 상단 영역
         x_start = max(cx - roi_size//2, 0)
         x_end = min(cx + roi_size//2, W)
         y_start = max(cy - roi_size//2, 0)
         y_end = min(cy + roi_size//2, H)
-
         roi = frame[y_start:y_end, x_start:x_end]
 
-        forward_distance = get_forward_distance(bot)  # mm 기준
+        forward_distance = get_forward_distance(bot)  # mm
 
-        # 4개 색상 확인
         for idx, color_name in enumerate(COLOR_LIST):
             if detected_flags[idx]:
                 print(f"[DEBUG] {color_name} already detected | Forward:{forward_distance:.3f} | Delta:{delta_angle_total:.2f}")
@@ -115,82 +107,74 @@ def turn_360_detect_roi(bot, roi_size=40):
     return detected_list
 
 # -------------------------------
-# Trilateration 2D (3개 이상 landmark)
+# Trilateration (3개 이상)
 # -------------------------------
 def trilateration(detected_list):
-    points = []
-    distances = []
+    xs, ys = [], []
 
     for idx, item in enumerate(detected_list):
-        if item is not None:
-            distance, delta_angle = item
-            if distance >= 9999.0:
-                continue
-            color_name = COLOR_LIST[idx]
-            points.append(landmark_positions[color_name])
-            distances.append(distance)
+        if item is None:
+            continue
+        distance, delta_angle = item
+        if distance >= 9999.0:
+            continue
+        color_name = COLOR_LIST[idx]
+        lx, ly = landmark_positions[color_name]
 
-    if len(points) < 3:
-        print("[TRILATERATION] Not enough landmarks detected for 3+ trilateration.")
-        return None, None
-
-    # Polar → Cartesian 변환
-    xs = []
-    ys = []
-    for i, (lx, ly) in enumerate(points):
-        # angle는 landmark 기준, 로봇 기준 0° = landmark 정면
-        angle_rad = math.radians(detected_list[i][1])
-        rx = lx - distances[i]*math.cos(angle_rad)
-        ry = ly - distances[i]*math.sin(angle_rad)
+        angle_rad = math.radians(delta_angle)
+        # landmark 기준 좌표에서 로봇 위치 계산
+        rx = lx - distance * math.cos(angle_rad)
+        ry = ly - distance * math.sin(angle_rad)
         xs.append(rx)
         ys.append(ry)
+
+    if len(xs) == 0:
+        return -300, -300
 
     estimated_x = np.mean(xs)
     estimated_y = np.mean(ys)
     return estimated_x, estimated_y
 
 # -------------------------------
-# Trilateration 2 points 교차점
+# Trilateration (2개 교차점)
 # -------------------------------
 def trilateration_two_points(detected_list):
     valid_items = [(COLOR_LIST[i], detected_list[i]) for i in range(4) if detected_list[i] is not None]
     if len(valid_items) != 2:
-        print("[ERROR] Not exactly 2 landmarks detected.")
         return -300, -300
 
-    (color1, (d1, a1)), (color2, (d2, a2)) = valid_items
-    x1, y1 = landmark_positions[color1]
-    x2, y2 = landmark_positions[color2]
+    (c1, (d1, a1)), (c2, (d2, a2)) = valid_items
+    x1, y1 = landmark_positions[c1]
+    x2, y2 = landmark_positions[c2]
 
     dx = x2 - x1
     dy = y2 - y1
     D = math.hypot(dx, dy)
 
     if D > d1 + d2 or D < abs(d1 - d2):
-        print("[WARNING] Circles do not intersect. Using midpoint fallback.")
         return (x1+x2)/2, (y1+y2)/2
 
-    a = (d1*d1 - d2*d2 + D*D) / (2*D)
-    h = math.sqrt(max(d1*d1 - a*a, 0))
-    xm = x1 + a * dx / D
-    ym = y1 + a * dy / D
-    rx = -dy * (h / D)
-    ry = dx * (h / D)
-    p1 = (xm + rx, ym + ry)
-    p2 = (xm - rx, ym - ry)
+    a = (d1**2 - d2**2 + D**2)/(2*D)
+    h = math.sqrt(max(d1**2 - a**2, 0))
+    xm = x1 + a*dx/D
+    ym = y1 + a*dy/D
+    rx = -dy * h/D
+    ry = dx * h/D
+    p1 = (xm+rx, ym+ry)
+    p2 = (xm-rx, ym-ry)
     print(f"[2-POINT SOLUTIONS] Intersection points: {p1}, {p2}")
     return ((p1[0]+p2[0])/2, (p1[1]+p2[1])/2)
 
 # -------------------------------
-# Grid cell index
+# Grid cell 매핑 (0~15)
 # -------------------------------
 def get_cell_index(x, y, grid_size=4, world_min=-2400, world_max=2400):
-    cell_width = (world_max - world_min) / grid_size
-    col = int((x - world_min) // cell_width)
-    row = int((world_max - y) // cell_width)
+    cell_width = (world_max - world_min)/grid_size
+    col = int((x - world_min)//cell_width)
+    row = int((world_max - y)//cell_width)
     col = max(0, min(grid_size-1, col))
     row = max(0, min(grid_size-1, row))
-    return row * grid_size + col  # 0~15
+    return row*grid_size + col  # 0~15
 
 # -------------------------------
 # Main
@@ -202,7 +186,7 @@ def main():
 
         detected_list = turn_360_detect_roi(bot)
 
-        num_detected = sum([1 for d in detected_list if d is not None and d[0] < 9999.0])
+        num_detected = sum([1 for d in detected_list if d is not None and d[0]<9999.0])
 
         if num_detected >= 3:
             x, y = trilateration(detected_list)
@@ -212,10 +196,10 @@ def main():
             print(f"[TRILATERATION-2] Estimated robot position: x={x:.2f}, y={y:.2f}")
         else:
             x, y = -300, -300
-            print("[TRILATERATION] Not enough landmarks detected. Using default position: x=-300, y=-300")
+            print("[TRILATERATION] Not enough landmarks detected. Using default position.")
 
-        cell_index = get_cell_index(x, y, grid_size=4)
-        print(f"[GRID] Estimated starting cell index: {cell_index}")
+        cell_index = get_cell_index(x, y)
+        print(f"[GRID] Estimated starting cell index (0~15): {cell_index}")
 
     except KeyboardInterrupt:
         print("Detection stopped by user.")
@@ -227,3 +211,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
