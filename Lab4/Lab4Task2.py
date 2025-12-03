@@ -11,7 +11,7 @@ N_PARTICLES = 160
 ORIENTATIONS = ["N", "E", "S", "W"]  # 북, 동, 남, 서
 GRID_SIZE = 16  # 4x4 grid
 SUCCESS_RATIO = 0.80
-STEP_DISTANCE = 700  # m
+STEP_DISTANCE = 1200  # m
 
 # ============================================
 # MAZE WALL INFO (N,E,S,W)
@@ -212,156 +212,161 @@ def drive_forward(bot, D, speed=8):
 
         time.sleep(0.01)
 
-
-# def turn_left(bot, deg):
-#     """
-#     Turn left by `deg` degrees using heading only.
-#     Stops when error < 3°.
-#     """
-#     start = bot.get_heading()
-#     if start is None:
-#         print("[DEBUG] No heading, skipping turn")
+# ============================================
+# TURN USING IMU
+# ============================================
+def turn_left(bot, deg):
+    """
+    Turn left by `deg` degrees using heading only.
+    Stops when error < 3°.
+    """
+    start = bot.get_heading()
+    if start is None:
+        print("[DEBUG] No heading, skipping turn")
         
 
-#     goal = (start - deg) % 360
-#     fixed_speed = 4.0
+    goal = (start - deg) % 360
+    fixed_speed = 4.0
 
-#     while True:
-#         current = bot.get_heading()
-#         if current is None:
-#             print("[DEBUG] No heading during turn")
-#             break
-#         # 왼쪽 회전 기준 최소 각도 error
-#         error = abs((current - goal + 360) % 360 - 180)
-#         if error > 180:
-#             error = 360 - error
+    while True:
+        current = bot.get_heading()
+        if current is None:
+            print("[DEBUG] No heading during turn")
+            break
+        # 왼쪽 회전 기준 최소 각도 error
+        error = abs((current - goal + 360) % 360 - 180)
+        if error > 180:
+            error = 360 - error
 
-#         #print(f"[DEBUG] Turning left - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
+        #print(f"[DEBUG] Turning left - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
 
-#         if error < 3:
-#             bot.set_left_motor_speed(0)
-#             bot.set_right_motor_speed(0)
-#             print("[DEBUG] Left turn complete")
-#             break
-#         else:
-#             bot.set_left_motor_speed(-fixed_speed)
-#             bot.set_right_motor_speed(fixed_speed)
-#         time.sleep(0.01)
+        if error < 3:
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+            print("[DEBUG] Left turn complete")
+            break
+        else:
+            bot.set_left_motor_speed(-fixed_speed)
+            bot.set_right_motor_speed(fixed_speed)
+        time.sleep(0.01)
 
 
-# def turn_right(bot, deg):
-#     """
-#     Turn right by `deg` degrees using heading only.
-#     Stops when error < 3°.
-#     """
-#     start = bot.get_heading()
-#     if start is None:
-#         print("[DEBUG] No heading, skipping turn")
+def turn_right(bot, deg):
+    """
+    Turn right by `deg` degrees using heading only.
+    Stops when error < 3°.
+    """
+    start = bot.get_heading()
+    if start is None:
+        print("[DEBUG] No heading, skipping turn")
     
 
-#     goal = (start + deg) % 360
-#     fixed_speed = 4.0
+    goal = (start + deg) % 360
+    fixed_speed = 4.0
 
-#     while True:
-#         current = bot.get_heading()
-#         if current is None:
-#             print("[DEBUG] No heading during turn")
-#             break
-#         # 오른쪽 회전 기준 최소 각도 error
-#         error = abs((goal - current + 360) % 360 - 180)
-#         if error > 180:
-#             error = 360 - error
+    while True:
+        current = bot.get_heading()
+        if current is None:
+            print("[DEBUG] No heading during turn")
+            break
+        # 오른쪽 회전 기준 최소 각도 error
+        error = abs((goal - current + 360) % 360 - 180)
+        if error > 180:
+            error = 360 - error
 
-#         # print(f"[DEBUG] Turning right - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
+        # print(f"[DEBUG] Turning right - Current: {current:.2f}, Goal: {goal:.2f}, Error: {error:.2f}")
 
-#         if error < 3:
-#             bot.set_left_motor_speed(0)
-#             bot.set_right_motor_speed(0)
-#             print("[DEBUG] Right turn complete")
-#             break
-#         else:
-#             bot.set_left_motor_speed(fixed_speed)
-#             bot.set_right_motor_speed(-fixed_speed)
-#         time.sleep(0.01)
+        if error < 3:
+            bot.set_left_motor_speed(0)
+            bot.set_right_motor_speed(0)
+            print("[DEBUG] Right turn complete")
+            break
+        else:
+            bot.set_left_motor_speed(fixed_speed)
+            bot.set_right_motor_speed(-fixed_speed)
+        time.sleep(0.01)
+
+
+
 # ============================================
 # TURN USING ENCODERS
 # ============================================
-def turn_left(bot, deg= 90, speed=8):
-    """
-    Turn left by `deg` degrees using only wheel encoders.
-    """
-    wheel_radius=90
-    axel_length=184
-    # 목표 바퀴 이동 거리 계산
-    delta_theta_rad = np.deg2rad(deg)
-    l_dist = -delta_theta_rad * (axel_length / 2)
-    r_dist = delta_theta_rad * (axel_length / 2)
+# def turn_left(bot, deg= 90, speed=8):
+#     """
+#     Turn left by `deg` degrees using only wheel encoders.
+#     """
+#     wheel_radius=90
+#     axel_length=184
+#     # 목표 바퀴 이동 거리 계산
+#     delta_theta_rad = np.deg2rad(deg)
+#     l_dist = -delta_theta_rad * (axel_length / 2)
+#     r_dist = delta_theta_rad * (axel_length / 2)
 
-    # 초기 엔코더 값 저장
-    init_l = bot.get_left_encoder_reading()
-    init_r = bot.get_right_encoder_reading()
+#     # 초기 엔코더 값 저장
+#     init_l = bot.get_left_encoder_reading()
+#     init_r = bot.get_right_encoder_reading()
 
-    # 속도 비율 설정
-    max_dist = max(abs(l_dist), abs(r_dist))
-    v_l = speed * l_dist / max_dist
-    v_r = speed * r_dist / max_dist
+#     # 속도 비율 설정
+#     max_dist = max(abs(l_dist), abs(r_dist))
+#     v_l = speed * l_dist / max_dist
+#     v_r = speed * r_dist / max_dist
 
-    # 모터 속도 설정
-    bot.set_left_motor_speed(v_l)
-    bot.set_right_motor_speed(v_r)
+#     # 모터 속도 설정
+#     bot.set_left_motor_speed(v_l)
+#     bot.set_right_motor_speed(v_r)
 
-    while True:
-        l_delta = bot.get_left_encoder_reading() - init_l
-        r_delta = bot.get_right_encoder_reading() - init_r
+#     while True:
+#         l_delta = bot.get_left_encoder_reading() - init_l
+#         r_delta = bot.get_right_encoder_reading() - init_r
 
-        l_d = wheel_radius * l_delta
-        r_d = wheel_radius * r_delta
+#         l_d = wheel_radius * l_delta
+#         r_d = wheel_radius * r_delta
 
-        if abs(l_d) >= abs(l_dist) or abs(r_d) >= abs(r_dist):
-            bot.set_left_motor_speed(0)
-            bot.set_right_motor_speed(0)
-            bot.stop_motors()
-            break
-        time.sleep(0.01)
+#         if abs(l_d) >= abs(l_dist) or abs(r_d) >= abs(r_dist):
+#             bot.set_left_motor_speed(0)
+#             bot.set_right_motor_speed(0)
+#             bot.stop_motors()
+#             break
+#         time.sleep(0.01)
 
 
-def turn_right(bot, deg = 150, speed=8):
-    """
-    Turn right by `deg` degrees using only wheel encoders.
-    """
-    wheel_radius=90
-    axel_length=184
-    # 목표 바퀴 이동 거리 계산
-    delta_theta_rad = np.deg2rad(deg)
-    l_dist = delta_theta_rad * (axel_length / 2)
-    r_dist = -delta_theta_rad * (axel_length / 2)
+# def turn_right(bot, deg = 150, speed=8):
+#     """
+#     Turn right by `deg` degrees using only wheel encoders.
+#     """
+#     wheel_radius=90
+#     axel_length=184
+#     # 목표 바퀴 이동 거리 계산
+#     delta_theta_rad = np.deg2rad(deg)
+#     l_dist = delta_theta_rad * (axel_length / 2)
+#     r_dist = -delta_theta_rad * (axel_length / 2)
 
-    # 초기 엔코더 값 저장
-    init_l = bot.get_left_encoder_reading()
-    init_r = bot.get_right_encoder_reading()
+#     # 초기 엔코더 값 저장
+#     init_l = bot.get_left_encoder_reading()
+#     init_r = bot.get_right_encoder_reading()
 
-    # 속도 비율 설정
-    max_dist = max(abs(l_dist), abs(r_dist))
-    v_l = speed * l_dist / max_dist
-    v_r = speed * r_dist / max_dist
+#     # 속도 비율 설정
+#     max_dist = max(abs(l_dist), abs(r_dist))
+#     v_l = speed * l_dist / max_dist
+#     v_r = speed * r_dist / max_dist
 
-    # 모터 속도 설정
-    bot.set_left_motor_speed(v_l)
-    bot.set_right_motor_speed(v_r)
+#     # 모터 속도 설정
+#     bot.set_left_motor_speed(v_l)
+#     bot.set_right_motor_speed(v_r)
 
-    while True:
-        l_delta = bot.get_left_encoder_reading() - init_l
-        r_delta = bot.get_right_encoder_reading() - init_r
+#     while True:
+#         l_delta = bot.get_left_encoder_reading() - init_l
+#         r_delta = bot.get_right_encoder_reading() - init_r
 
-        l_d = wheel_radius * l_delta
-        r_d = wheel_radius * r_delta
+#         l_d = wheel_radius * l_delta
+#         r_d = wheel_radius * r_delta
 
-        if abs(l_d) >= abs(l_dist) or abs(r_d) >= abs(r_dist):
-            bot.set_left_motor_speed(0)
-            bot.set_right_motor_speed(0)
-            bot.stop_motors()
-            break
-        time.sleep(0.01)
+#         if abs(l_d) >= abs(l_dist) or abs(r_d) >= abs(r_dist):
+#             bot.set_left_motor_speed(0)
+#             bot.set_right_motor_speed(0)
+#             bot.stop_motors()
+#             break
+#         time.sleep(0.01)
 
 # ============================================
 # MAIN LOOP
@@ -370,7 +375,7 @@ def main():
     bot = HamBot()
     
     
-    motions = ["forward","right_turn", "forward", "forward", "forward", "forward", "right_turn", "forward", "right_turn", "forward", "forward", "left_turn", "left_turn", "forward", "forward", "right_turn", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "right_turn", "forward", "forward"]
+    motions = ["forward","right_turn", "forward", "forward", "forward", "right_turn", "forward", "right_turn", "forward", "forward", "left_turn", "left_turn", "forward", "forward", "right_turn", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "right_turn", "forward", "forward"]
 
     for step, command in enumerate(motions):
         print(f"\n=== STEP {step+1}: {command} ===")
