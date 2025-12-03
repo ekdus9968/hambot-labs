@@ -9,6 +9,13 @@ from robot_systems.robot import HamBot
 # ============================================
 N_PARTICLES = 160
 ORIENTATIONS = ["N", "E", "S", "W"]  # 북, 동, 남, 서
+DIR_MAP = {
+    "N": ["N", "W", "E", "S"],
+    "E": ["E", "N", "S", "W"],
+    "S": ["S", "E", "W", "N"],
+    "W": ["W", "S", "N", "E"]
+}
+
 DIR_INDEX = {o:i for i,o in enumerate(ORIENTATIONS)}
 GRID_SIZE = 16  # 4x4 grid
 SUCCESS_RATIO = 0.80
@@ -261,34 +268,28 @@ def rotate_observation(robot_ori, obs_robot):
 # MODIFY get_observation()
 # ============================
 def get_observation(bot):
-    # LiDAR는 로봇 기준(front,left,back,right) 반환
-    dF, dL, dB, dR = read_lidar(bot)
-    if dF is None:
-        return (0,0,0,0)
+    front, left, right, back = read_lidar(bot)
+    
+    # 0=free, 1=wall
+    local = [
+        is_wall(front),
+        is_wall(left),
+        is_wall(right),
+        is_wall(back)
+    ]
 
-    TH = 600
-    obs_robot = (
-        1 if dF < TH else 0,
-        1 if dL < TH else 0,
-        1 if dR < TH else 0,
-        1 if dB < TH else 0
-    )
+    heading = bot.get_heading()  # "N", "E", "S", "W"
 
-    # ------------------------------
-    # 추가: 로봇 heading 을 orientation 문자로 변환
-    # ------------------------------
-    heading = bot.get_heading()
-    if heading is None:
-        robot_ori = "N"
-    else:
-        robot_ori = heading_to_orientation(heading)
+    # 로봇 기준 → 월드 기준으로 변환
+    world_dirs = DIR_MAP[heading]  # ex: ["S","E","W","N"]
+    obs = {}                       # ex: {"S":1, "E":0, "W":1, "N":0}
 
-    # ------------------------------
-    # 추가: 로봇 기준 → 월드 기준으로 변환
-    # ------------------------------
-    world_obs = rotate_observation(robot_ori, obs_robot)
+    for i, d in enumerate(world_dirs):
+        obs[d] = local[i]
 
-    return world_obs
+    # return world order (N,E,S,W)
+    return (obs["N"], obs["E"], obs["S"], obs["W"])
+
 
 
 # ============================================
@@ -522,7 +523,7 @@ def main():
     bot = HamBot()
     
     
-    motions = ["forward","right_turn", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward"]
+    motions = ["forward","right_turn", "forward", "forward","forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward"]
     #motions = ["forward", "forward", "right_turn", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "forward", "forward", "right_turn", "forward", "right_turn", "forward", "forward"]
     for step, command in enumerate(motions):
         print(f"\n=== STEP {step+1}: {command} ===")
