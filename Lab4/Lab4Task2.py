@@ -286,7 +286,7 @@ def drive_forward(bot, D, speed=8):
 # ============================================
 # TURN USING ENCODERS
 # ============================================
-def turn_left(bot, deg, speed=8):
+def turn_left(bot, deg= 90, speed=8):
     """
     Turn left by `deg` degrees using only wheel encoders.
     """
@@ -325,7 +325,7 @@ def turn_left(bot, deg, speed=8):
         time.sleep(0.01)
 
 
-def turn_right(bot, deg, speed=8):
+def turn_right(bot, deg = 150, speed=8):
     """
     Turn right by `deg` degrees using only wheel encoders.
     """
@@ -408,7 +408,7 @@ def main():
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
         elif command == "right_turn":
-            turn_right(bot, 90)
+            turn_right(bot, 150)
             bot.set_left_motor_speed(0)
             bot.set_right_motor_speed(0)
 
