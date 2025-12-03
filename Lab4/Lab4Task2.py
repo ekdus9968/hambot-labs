@@ -236,7 +236,7 @@ def get_observation(bot):
     dN, dE, dS, dW = read_lidar(bot)
     if dN is None: 
         return 0,0,0,0
-    TH = 400
+    TH = 600
     return (1 if dN < TH else 0,
             1 if dE < TH else 0,
             1 if dS < TH else 0,
