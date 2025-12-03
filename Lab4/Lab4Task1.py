@@ -139,7 +139,7 @@ def turn_360_detect_roi(bot, roi_size=40):
             continue
 
         H, W = frame.shape[:2]
-        cx, cy = W // 2, H // 2
+        cx, cy = W // 2, H // 6
 
         # ROI 범위 설정
         x_start = max(cx - roi_size//2, 0)
