@@ -268,26 +268,39 @@ def rotate_observation(robot_ori, obs_robot):
 # MODIFY get_observation()
 # ============================
 def get_observation(bot):
-    front, left, right, back = read_lidar(bot)
-    
-    # 0=free, 1=wall
-    local = [
-        is_wall(front),
-        is_wall(left),
-        is_wall(right),
-        is_wall(back)
-    ]
+    # LiDAR는 로봇 기준(front,left,back,right) 반환
+    dF, dL, dB, dR = read_lidar(bot)
+    if dF is None:
+        return (0,0,0,0)
 
-    heading = bot.get_heading()  # "N", "E", "S", "W"
+    TH = 600
+    obs_robot = (
+        1 if dF < TH else 0,
+        1 if dL < TH else 0,
+        1 if dR < TH else 0,
+        1 if dB < TH else 0
+    )
 
-    # 로봇 기준 → 월드 기준으로 변환
-    world_dirs = DIR_MAP[heading]  # ex: ["S","E","W","N"]
-    obs = {}                       # ex: {"S":1, "E":0, "W":1, "N":0}
+    # ------------------------------
+    # 추가: 로봇 heading 을 orientation 문자로 변환
+    # ------------------------------
+    heading = bot.get_heading()
+    heading_deg = bot.get_heading()
+    if heading_deg is None:
+        robot_ori = "N"
+    else:
+        robot_ori = heading_to_orientation(heading_deg)
 
-    for i, d in enumerate(world_dirs):
-        obs[d] = local[i]
+    # 로봇 기준 → 월드 기준 방향 변환
+    # DIR_MAP["S"] = ["S","E","W","N"] (front, left, right, back)
+    world_dirs = DIR_MAP[robot_ori]
 
-    # return world order (N,E,S,W)
+    # 월드 좌표계 해시맵 생성
+    obs = {}
+    for i, wdir in enumerate(world_dirs):
+        obs[wdir] = obs_robot[i]
+
+    # 최종 반환은 월드 기준 (N, E, S, W) 순서
     return (obs["N"], obs["E"], obs["S"], obs["W"])
 
 
