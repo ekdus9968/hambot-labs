@@ -33,7 +33,7 @@ landmark_positions = {
 def get_forward_distance(bot):
     scan = bot.get_range_image()
     if scan is not None and len(scan) > 0:
-        forward_distance = np.min(scan[175:185])
+        forward_distance = np.max(scan[175:185])
         if np.isnan(forward_distance) or np.isinf(forward_distance) or forward_distance < 0:
             forward_distance = 9999.9999
         return forward_distance
