@@ -173,12 +173,15 @@ def read_lidar(bot):
 def get_observation(bot):
     dN, dE, dS, dW = read_lidar(bot)
     if dN is None: 
-        return 0,0,0,0
-    TH = 400
-    return (1 if dN < TH else 0,
-            1 if dE < TH else 0,
-            1 if dS < TH else 0,
-            1 if dW < TH else 0)
+        return (2,2,2,2)
+    
+    def encode(d):
+        if d < 300: return 0  # near wall
+        if d < 800: return 1  # mid range
+        return 2              # open
+    
+    return (encode(dN), encode(dE), encode(dS), encode(dS), encode(dW))
+
 
 # ============================================
 # ROBOT CONTROL
